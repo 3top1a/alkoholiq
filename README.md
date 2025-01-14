@@ -1,6 +1,7 @@
 # Alkoholiq
 
-Alcoholiq, a programming language that transpiles to Brainfuck
+Alcoholiq, a programming language that transpiles to Brainfuck.
+The output is not executable immediately, and needs to be piped into a tool such as [my 540 byte brainfuck interpreter](https://github.com/3top1a/sbfi-rs).
 
 The ultimate goal for this semi-esoteric language is to be able to write itself in a readable way, with sytnax similar
 to rust and operation similar to C.
