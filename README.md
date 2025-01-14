@@ -26,10 +26,11 @@ bool = true
 
 // Fixed size arrays
 // Arrays are denoted by the * symbol as they work like pointers
-array* = [1, 2, 3, 4, 5]
+array = [1, 2, 3, 4, 5]
+array_empty = [0; 64]
 // Strings are arrays
-string* = "Hello, World!"
-beer* = "🍺"
+string = "Hello, World!"
+beer = "🍺"
 
 // Operators
 // Math with priority

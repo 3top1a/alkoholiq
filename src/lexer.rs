@@ -1,6 +1,6 @@
 use logos::Logos;
 
-#[derive(Logos, Debug, PartialEq)]
+#[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\f]+")]  // Skip whitespace
 #[logos(skip r"//[^\n]*")]    // Skip single-line comments
 #[logos(skip r"/\*(?:[^*]|\*[^/])*\*/")]  // Skip multi-line comments
@@ -30,6 +30,8 @@ pub enum Token {
     // Separators
     #[token(",")]
     Comma,
+    #[token(";")]
+    Semicolon,
 
     // Keywords
     #[token("true")]

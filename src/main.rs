@@ -1,6 +1,8 @@
 use std::io::Read;
 
 mod lexer;
+mod ast;
+mod parser;
 
 fn main() {
     let input = std::env::args().nth(1).map_or_else(
@@ -17,4 +19,8 @@ fn main() {
     );
 
     let tokens = lexer::tokenize(&input);
+
+    let ast = parser::parse(tokens);
+
+    println!("{:#?}", ast);
 }
