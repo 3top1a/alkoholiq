@@ -7,8 +7,10 @@ to rust and operation similar to C.
 
 ## Syntax
 
-The only valid file extension is .🍺 (U+1F37A)
+The only valid file extension is .🍺 (U+1F37A).
+
 Not all features of this section's example are implemented.
+Syntax may also change, I maybe might possibly try to think about doing math properly.
 
 ```js
 // Comment
@@ -32,17 +34,18 @@ bool = true
 
 // Fixed size arrays
 // Arrays are denoted by the * symbol as they work like pointers
+// Expressions can be used inside anything
 array = [ 1 2 3 4 { + ( 3 2 ) } ]
 // An array can also be created this way, substituting memset
 array_empty = [ 0 ; 3 ]
 // Strings are arrays
 string = "Hello, World!"
+// This string is four characters wide!
 beer = "🍺"
 
 // Operators
-// Math with priority
 two = 2
-// I'm too lazy to make actual math
+// I'm too lazy to make actual math so enjoy reversed reverse polish notation
 math = +( 5 *(5 two))
 
 // Functions
@@ -61,6 +64,33 @@ print("!\n")
 // If this project succeeds it's ultimate goal, basm will be the only function from the compiler except math,
 // and all other functions will be written in alkoholiq
 basm("<>+-")
+
+// Iterators work like in Rust
+for ch in input_array {
+	// Indents are 8 wide tabs
+	print(ch);
+	print('\n');
+}
+
+// Example foobar implementation
+hit = false
+for i in 0..254 {
+	if %(i, 5) == 0 {
+		hit = true
+		print("Foo")
+	}
+	if %(i, 7) == 0 {
+		hit = true
+		print("Bar")
+	}
+	if hit == true {
+		print("\n")
+	} else {
+		print(i)
+		print('\n')
+	}
+}
+
 ```
 
 ## The name?
@@ -70,3 +100,6 @@ The name stems from alcoholism, because, well, I'm from the Czech Republic where
 Inspired by our automotive manufacturer, *Škoda*, that have started naming all of their new cars with the letter q at the end, I decided to do the same.
 Tune in next time for *QDE Qonnect*.
 
+## Q&A
+
+I will not be taking any questions, thank you.
