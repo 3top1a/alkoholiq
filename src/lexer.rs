@@ -1,9 +1,9 @@
 use logos::Logos;
 
 #[derive(Logos, Debug, PartialEq, Clone)]
-#[logos(skip r"[ \t\f]+")]  // Skip whitespace
-#[logos(skip r"//[^\n]*")]    // Skip single-line comments
-#[logos(skip r"/\*(?:[^*]|\*[^/])*\*/")]  // Skip multi-line comments
+#[logos(skip r"[ \t\f]+")] // Skip whitespace
+#[logos(skip r"//[^\n]*")] // Skip single-line comments
+#[logos(skip r"/\*(?:[^*]|\*[^/])*\*/")] // Skip multi-line comments
 pub enum Token {
     #[token("\n")]
     Newline,
@@ -23,9 +23,19 @@ pub enum Token {
 
     // Brackets
     #[token("[")]
-    BracketOpen,
+    SquareOpen,
     #[token("]")]
-    BracketClose,
+    SquareClose,
+
+    #[token("(")]
+    RoundOpen,
+    #[token(")")]
+    RoundClose,
+
+    #[token("{")]
+    CurlyOpen,
+    #[token("}")]
+    CurlyClose,
 
     // Separators
     #[token(",")]
@@ -87,13 +97,13 @@ mod tests {
             Token::Identifier("array".to_string()),
             Token::Multiply,
             Token::Assign,
-            Token::BracketOpen,
+            Token::SquareOpen,
             Token::Integer(1),
             Token::Comma,
             Token::Integer(2),
             Token::Comma,
             Token::Integer(3),
-            Token::BracketClose,
+            Token::SquareClose,
         ]);
     }
 

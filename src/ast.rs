@@ -3,9 +3,9 @@ pub enum Expression {
     // Literals
     /// Numeric literal
     /// Doubles as a ASCII character literal, for Unicode an Array of these is used instead.
-    /// Also used for boolean literals, where 0 is false and anything non-zero is true.
+    /// Also used for boolean literals, where 0 is false and 1 is true.
+    /// In comparison, x == true is equivalent to x != 0 and will match any non-zero.
     Number(u8),
-
     /// Array
     Array(Vec<Expression>),
 
@@ -34,7 +34,7 @@ pub enum Expression {
     Closure {
         /// Body
         body: Vec<Expression>,
-    }
+    },
 }
 
 #[derive(Debug, PartialEq, Clone)]
