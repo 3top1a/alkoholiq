@@ -1,10 +1,13 @@
 use logos::Logos;
 
 #[derive(Logos, Debug, PartialEq)]
-#[logos(skip r"[ \t\n\f]+")]  // Skip whitespace
+#[logos(skip r"[ \t\f]+")]  // Skip whitespace
 #[logos(skip r"//[^\n]*")]    // Skip single-line comments
 #[logos(skip r"/\*(?:[^*]|\*[^/])*\*/")]  // Skip multi-line comments
 pub enum Token {
+    #[token("\n")]
+    Newline,
+
     // Operators
     #[token("=")]
     Assign,
@@ -53,7 +56,10 @@ pub enum Token {
 }
 
 pub fn tokenize(input: &str) -> Vec<Token> {
-    Token::lexer(input).map(|x| x.unwrap()).collect()
+    let output = Token::lexer(input).map(|x| x.unwrap()).collect();
+    #[cfg(debug_assertions)]
+    dbg!(&output);
+    output
 }
 
 #[cfg(test)]
@@ -106,9 +112,11 @@ mod tests {
         let input = "// This is a comment\nvar = 42\n/* This is a multi-line comment */";
         let tokens = tokenize(input);
         assert_eq!(tokens, vec![
+            Token::Newline,
             Token::Identifier("var".to_string()),
             Token::Assign,
             Token::Integer(42),
+            Token::Newline,
         ]);
     }
 }
