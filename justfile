@@ -10,4 +10,4 @@ lint:
 
 test: build
     cargo test
-    cargo run --release -- examples/*
+    for x in examples/*; do cargo run --release -- $x; done

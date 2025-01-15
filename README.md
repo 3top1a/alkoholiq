@@ -1,9 +1,9 @@
 # Alkoholiq
 
-Alcoholiq, a programming language that transpiles to Brainfuck.
+Alkoholiq, a programming language that transpiles to Brainfuck.
 The output is not executable immediately, and needs to be piped into a tool such as [my 540 byte brainfuck interpreter](https://github.com/3top1a/sbfi-rs).
 
-The ultimate goal for this semi-esoteric language is to be able to write itself in a readable way, with sytnax similar
+The ultimate goal for this semi-esoteric language is to be able to write itself in a readable way, with syntax similar
 to rust and operation similar to C.
 
 ## Syntax
@@ -11,7 +11,7 @@ to rust and operation similar to C.
 The only valid file extension is .🍺 (U+1F37A).
 
 Not all features of this section's example are implemented.
-Syntax may also change, I maybe might possibly try to think about doing math properly.
+Syntax may also change, I might possibly maybe try to think about doing math properly someday for three seconds.
 
 ```js
 // Comment
@@ -59,18 +59,23 @@ input(input_array, 16)
 print("Hello ")
 print(input_array)
 print("!\n")
+// Printf is used for printing strings and numbers in decimal
+// This prints `c`
+print(c)
+// This prints `99`
+printf(c)
 
 // Raw Brainfuck
 // This should only be used in the standard library, e.g. input(), not in user code
-// If this project succeeds it's ultimate goal, basm will be the only function from the compiler except math,
-// and all other functions will be written in alkoholiq
+// If this project succeeds it's ultimate goal, basm will be the only function from
+// the compiler except math, and all other functions will be written in alkoholiq
 basm("<>+-")
 
 // Iterators work like in Rust
 for ch in input_array {
 	// Indents are 8 wide tabs
-	print(ch);
-	print('\n');
+	printf(ch);
+	printf('\n');
 }
 
 // Example foobar implementation
@@ -78,17 +83,17 @@ hit = false
 for i in 0..254 {
 	if %(i, 5) == 0 {
 		hit = true
-		print("Foo")
+		printf("Foo")
 	}
 	if %(i, 7) == 0 {
 		hit = true
-		print("Bar")
+		printf("Bar")
 	}
 	if hit == true {
-		print("\n")
+		printf("\n")
 	} else {
-		print(i)
-		print('\n')
+		printf(i)
+		printf('\n')
 	}
 }
 

@@ -1,28 +1,43 @@
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
-    // Literals
     /// Numeric literal
-    /// Doubles as a ASCII character literal, for Unicode an Array of these is used instead.
+    /// Doubles as an ASCII character literal, for Unicode an Array of these is used instead.
     /// Also used for boolean literals, where 0 is false and 1 is true.
-    /// In comparison, x == true is equivalent to x != 0 and will match any non-zero.
     Number(u8),
-    /// Array
+    /// Array literal
     Array(Vec<Expression>),
 
-    /// A literal identifier
-    Identifier(String),
+    /// A path denotes a variable
+    Path(String),
+
+    /// A function call
+    Call {
+        /// Name of the function
+        name: String,
+        /// Arguments
+        args: Vec<Expression>,
+    },
+
+    /// Unary arithmetic operation
+    Unary {
+        /// Operator
+        op: UnaryOperator,
+        /// Operand
+        operand: Box<Expression>,
+    },
 
     /// Basic arithmetic operation
-    Arithmetic {
+    /// Since the output is a number anyway, we can group comparisons with arithmetic operations.
+    Binary {
         /// Left side
-        left: Box<Expression>,
+        lhs: Box<Expression>,
         /// Operator
         op: MathOperator,
         /// Right side
-        right: Box<Expression>,
+        rhs: Box<Expression>,
     },
 
-    /// Assignment
+    /// Variable assignment
     Assignment {
         /// Name of the variable
         name: String,
@@ -31,7 +46,7 @@ pub enum Expression {
     },
 
     /// Closure
-    Closure {
+    Expression {
         /// Body
         body: Vec<Expression>,
     },
@@ -43,4 +58,15 @@ pub enum MathOperator {
     Subtract,
     Multiply,
     Divide,
+    Equals,
+    NotEquals,
+    LessThan,
+    GreaterThan,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum UnaryOperator {
+    /// Negate a number
+    /// Works by subtracting the number from 0 and returning the absolute value.
+    Negate,
 }

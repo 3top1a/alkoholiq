@@ -16,6 +16,9 @@ named_char = 'c'
 // false is 0, true is 1
 // In comparison, 0 is false, everything else is true
 bool = true
+// ! negates the value
+// Since it's just numbers, it's simply |(0 - x)|
+bool = !bool
 
 // Fixed size arrays
 // Arrays are denoted by the * symbol as they work like pointers
@@ -36,7 +39,7 @@ math = +( 5 *( 5 two ) )
 input_array = [0; 16]
 // Get user input
 // Maximum length is 16
-input(input_array, 16)
+input(input_array 16)
 
 // Print
 print("Hello ")
