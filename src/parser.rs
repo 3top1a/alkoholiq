@@ -7,15 +7,13 @@ use crate::utils::repeat;
 pub struct Parser {
     tokens: Vec<IndexedToken>,
     current: usize,
-    input: String,
 }
 
 impl Parser {
-    pub fn new(tokens: Vec<IndexedToken>, input: String) -> Self {
+    pub fn new(tokens: Vec<IndexedToken>, _input: String) -> Self {
         Parser {
             tokens,
             current: 0,
-            input,
         }
     }
 
@@ -29,7 +27,7 @@ impl Parser {
     }
 
     fn consume(&mut self, token: Token) -> Option<&IndexedToken> {
-        if self.peek() == Some(token.into()) {
+        if self.peek() == Some(token) {
             self.next()
         } else {
             None
@@ -38,14 +36,12 @@ impl Parser {
 
     fn peek(&self) -> Option<Token> {
         self.tokens
-            .get(self.current)
-            .map_or(None, |x| Some(x.clone().token))
+            .get(self.current).map(|x| x.clone().token)
     }
 
     fn ipeek(&self) -> Option<IndexedToken> {
         self.tokens
-            .get(self.current)
-            .map_or(None, |x| Some(x.clone()))
+            .get(self.current).cloned()
     }
 
     fn check(&self, token: Token) -> bool {
@@ -88,7 +84,7 @@ impl Parser {
 
         if token.is_literal() {
             self.advance();
-            return Some(Self::parse_literal(token)?);
+            return Self::parse_literal(token);
         }
 
         match token {
@@ -170,7 +166,7 @@ impl Parser {
                     body.push(self.parse_expression()?);
                 }
                 self.advance();
-                Some(Expression::Expression { body })
+                Some(Expression::Closure { body })
             }
 
             // If statements
@@ -235,7 +231,7 @@ impl Parser {
             Token::Integer(num) => Expression::Number(num),
             Token::Char(num) => Expression::Number(num),
             Token::String(s) => {
-                Expression::Array(s.bytes().map(|x| Expression::Number(x)).collect())
+                Expression::Array(s.bytes().map(Expression::Number).collect())
             }
             Token::True => Expression::Number(1),
             Token::False => Expression::Number(0),

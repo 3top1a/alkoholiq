@@ -26,16 +26,17 @@ pub enum Expression {
         operand: Box<Expression>,
     },
 
-    /// Basic arithmetic operation
-    /// Since the output is a number anyway, we can group comparisons with arithmetic operations.
-    Binary {
-        /// Left side
-        lhs: Box<Expression>,
-        /// Operator
-        op: MathOperator,
-        /// Right side
-        rhs: Box<Expression>,
-    },
+    // Not used right now because maths are functions
+    // /// Basic arithmetic operation
+    // /// Since the output is a number anyway, we can group comparisons with arithmetic operations.
+    // Binary {
+    //     /// Left side
+    //     lhs: Box<Expression>,
+    //     /// Operator
+    //     op: MathOperator,
+    //     /// Right side
+    //     rhs: Box<Expression>,
+    // },
 
     /// Variable assignment
     Assignment {
@@ -46,7 +47,7 @@ pub enum Expression {
     },
 
     /// Closure
-    Expression {
+    Closure {
         /// Body
         body: Vec<Expression>,
     },
@@ -74,17 +75,18 @@ pub enum Expression {
     },
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum MathOperator {
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Equals,
-    NotEquals,
-    LessThan,
-    GreaterThan,
-}
+// Not used right now because maths are functions
+// #[derive(Debug, PartialEq, Clone)]
+// pub enum MathOperator {
+//     Add,
+//     Subtract,
+//     Multiply,
+//     Divide,
+//     Equals,
+//     NotEquals,
+//     LessThan,
+//     GreaterThan,
+// }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum UnaryOperator {

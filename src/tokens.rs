@@ -76,19 +76,11 @@ pub enum Token {
 
 impl Token {
     pub fn is_literal(&self) -> bool {
-        match self {
-            Token::Char(_) | Token::False | Token::True | Token::String(_) | Token::Integer(_) => {
-                true
-            }
-            _ => false,
-        }
+        matches!(self, Token::Char(_) | Token::False | Token::True | Token::String(_) | Token::Integer(_))
     }
 
     pub fn is_identifier(&self) -> bool {
-        match self {
-            Token::Identifier(_) => true,
-            _ => false,
-        }
+        matches!(self, Token::Identifier(_))
     }
 
     pub fn inner_string(&self) -> Option<String> {
