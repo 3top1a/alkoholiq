@@ -3,6 +3,7 @@ use std::io::Read;
 mod ast;
 mod lexer;
 mod parser;
+mod tokens;
 mod utils;
 
 fn main() {

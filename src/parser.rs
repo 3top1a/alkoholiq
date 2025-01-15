@@ -1,6 +1,6 @@
 use crate::ast;
 use crate::ast::{Expression, UnaryOperator};
-use crate::lexer::{IndexedToken, Token};
+use crate::tokens::{IndexedToken, Token};
 use crate::utils::repeat;
 
 #[derive(Debug)]
@@ -9,7 +9,6 @@ pub struct Parser {
     current: usize,
     input: String,
 }
-
 
 impl Parser {
     pub fn new(tokens: Vec<IndexedToken>, input: String) -> Self {
@@ -38,11 +37,15 @@ impl Parser {
     }
 
     fn peek(&self) -> Option<Token> {
-        self.tokens.get(self.current).map_or(None, |x| Some(x.clone().token))
+        self.tokens
+            .get(self.current)
+            .map_or(None, |x| Some(x.clone().token))
     }
 
     fn ipeek(&self) -> Option<IndexedToken> {
-        self.tokens.get(self.current).map_or(None, |x| Some(x.clone()))
+        self.tokens
+            .get(self.current)
+            .map_or(None, |x| Some(x.clone()))
     }
 
     fn check(&self, token: Token) -> bool {
@@ -66,7 +69,11 @@ impl Parser {
                 let itoken = self.ipeek().unwrap();
                 eprintln!("Failed to parse token {:?}", self.peek().unwrap());
                 eprintln!("At line {}:\n{}", itoken.line_number, itoken.line);
-                eprintln!("{}{}", " ".repeat(itoken.chars_before - itoken.range.len()), "^".repeat(itoken.range.len()));
+                eprintln!(
+                    "{}{}",
+                    " ".repeat(itoken.chars_before - itoken.range.len()),
+                    "^".repeat(itoken.range.len())
+                );
 
                 panic!();
             }
@@ -163,9 +170,7 @@ impl Parser {
                     body.push(self.parse_expression()?);
                 }
                 self.advance();
-                Some(Expression::Expression {
-                    body,
-                })
+                Some(Expression::Expression { body })
             }
 
             // If statements
@@ -221,7 +226,7 @@ impl Parser {
                 }
             }
 
-            _ => { None }
+            _ => None,
         }
     }
 
@@ -229,7 +234,9 @@ impl Parser {
         Some(match lit {
             Token::Integer(num) => Expression::Number(num),
             Token::Char(num) => Expression::Number(num),
-            Token::String(s) => Expression::Array(s.bytes().map(|x| Expression::Number(x)).collect()),
+            Token::String(s) => {
+                Expression::Array(s.bytes().map(|x| Expression::Number(x)).collect())
+            }
             Token::True => Expression::Number(1),
             Token::False => Expression::Number(0),
             _ => return None,
