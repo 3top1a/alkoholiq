@@ -56,9 +56,21 @@ pub enum Expression {
         /// Variable name
         name: String,
         /// Range
-        range: (Box<Expression>, Box<Expression>),
+        range: Iterator,
         /// Body
-        body: Vec<Expression>,
+        /// Should be of type Expression::Expression
+        body: Box<Expression>,
+    },
+
+    // If
+    If {
+        /// Condition
+        condition: Box<Expression>,
+        /// Then branch
+        /// Should be of type Expression::Expression
+        then_branch: Box<Expression>,
+        /// Else branch
+        else_branch: Option<Box<Expression>>,
     },
 }
 
@@ -79,4 +91,13 @@ pub enum UnaryOperator {
     /// Negate a number
     /// Works by subtracting the number from 0 and returning the absolute value.
     Negate,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Iterator {
+    Range {
+        start: Box<Expression>,
+        end: Box<Expression>,
+    },
+    Path(Box<Expression>),
 }

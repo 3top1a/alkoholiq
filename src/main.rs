@@ -23,6 +23,10 @@ fn main() {
 
     let tokens = lexer::tokenize_indexed(&input);
 
+    let output = tokens.iter().map(|x| x.token.clone()).collect::<Vec<_>>();
+    #[cfg(debug_assertions)]
+    dbg!(&output);
+
     let mut parser = parser::Parser::new(tokens, input);
     let ast = parser.parse();
 

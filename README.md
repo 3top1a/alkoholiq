@@ -74,28 +74,28 @@ basm("<>+-")
 // Iterators work like in Rust
 for ch in input_array {
 	// Indents are 8 wide tabs
-	printf(ch);
+	printf(ch)
     // \n prints out a new line, a single \ does not need to be escaped
-	print('\n');
+	print('\n')
 }
 
 // Example foobar implementation
 hit = false
 for i in 0..254 {
-	if %(i 5) == 0 {
-		hit = true
-		print("Foo")
-	}
-	if %(i 7) == 0 {
-		hit = true
-		print("Bar")
-	}
-	if hit == true {
-		print("\n")
-	} else {
-		printf(i)
-		print('\n')
-	}
+    if eq( %( i 5 ) 0 ) {
+        hit = true
+        print("Foo")
+    }
+    if eq( %( i 7 ) 0 ) {
+        hit = true
+        print("Bar")
+    }
+    if eq( hit true ) {
+        print("\n")
+    } else {
+        printf(i)
+        print('\n')
+    }
 }
 
 ```

@@ -1,3 +1,4 @@
+use crate::ast;
 use crate::ast::{Expression, UnaryOperator};
 use crate::lexer::{IndexedToken, Token};
 use crate::utils::repeat;
@@ -59,11 +60,15 @@ impl Parser {
             if let Some(expr) = self.parse_expression() {
                 expressions.push(expr);
             } else {
+                // Print the generated AST anyway
+                dbg!(expressions);
+
                 let itoken = self.ipeek().unwrap();
-                eprintln!("Failed to parse expression {:?}", self.peek().unwrap());
-                eprintln!("At line:\n{}", itoken.line);
-                eprintln!("{}^", " ".repeat(itoken.chars_before - 1));
-                std::process::exit(1);
+                eprintln!("Failed to parse token {:?}", self.peek().unwrap());
+                eprintln!("At line {}:\n{}", itoken.line_number, itoken.line);
+                eprintln!("{}{}", " ".repeat(itoken.chars_before - itoken.range.len()), "^".repeat(itoken.range.len()));
+
+                panic!();
             }
         }
 
@@ -76,7 +81,7 @@ impl Parser {
 
         if token.is_literal() {
             self.advance();
-            return Some(Self::parse_literal(token));
+            return Some(Self::parse_literal(token)?);
         }
 
         match token {
@@ -163,18 +168,71 @@ impl Parser {
                 })
             }
 
+            // If statements
+            Token::If => {
+                self.advance();
+
+                let condition = self.parse_expression()?;
+
+                let then_branch = self.parse_expression()?;
+
+                // Check for optional else
+                let else_branch = if self.consume(Token::Else).is_some() {
+                    Some(Box::new(self.parse_expression()?))
+                } else {
+                    None
+                };
+
+                Some(Expression::If {
+                    condition: Box::new(condition),
+                    then_branch: Box::new(then_branch),
+                    else_branch,
+                })
+            }
+
+            // For loops
+            Token::For => {
+                // for i in 0..10 { ... }
+                self.advance();
+                let name = self.next()?.token.inner_string()?;
+                self.consume(Token::In);
+
+                // Can be either a range or a single path
+                let start = self.parse_expression()?;
+
+                if self.consume(Token::DoubleDot).is_none() {
+                    let body = self.parse_expression()?;
+                    Some(Expression::For {
+                        name,
+                        range: ast::Iterator::Path(start.into()),
+                        body: body.into(),
+                    })
+                } else {
+                    let end = self.parse_expression()?;
+                    let body = self.parse_expression()?;
+                    Some(Expression::For {
+                        name,
+                        range: ast::Iterator::Range {
+                            start: start.into(),
+                            end: end.into(),
+                        },
+                        body: body.into(),
+                    })
+                }
+            }
+
             _ => { None }
         }
     }
 
-    fn parse_literal(lit: Token) -> Expression {
-        match lit {
+    fn parse_literal(lit: Token) -> Option<Expression> {
+        Some(match lit {
             Token::Integer(num) => Expression::Number(num),
             Token::Char(num) => Expression::Number(num),
             Token::String(s) => Expression::Array(s.bytes().map(|x| Expression::Number(x)).collect()),
             Token::True => Expression::Number(1),
             Token::False => Expression::Number(0),
-            _ => panic!("Unexpected literal: {:?}", lit),
-        }
+            _ => return None,
+        })
     }
 }

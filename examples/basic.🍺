@@ -58,23 +58,24 @@ basm("<>+-")
 // Iterators work like in Rust
 for ch in input_array {
 	// Indents are 8 wide tabs
-	printf(ch);
+	printf(ch)
 	// \n prints out a new line,
-	print('\n');
+	print('\n')
 }
 
 // Example foobar implementation
 hit = false
 for i in 0..254 {
-	if %(i 5) == 0 {
+    // The if branch will be hit if the expression inside is not 0
+	if eq( %( i 5 ) 0 ) {
 		hit = true
 		print("Foo")
 	}
-	if %(i 7) == 0 {
+	if eq( %( i 7 ) 0 ) {
 		hit = true
 		print("Bar")
 	}
-	if hit == true {
+	if eq( hit true ) {
 		print("\n")
 	} else {
 		printf(i)

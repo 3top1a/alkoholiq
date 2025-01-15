@@ -14,15 +14,6 @@ pub enum Token {
     #[token("<")]
     Less,
 
-    // #[token("+")]
-    // Plus,
-    // #[token("-")]
-    // Minus,
-    // #[token("*")]
-    // Multiply,
-    // #[token("/")]
-    // Divide,
-
     // Brackets
     #[token("[")]
     SquareOpen,
@@ -33,15 +24,12 @@ pub enum Token {
     RoundOpen,
     #[token(")")]
     RoundClose,
-
     #[token("{")]
     CurlyOpen,
     #[token("}")]
     CurlyClose,
 
     // Separators
-    // #[token(",")]
-    // Comma,
     #[token(";")]
     Semicolon,
 
@@ -50,6 +38,10 @@ pub enum Token {
     True,
     #[token("false")]
     False,
+    #[token("if")]
+    If,
+    #[token("else")]
+    Else,
 
     // Iterators
     #[token("for")]
@@ -77,54 +69,8 @@ pub enum Token {
 
     // Identifiers
     #[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_string())]
-    #[regex(r"\+|\-|\*|\/|%", |lex| lex.slice().to_string())]
+    #[regex(r"\+|\-|\*|\/|%", |lex| lex.slice().to_string())] // Because math ops are also functions
     Identifier(String),
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct IndexedToken {
-    pub token: Token,
-    pub range: Range<usize>,
-    pub line: String,
-    pub chars_before: usize,
-}
-
-impl Into<Token> for IndexedToken {
-    fn into(self) -> Token {
-        self.token
-    }
-}
-
-pub fn tokenize_indexed(input: &str) -> Vec<IndexedToken> {
-    // Add newline so line_text_after doesn't panic
-    let input = input.to_owned() + "\n";
-    let input = input.replace("\t", &*" ".repeat(8));
-    let output = Token::lexer(&*input).spanned().into_iter().map(|(x, span)| {
-        let line_number = input[..span.end].chars().filter(|&x| x == '\n').count() + 1;
-        let line_text_before = input[..span.end].lines().last().unwrap();
-        let line_text_after = input[span.end..].lines().next().unwrap();
-        match x {
-            Ok(x) => IndexedToken {
-                token: x,
-                range: span.start..span.end,
-                line: line_text_before.to_owned() + line_text_after,
-                chars_before: line_text_before.len(),
-            },
-            Err(e) => {
-                eprintln!("Failed lexing `{}` on line {}:", input[span].to_string(), line_number);
-                eprintln!("{}{}", line_text_before, line_text_after);
-                eprintln!("{}^", " ".repeat(line_text_before.len() - 1));
-                std::process::exit(1)
-            }
-        }
-    }).collect();
-    #[cfg(debug_assertions)]
-    dbg!(&output);
-    output
-}
-
-pub fn tokenize(input: &str) -> Vec<Token> {
-    tokenize_indexed(input).into_iter().map(|x| x.token).collect()
 }
 
 impl Token {
@@ -143,7 +89,68 @@ impl Token {
             _ => false,
         }
     }
+
+    pub fn inner_string(&self) -> Option<String> {
+        match self {
+            Token::Identifier(x) => Some(x.clone()),
+            Token::String(x) => Some(x.clone()),
+            _ => None
+        }
+    }
 }
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct IndexedToken {
+    pub token: Token,
+    pub range: Range<usize>,
+    pub line: String,
+    pub line_number: usize,
+    pub chars_before: usize,
+}
+
+impl IndexedToken {
+    pub fn new_hidden(token: Token) -> Self {
+        IndexedToken {
+            token,
+            range: 0..0,
+            line: "".to_string(),
+            line_number: 0,
+            chars_before: 0,
+        }
+    }
+}
+
+pub fn tokenize_indexed(input: &str) -> Vec<IndexedToken> {
+    // Add newline so line_text_after doesn't panic
+    let input = input.to_owned() + "\n";
+    let input = input.replace("\t", &*" ".repeat(8));
+    let output = Token::lexer(&*input).spanned().into_iter().map(|(x, span)| {
+        let line_number = input[..span.end].chars().filter(|&x| x == '\n').count() + 1;
+        let line_text_before = input[..span.end].lines().last().unwrap();
+        let line_text_after = input[span.end..].lines().next().unwrap();
+        match x {
+            Ok(x) => IndexedToken {
+                token: x,
+                range: span.start..span.end,
+                line: line_text_before.to_owned() + line_text_after,
+                chars_before: line_text_before.len(),
+                line_number,
+            },
+            Err(e) => {
+                eprintln!("Failed lexing `{}` on line {}:", input[span].to_string(), line_number);
+                eprintln!("{}{}", line_text_before, line_text_after);
+                eprintln!("{}^", " ".repeat(line_text_before.len() - 1));
+                std::process::exit(1)
+            }
+        }
+    }).collect();
+    output
+}
+
+pub fn tokenize(input: &str) -> Vec<Token> {
+    tokenize_indexed(input).into_iter().map(|x| x.token).collect()
+}
+
 
 #[cfg(test)]
 mod tests {
