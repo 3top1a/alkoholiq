@@ -1,5 +1,5 @@
-use std::ops::Range;
 use logos::Logos;
+use std::ops::Range;
 
 #[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\f\n]+")] // Skip whitespace
@@ -66,7 +66,7 @@ pub enum Token {
     #[regex(r"[0-9]+", |lex| lex.slice().parse().ok())]
     Integer(u8),
 
-    #[regex(r"'.'", |lex| lex.slice().chars().nth(1).map(|c| c as u8))]
+    #[regex(r"'(.|\\n|\\d)'", |lex| lex.slice().chars().nth(1).map(|c| c as u8))]
     Char(u8),
 
     #[regex(r#""[^"]*""#, |lex| {
@@ -77,7 +77,7 @@ pub enum Token {
 
     // Identifiers
     #[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_string())]
-    #[regex(r"\+|\-|\*|\/", |lex| lex.slice().to_string())]
+    #[regex(r"\+|\-|\*|\/|%", |lex| lex.slice().to_string())]
     Identifier(String),
 }
 
@@ -96,7 +96,10 @@ impl Into<Token> for IndexedToken {
 }
 
 pub fn tokenize_indexed(input: &str) -> Vec<IndexedToken> {
-    let output = Token::lexer(input).spanned().into_iter().map(|(x, span)| {
+    // Add newline so line_text_after doesn't panic
+    let input = input.to_owned() + "\n";
+    let input = input.replace("\t", &*" ".repeat(8));
+    let output = Token::lexer(&*input).spanned().into_iter().map(|(x, span)| {
         let line_number = input[..span.end].chars().filter(|&x| x == '\n').count() + 1;
         let line_text_before = input[..span.end].lines().last().unwrap();
         let line_text_after = input[span.end..].lines().next().unwrap();
@@ -162,13 +165,12 @@ mod tests {
 
     #[test]
     fn test_array() {
-        let input = "array* = [1 2 3]";
+        let input = "array = [1 2 3]";
         let tokens = tokenize(input);
         assert_eq!(
             tokens,
             vec![
                 Token::Identifier("array".to_string()),
-                Token::Identifier("*".to_string()),
                 Token::Assign,
                 Token::SquareOpen,
                 Token::Integer(1),

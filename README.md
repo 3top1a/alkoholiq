@@ -41,7 +41,7 @@ array = [ 1 2 3 4 { + ( 3 2 ) } ]
 array_empty = [ 0 ; 3 ]
 // Strings are arrays
 string = "Hello, World!"
-// This string is four characters wide!
+// This string is four characters long!
 beer = "🍺"
 
 // Operators
@@ -53,7 +53,7 @@ math = +( 5 *(5 two))
 input_array = [0;16]
 // Get user input
 // Maximum length is 16
-input(input_array, 16)
+input(input_array 16)
 
 // Print
 print("Hello ")
@@ -75,25 +75,26 @@ basm("<>+-")
 for ch in input_array {
 	// Indents are 8 wide tabs
 	printf(ch);
-	printf('\n');
+    // \n prints out a new line, a single \ does not need to be escaped
+	print('\n');
 }
 
 // Example foobar implementation
 hit = false
 for i in 0..254 {
-	if %(i, 5) == 0 {
+	if %(i 5) == 0 {
 		hit = true
-		printf("Foo")
+		print("Foo")
 	}
-	if %(i, 7) == 0 {
+	if %(i 7) == 0 {
 		hit = true
-		printf("Bar")
+		print("Bar")
 	}
 	if hit == true {
-		printf("\n")
+		print("\n")
 	} else {
 		printf(i)
-		printf('\n')
+		print('\n')
 	}
 }
 

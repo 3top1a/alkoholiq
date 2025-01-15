@@ -44,8 +44,8 @@ impl Parser {
         self.tokens.get(self.current).map_or(None, |x| Some(x.clone()))
     }
 
-    fn check(&self, token: &Token) -> bool {
-        self.peek() == Some(token.clone())
+    fn check(&self, token: Token) -> bool {
+        self.peek() == Some(token)
     }
 
     fn is_at_end(&self) -> bool {
@@ -139,13 +139,11 @@ impl Parser {
                 }
 
                 let mut elements = vec![first];
-                while !self.check(&Token::SquareClose) {
-                    if !self.check(&Token::SquareClose) {
+                while !self.check(Token::SquareClose) {
+                    if self.check(Token::SquareClose) {
                         break;
                     }
-                    if !self.check(&Token::SquareClose) {
-                        elements.push(self.parse_expression()?);
-                    }
+                    elements.push(self.parse_expression()?);
                 }
 
                 self.consume(Token::SquareClose)?;

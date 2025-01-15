@@ -50,6 +50,16 @@ pub enum Expression {
         /// Body
         body: Vec<Expression>,
     },
+
+    /// For loop
+    For {
+        /// Variable name
+        name: String,
+        /// Range
+        range: (Box<Expression>, Box<Expression>),
+        /// Body
+        body: Vec<Expression>,
+    },
 }
 
 #[derive(Debug, PartialEq, Clone)]
