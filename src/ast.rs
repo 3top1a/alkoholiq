@@ -103,3 +103,12 @@ pub enum Iterator {
     },
     Path(Box<Expression>),
 }
+
+impl Expression {
+    pub fn as_number(&self) -> Option<u8> {
+        match self {
+            Expression::Number(n) => Some(*n),
+            _ => None,
+        }
+    }
+}

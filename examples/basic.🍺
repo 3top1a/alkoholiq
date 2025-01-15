@@ -3,3 +3,9 @@ y = 5
 // This will generate a single - because it's faster
 z = 255
 array = [1 2 3 4 5]
+c = 'c'
+basm(".")
+newline = '\n'
+basm(".")
+x = "\nHello, World!"
+basm("<<<<<<<<<<<<.>.>.>.>.>.>.>.>.>.>.>.>.")

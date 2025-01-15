@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::str::from_utf8;
 use crate::ast::Expression;
 
 pub struct Codegen {
@@ -149,6 +150,25 @@ impl Codegen {
             Expression::Number(x) => {
                 self.set_new_value(*x);
             }
+            Expression::Path(x) => {
+                self.move_to(*self.variables.get(x).unwrap());
+            }
+            Expression::Call { name, args } => {
+                match name.as_str() {
+                    "basm" => {
+                        assert_eq!(args.len(), 1);
+                        match args.get(0).unwrap() {
+                            Expression::Array(x) => {
+                                for value in x.iter() {
+                                    self.code += from_utf8(&[value.as_number().unwrap()]).unwrap()
+                                }
+                            }
+                            _ => { todo!() }
+                        }
+                    }
+                    _ => { todo!("Implement other functions"); }
+                }
+            }
             Expression::Assignment { name, value } => {
                 if self.variables.get(name).is_none() {
                     match *value.clone() {
@@ -176,7 +196,9 @@ impl Codegen {
                     self.add_value(3);
                 }
             }
-            _ => {}
+            _ => {
+                todo!("Implement other expressions");
+            }
         }
     }
 }

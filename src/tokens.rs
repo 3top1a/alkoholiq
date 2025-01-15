@@ -58,7 +58,8 @@ pub enum Token {
     #[regex(r"[0-9]+", |lex| lex.slice().parse().ok())]
     Integer(u8),
 
-    #[regex(r"'(.|\\n|\\d)'", |lex| lex.slice().chars().nth(1).map(|c| c as u8))]
+    #[regex(r"'(.)'", |lex| lex.slice().chars().nth(1).map(|c| c as u8))]
+    #[regex(r"'\\n'", |_| Some(10))]
     Char(u8),
 
     #[regex(r#""[^"]*""#, |lex| {

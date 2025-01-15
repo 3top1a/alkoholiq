@@ -32,7 +32,7 @@ pub fn tokenize_indexed(input: &str) -> Vec<IndexedToken> {
             }
         })
         .collect();
-    output
+    postprocess(output)
 }
 
 #[allow(dead_code)]
@@ -41,4 +41,17 @@ pub fn tokenize(input: &str) -> Vec<Token> {
         .into_iter()
         .map(|x| x.token)
         .collect()
+}
+
+fn postprocess(mut input: Vec<IndexedToken>) -> Vec<IndexedToken> {
+    for token in input.iter_mut() {
+        match token.token {
+            Token::String(ref mut x) => {
+                *x = x.replace("\\n", "\n");
+            }
+            _ => {}
+        }
+    }
+
+    input
 }
