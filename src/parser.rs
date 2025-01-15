@@ -52,14 +52,28 @@ impl Parser {
         self.current >= self.tokens.len()
     }
 
-    pub fn parse(&mut self) -> Vec<Expression> {
+    pub fn parse(mut self) -> Vec<Expression> {
         let mut expressions = Vec::new();
 
         while !self.is_at_end() {
             if let Some(expr) = self.parse_expression() {
+                // Check if the new expression is valid
+                if !self.valid(&expressions, &expr) {
+                    let last_parsed_token = self.tokens[self.current - 1].clone();
+                    eprintln!("Unexpected expression {:?} on line {}:", expr, last_parsed_token.line_number);
+                    eprintln!("{}", last_parsed_token.line);
+                    eprintln!(
+                        "{}{}",
+                        " ".repeat(last_parsed_token.chars_before - last_parsed_token.range.len()),
+                        "^".repeat(last_parsed_token.range.len())
+                    );
+                    panic!();
+                }
+
                 expressions.push(expr);
             } else {
                 // Print the generated AST anyway
+                #[cfg(debug_assertions)]
                 dbg!(expressions);
 
                 let itoken = self.ipeek().unwrap();
@@ -237,5 +251,19 @@ impl Parser {
             Token::False => Expression::Number(0),
             _ => return None,
         })
+    }
+
+    fn valid(&self, expressions: &Vec<Expression>, new: &Expression) -> bool {
+        match new {
+            Expression::Path(_) => {
+                // Check if the previous expression was also a path
+                if let Some(Expression::Path(_)) = expressions.last() {
+                    return false;
+                }
+
+                true
+            },
+            _ => true,
+        }
     }
 }

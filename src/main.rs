@@ -5,6 +5,7 @@ mod lexer;
 mod parser;
 mod tokens;
 mod utils;
+mod codegen;
 
 fn main() {
     let input = std::env::args().nth(1).map_or_else(
@@ -24,12 +25,15 @@ fn main() {
 
     let tokens = lexer::tokenize_indexed(&input);
 
-    let output = tokens.iter().map(|x| x.token.clone()).collect::<Vec<_>>();
+    let normal_tokens = tokens.iter().map(|x| x.token.clone()).collect::<Vec<_>>();
     #[cfg(debug_assertions)]
-    dbg!(&output);
+    dbg!(&normal_tokens);
 
-    let mut parser = parser::Parser::new(tokens, input);
-    let ast = parser.parse();
+    let ast = parser::Parser::new(tokens, input).parse();
 
-    println!("{:#?}", ast);
+    #[cfg(debug_assertions)]
+    dbg!(&ast);
+
+    let code = codegen::Codegen::new().generate(ast);
+    println!("{}", code);
 }
