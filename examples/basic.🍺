@@ -1,11 +1,52 @@
-x = 4
-y = 5
-// This will generate a single - because it's faster
-z = 255
-array = [1 2 3 4 5]
-c = 'c'
+// No arrays for now
+
+x = 1
+y = 2
+
+fn + a b {
+    ret = 0
+    copy a ret
+    copy b ret
+    return ret
+}
+
+z = +( x y)
+goto(z)
 basm(".")
-newline = '\n'
-basm(".")
-x = "\nHello, World!"
-basm("<<<<<<<<<<<<.>.>.>.>.>.>.>.>.>.>.>.>.")
+
+
+---
+
+
+set x
+> (alloc) + (add)
+
+set y
+> (alloc) ++ (add)
+
+
+function call
+allocate z
+> (alloc)
+new stack
+>
+
+set a
+> (alloc) (copy)
+
+set b
+> (alloc) (copy)
+
+copy a
+copy b
+return ret
+(move ret to z)
+
+pop stack
+(zero b)
+(zero a)
+
+goto z
+< (goto z)
+print
+.

@@ -18,13 +18,14 @@ pub enum Expression {
         args: Vec<Expression>,
     },
 
-    /// Unary arithmetic operation
-    Unary {
-        /// Operator
-        op: UnaryOperator,
-        /// Operand
-        operand: Box<Expression>,
-    },
+    // Now also a function
+    // /// Unary arithmetic operation
+    // Unary {
+    //     Operator
+    // op: UnaryOperator,
+    // Operand
+    // operand: Box<Expression>,
+    // },
 
     // Not used right now because maths are functions
     // /// Basic arithmetic operation
@@ -57,7 +58,7 @@ pub enum Expression {
         /// Variable name
         name: String,
         /// Range
-        range: Iterator,
+        range: AlcIterator,
         /// Body
         /// Should be of type Expression::Expression
         body: Box<Expression>,
@@ -72,6 +73,16 @@ pub enum Expression {
         then_branch: Box<Expression>,
         /// Else branch
         else_branch: Option<Box<Expression>>,
+    },
+
+    // Function
+    Function {
+        /// Name of the function
+        name: String,
+        /// Arguments
+        args: Vec<String>,
+        /// Body
+        body: Box<Expression>,
     },
 }
 
@@ -96,12 +107,12 @@ pub enum UnaryOperator {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Iterator {
+pub enum AlcIterator {
     Range {
         start: Box<Expression>,
         end: Box<Expression>,
     },
-    Path(Box<Expression>),
+    Variable(Box<Expression>),
 }
 
 impl Expression {
@@ -109,6 +120,14 @@ impl Expression {
         match self {
             Expression::Number(n) => Some(*n),
             _ => None,
+        }
+    }
+
+    pub fn size(&self) -> usize {
+        match self {
+            Expression::Number(_) => 1,
+            Expression::Array(arr) => arr.iter().map(|e| e.size()).sum(),
+            _ => 0,
         }
     }
 }

@@ -32,6 +32,8 @@ pub enum Token {
     // Separators
     #[token(";")]
     Semicolon,
+    #[token(":")]
+    Colon,
 
     // Keywords
     #[token("true")]
@@ -42,6 +44,10 @@ pub enum Token {
     If,
     #[token("else")]
     Else,
+    #[token("fn")]
+    Fn,
+    #[token("return")]
+    Return,
 
     // Iterators
     #[token("for")]

@@ -132,14 +132,14 @@ impl Parser {
             }
 
             // Negation
-            Token::Not => {
-                self.advance();
-                let operand = self.parse_expression()?;
-                Some(Expression::Unary {
-                    op: UnaryOperator::Negate,
-                    operand: Box::new(operand),
-                })
-            }
+            // Token::Not => {
+            //     self.advance();
+            //     let operand = self.parse_expression()?;
+            //     Some(Expression::Unary {
+            //         op: UnaryOperator::Negate,
+            //         operand: Box::new(operand),
+            //     })
+            // }
 
             // Array
             Token::SquareOpen => {
@@ -219,7 +219,7 @@ impl Parser {
                     let body = self.parse_expression()?;
                     Some(Expression::For {
                         name,
-                        range: ast::Iterator::Path(start.into()),
+                        range: ast::AlcIterator::Variable(start.into()),
                         body: body.into(),
                     })
                 } else {
@@ -227,7 +227,7 @@ impl Parser {
                     let body = self.parse_expression()?;
                     Some(Expression::For {
                         name,
-                        range: ast::Iterator::Range {
+                        range: ast::AlcIterator::Range {
                             start: start.into(),
                             end: end.into(),
                         },
@@ -235,6 +235,30 @@ impl Parser {
                     })
                 }
             }
+
+            // Function definition
+            Token::Fn => {
+                self.advance();
+
+                let name = self.next()?.token.inner_string()?;
+
+                // Arguments
+                // Take until colon
+                let mut args = Vec::new();
+                while self.peek() != Some(Token::CurlyOpen) {
+                    args.push(self.next()?.token.inner_string()?);
+                }
+
+                assert_eq!(self.peek().unwrap(), Token::CurlyOpen);
+
+                let body = self.parse_expression()?;
+
+                Some(Expression::Function {
+                    name,
+                    args,
+                    body: Box::new(body),
+                })
+            },
 
             _ => None,
         }

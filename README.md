@@ -72,6 +72,7 @@ printf(c)
 basm("<>+-")
 
 // Iterators work like in Rust
+// For simplicity, if the iterator is a single number it is still ran
 for ch in input_array {
 	// Indents are 8 wide tabs
 	printf(ch)
