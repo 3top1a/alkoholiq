@@ -65,12 +65,6 @@ print(c)
 // This prints `99`
 printf(c)
 
-// Raw Brainfuck
-// This should only be used in the standard library, e.g. input(), not in user code
-// If this project succeeds it's ultimate goal, basm will be the only function from
-// the compiler except math, and all other functions will be written in alkoholiq
-basm("<>+-")
-
 // Iterators work like in Rust
 // For simplicity, if the iterator is a single number it is still ran
 for ch in input_array {

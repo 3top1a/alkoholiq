@@ -20,11 +20,7 @@ pub fn tokenize_indexed(input: &str) -> Vec<IndexedToken> {
                     line_number,
                 },
                 Err(_) => {
-                    eprintln!(
-                        "Failed lexing `{}` on line {}:",
-                        &input[span],
-                        line_number
-                    );
+                    eprintln!("Failed lexing `{}` on line {}:", &input[span], line_number);
                     eprintln!("{}{}", line_text_before, line_text_after);
                     eprintln!("{}^", " ".repeat(line_text_before.len() - 1));
                     std::process::exit(1)

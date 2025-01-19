@@ -38,7 +38,6 @@ pub enum Expression {
     //     /// Right side
     //     rhs: Box<Expression>,
     // },
-
     /// Variable assignment
     Assignment {
         /// Name of the variable
@@ -83,6 +82,12 @@ pub enum Expression {
         args: Vec<String>,
         /// Body
         body: Box<Expression>,
+    },
+
+    // Return
+    Return {
+        // Name of return value
+        name: String,
     },
 }
 

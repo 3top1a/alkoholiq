@@ -11,10 +11,7 @@ pub struct Parser {
 
 impl Parser {
     pub fn new(tokens: Vec<IndexedToken>, _input: String) -> Self {
-        Parser {
-            tokens,
-            current: 0,
-        }
+        Parser { tokens, current: 0 }
     }
 
     fn next(&mut self) -> Option<&IndexedToken> {
@@ -35,13 +32,11 @@ impl Parser {
     }
 
     fn peek(&self) -> Option<Token> {
-        self.tokens
-            .get(self.current).map(|x| x.clone().token)
+        self.tokens.get(self.current).map(|x| x.clone().token)
     }
 
     fn ipeek(&self) -> Option<IndexedToken> {
-        self.tokens
-            .get(self.current).cloned()
+        self.tokens.get(self.current).cloned()
     }
 
     fn check(&self, token: Token) -> bool {
@@ -57,18 +52,22 @@ impl Parser {
 
         while !self.is_at_end() {
             if let Some(expr) = self.parse_expression() {
-                // Check if the new expression is valid
-                if !self.valid(&expressions, &expr) {
-                    let last_parsed_token = self.tokens[self.current - 1].clone();
-                    eprintln!("Unexpected expression {:?} on line {}:", expr, last_parsed_token.line_number);
-                    eprintln!("{}", last_parsed_token.line);
-                    eprintln!(
-                        "{}{}",
-                        " ".repeat(last_parsed_token.chars_before - last_parsed_token.range.len()),
-                        "^".repeat(last_parsed_token.range.len())
-                    );
-                    panic!();
-                }
+                // Will be done in the IR generation
+                // // Check if the new expression is valid
+                // if !self.valid(&expressions, &expr) {
+                //     let last_parsed_token = self.tokens[self.current - 1].clone();
+                //     eprintln!(
+                //         "Unexpected expression {:?} on line {}:",
+                //         expr, last_parsed_token.line_number
+                //     );
+                //     eprintln!("{}", last_parsed_token.line);
+                //     eprintln!(
+                //         "{}{}",
+                //         " ".repeat(last_parsed_token.chars_before - last_parsed_token.range.len()),
+                //         "^".repeat(last_parsed_token.range.len())
+                //     );
+                //     panic!();
+                // }
 
                 expressions.push(expr);
             } else {
@@ -258,7 +257,27 @@ impl Parser {
                     args,
                     body: Box::new(body),
                 })
-            },
+            }
+
+            // Return
+            Token::Return => {
+                self.advance();
+                let name = self.next()?.token.inner_string()?;
+
+                Some(Expression::Return { name })
+            }
+
+            // Math operations
+            Token::Add => {
+                // + a b
+                self.advance();
+                let a = self.parse_expression()?;
+                let b = self.parse_expression()?;
+                Some(Expression::Call {
+                    name: "+".to_string(),
+                    args: vec![a, b],
+                })
+            }
 
             _ => None,
         }
@@ -268,26 +287,10 @@ impl Parser {
         Some(match lit {
             Token::Integer(num) => Expression::Number(num),
             Token::Char(num) => Expression::Number(num),
-            Token::String(s) => {
-                Expression::Array(s.bytes().map(Expression::Number).collect())
-            }
+            Token::String(s) => Expression::Array(s.bytes().map(Expression::Number).collect()),
             Token::True => Expression::Number(1),
             Token::False => Expression::Number(0),
             _ => return None,
         })
-    }
-
-    fn valid(&self, expressions: &Vec<Expression>, new: &Expression) -> bool {
-        match new {
-            Expression::Path(_) => {
-                // Check if the previous expression was also a path
-                if let Some(Expression::Path(_)) = expressions.last() {
-                    return false;
-                }
-
-                true
-            },
-            _ => true,
-        }
     }
 }

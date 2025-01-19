@@ -1,11 +1,12 @@
 use std::io::Read;
 
 mod ast;
+mod codegen;
+mod ir;
 mod lexer;
 mod parser;
 mod tokens;
 mod utils;
-mod codegen;
 
 fn main() {
     let input = std::env::args().nth(1).map_or_else(
@@ -34,6 +35,6 @@ fn main() {
     #[cfg(debug_assertions)]
     dbg!(&ast);
 
-    let code = codegen::Codegen::new().generate(ast);
-    println!("{}", code);
+    let ir = ir::IRGenerator::new().generate(ast);
+    dbg!(ir);
 }

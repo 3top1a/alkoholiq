@@ -76,14 +76,24 @@ pub enum Token {
 
     // Identifiers
     #[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_string())]
-    #[regex(r"\+|\-|\*|\/|%", |lex| lex.slice().to_string())]
     // Because math ops are also functions
+    // #[regex(r"\+|\-|\*|\/|%", |lex| lex.slice().to_string())]
     Identifier(String),
+
+    #[token("+")]
+    Add,
+    #[token("-")]
+    Subtract,
+    #[token("*")]
+    Multiply,
 }
 
 impl Token {
     pub fn is_literal(&self) -> bool {
-        matches!(self, Token::Char(_) | Token::False | Token::True | Token::String(_) | Token::Integer(_))
+        matches!(
+            self,
+            Token::Char(_) | Token::False | Token::True | Token::String(_) | Token::Integer(_)
+        )
     }
 
     pub fn is_identifier(&self) -> bool {
