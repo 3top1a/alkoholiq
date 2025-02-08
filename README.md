@@ -1,5 +1,9 @@
 # Alkoholiq
 
+[![codecov](https://codecov.io/gh/3top1a/alkoholiq/graph/badge.svg?token=ZSXBRAWT1M)](https://codecov.io/gh/3top1a/alkoholiq)
+![brain? fucked.](https://img.shields.io/badge/brain-fucked-darkred?style=flat)
+
+
 Alkoholiq, a programming language that transpiles to Brainfuck.
 The output is not executable immediately, and needs to be piped into a tool such as [my 540 byte brainfuck interpreter](https://github.com/3top1a/sbfi-rs).
 
