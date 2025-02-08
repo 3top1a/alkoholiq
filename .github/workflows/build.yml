@@ -16,4 +16,4 @@ jobs:
     - uses: actions/checkout@v4
     - uses: extractions/setup-just@v2
     - name: Test
-      run: just test
+      run: just ci
