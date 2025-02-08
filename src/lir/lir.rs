@@ -1,43 +1,73 @@
-/// Low Intermediate Representation
-///
-/// A smaller abstraction on top of brainfuck that turns it into a stack machine
-#[derive(Debug, Clone, Copy)]
-pub enum LIR {
-    /// Push a value on top of the stack
-    Push(u8),
-    /// Remove the topmost value
-    Pop,
-    /// Push a 0 on top of the stack
-    False,
-    /// Push a 1 on top of the stack
-    True,
+type Immediate = u8;
 
-    /// Copy the value at stack number x and push it to the top
-    Var(usize),
-    /// Duplicate the top value
+#[derive(Debug, Clone)]
+pub enum Location {
+    Stack,
+    Variable(usize),
+}
+
+#[derive(Debug, Clone)]
+pub enum Value {
+    Immediate(Immediate),
+    Location(Location),
+}
+
+#[derive(Debug, Clone)]
+pub enum Instruction {
+    // Stack operations
+    Push(Immediate),
+    Pop,
     Dup,
 
-    /// Prints the top value while poping it
-    Print,
-    /// Take one byte from stdin and push it
-    Input,
+    // Data manipulation
+    Binary {
+        op: BinaryOp,
+        modified: Location,
+        consumed: Value,
+    },
 
-    /// Add the two topmost values
+    // Variable modification
+    Copy {
+        from: Value,
+        to: Location,
+    },
+
+    // I/O
+    Read(Location),
+    Print(Value),
+
+    // Control flow
+    Match(Location),
+    Case(Immediate),
+    EndMatch,
+}
+
+#[derive(Debug, Clone)]
+pub enum BinaryOp {
     Add,
-    /// Substract the two topmost values
-    /// Can also be used as a not equals operation
     Sub,
-    // MUL,
-    /// Check if the two topmost values are equal
-    /// Pushes 1 if true, 0 if false
+    Mul,
+    Div,
     Eq,
+}
 
-    /// Start of an if block without an else block
-    ///
-    /// If the top value is 0, skip the next instruction.
-    /// This will consume the top value either way.
-    StartIf,
-    StartElse,
-    /// End of an if block
-    EndIf,
+impl Instruction {
+    pub fn debug(&self) -> String {
+        match self {
+            Instruction::Push(n) => format!("Push({})", n),
+            Instruction::Pop => "pop".to_string(),
+            Instruction::Dup => "Dup".to_string(),
+            Instruction::Binary {
+                op,
+                modified,
+                consumed,
+            } => format!("{:?}", op),
+            Instruction::Copy { from, to } => format!("C{:?}{:?}", from, to),
+            Instruction::Read(loc) => format!("Read {:?}", loc),
+            Instruction::Print(val) => format!("Print {:?}", val),
+            Instruction::Match(loc) => format!("Match {:?}", loc),
+            Instruction::Case(n) => format!("Case {}", n),
+            Instruction::EndMatch => "EndMatch".to_string(),
+        }
+    }
 }

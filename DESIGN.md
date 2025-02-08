@@ -32,7 +32,7 @@ Inefficiencies caused by this should be optimized in the next step.
 The memory layout looks like this:
 
 ```
-[+variable storage] [2 temp] [+working stack]
+[+variable storage] [+working stack]
 ```
 
 The variable storage stores variables and are retrieved and stored at runtime by their index of insertion. The size is fixed and must be known at compile time.
@@ -50,6 +50,7 @@ LIR therefore only needs a few instructions:
 - Sub <modified: var OR stack> <con: immidiate OR var OR stack>
 - Mul ...
 - Div ...
+- Eq <modified: var OR stack> <con: immidiate OR var OR stack>
 
 3) Variable modification
 - Copy <to: var OR stack> <from: immidiate OR var OR stack>
@@ -66,4 +67,24 @@ LIR therefore only needs a few instructions:
 
 
 For efficiency, instructions can modify the stack or variables without copying.
+
+For example:
+```asm
+Push 65 ; [65]
+Print (Stack) ; Consumes 65, leaving stack empty
+
+Push 5 ; [5]
+Dup ; [5] [5]
+Eq ; [1] Tests for equality
+
+Match (Stack) ; Consumes top of stack
+Case (0)
+Print (65)
+Case (1)
+Print (66)
+EndMatch
+
+Read (Stack) ; Pushes one byte of used input to stack
+Copy (from: Stack) (to: Variable 0 ) ; Pops and puts it into variable storage
+```
 
