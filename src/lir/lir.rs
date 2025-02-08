@@ -18,6 +18,7 @@ pub enum Instruction {
     Push(Immediate),
     Pop,
     Dup,
+    Swap,
 
     // Data manipulation
     Binary {
@@ -39,6 +40,9 @@ pub enum Instruction {
     // Control flow
     Match(Location),
     Case(Immediate),
+    EndCase,
+    CaseDefault,
+    EndCaseDefault,
     EndMatch,
 }
 
@@ -57,17 +61,21 @@ impl Instruction {
             Instruction::Push(n) => format!("Push({})", n),
             Instruction::Pop => "pop".to_string(),
             Instruction::Dup => "Dup".to_string(),
+            Instruction::Swap => "Swap".to_string(),
             Instruction::Binary {
                 op,
                 modified,
                 consumed,
-            } => format!("{:?}", op),
+            } => format!("{:?} {:?} {:?}", op, modified, consumed),
             Instruction::Copy { from, to } => format!("Copy {:?} to {:?}", from, to),
             Instruction::Read(loc) => format!("Read {:?}", loc),
             Instruction::Print(val) => format!("Print {:?}", val),
             Instruction::Match(loc) => format!("Match {:?}", loc),
             Instruction::Case(n) => format!("Case {}", n),
+            Instruction::CaseDefault => "CaseDefault".to_string(),
             Instruction::EndMatch => "EndMatch".to_string(),
+            Instruction::EndCase => "EndCase".to_string(),
+            Instruction::EndCaseDefault => "EndCaseDefault".to_string(),
         }
     }
 }

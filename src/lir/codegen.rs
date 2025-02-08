@@ -22,6 +22,8 @@ impl Codegen {
     ///
     /// This consumes the Codegen instance and returns the generated code.
     pub fn codegen(mut self, instructions: Instructions) -> String {
+        instructions.validate();
+
         self.variables = instructions.get_variable_indexes().len();
 
         // Allocate memory for variables
@@ -39,20 +41,24 @@ impl Codegen {
                 Push(n) => self.push(n),
                 Pop => self.pop(),
                 Dup => self.dup(),
-
+                Swap => self.swap(),
                 Binary {
                     op,
                     modified,
                     consumed,
                 } => self.binary(op, modified, consumed),
-
                 Copy { from, to } => self.copy(from, to),
-
                 Read(loc) => self.read(loc),
-
                 Print(val) => self.print(val),
 
-                _ => unimplemented!(),
+                Match(loc) => self.startmatch(loc),
+                EndCaseDefault => self.endcasedefault(),
+                CaseDefault => self.casedefault(),
+                Case(n) => self.case(n),
+                EndCase => self.endcase(),
+                EndMatch => self.endmatch(),
+
+                // _ => unimplemented!("Instruction not implemented: {:?}", instr),
             }
 
             self.code += "\n";
@@ -84,6 +90,11 @@ impl Codegen {
         self.goto_stack();
         self.code += "[->+>+<<]>>[-<<+>>]<";
         self.ptr += 1;
+    }
+
+    fn swap(&mut self) {
+        self.goto_stack();
+        self.code += "[->+<]<[->+<]>>[-<<+>>]<";
     }
 
     fn copy(&mut self, from: Value, to: Location) {
@@ -204,5 +215,50 @@ impl Codegen {
                 }
             }
         }
+    }
+
+    fn startmatch(&mut self, loc: Location) {
+        /*
+        For example:
+
+        ++++
+        >+<[
+            -[
+                [-]>-default#<
+            ]>[-1#]<
+        ]>[-0#]<
+
+        Every iteration we decrement and if it's zero we don't recurse further.
+
+        see https://brainfuck.org/function_tutorial.b
+         */
+        match loc {
+            Location::Stack => {
+                self.goto_stack();
+                self.code += ">+<[";
+                self.ptr += 1;
+            }
+            _ => unimplemented!(),
+        }
+    }
+
+    fn endmatch(&mut self) {
+        // TODO
+    }
+
+    fn case(&mut self, n: u8) {
+        // TODO
+    }
+
+    fn endcase(&mut self) {
+        // TODO
+    }
+
+    fn casedefault(&mut self) {
+        // TODO
+    }
+
+    fn endcasedefault(&mut self) {
+        // TODO
     }
 }

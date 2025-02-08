@@ -2,7 +2,7 @@ use crate::lir::lir::{Instruction, Location, Value};
 
 pub struct Instructions(pub Vec<Instruction>);
 impl Instructions {
-    /// Validates instructions and returns if it's valid
+    /// Validates instructions and panics if invalid.
     pub fn validate(&self) -> bool {
         // Check for equal match and unmatch
         let mut match_count = 0;
@@ -14,21 +14,21 @@ impl Instructions {
             }
         }
         if match_count != 0 {
-            return false;
+            panic!("Unmatched match");
         }
 
-        // Check that case (x) are ordered from 0 to n
-        let mut highest_case = 0;
+        // Check that case (x) are ordered from n to 0
+        let mut highest_case = 255;
         for instr in &self.0 {
             match instr {
                 Instruction::Case(x) => {
-                    if *x > highest_case {
+                    if *x < highest_case {
                         highest_case = *x;
                     } else {
-                        return false;
+                        panic!("Case not ordered");
                     }
                 }
-                Instruction::Match(_) => highest_case = 0,
+                Instruction::Match(_) => highest_case = 255,
                 _ => (),
             }
         }

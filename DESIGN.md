@@ -78,10 +78,12 @@ Dup ; [5] [5]
 Eq ; [1] Tests for equality
 
 Match (Stack) ; Consumes top of stack
-Case (0)
-Print (65)
+CaseDefault
+Print (67)
 Case (1)
 Print (66)
+Case (0)
+Print (65)
 EndMatch
 
 Read (Stack) ; Pushes one byte of used input to stack

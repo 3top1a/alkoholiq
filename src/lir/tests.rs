@@ -98,6 +98,15 @@ mod tests {
     }
 
     #[test]
+    fn test_swap() {
+        test(
+            vec![Push(4), Push(9), Swap],
+            ">++++>+++++++++[->+<]<[->+<]>>[-<<+>>]<",
+        );
+        // The stack should be [0] [9] [4]
+    }
+
+    #[test]
     fn test_print() {
         // Test print stack
         test(
@@ -121,5 +130,39 @@ mod tests {
             vec![Print(Value::Immediate(72))],
             ">++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<",
         )
+    }
+
+    #[test]
+    fn test_match() {
+        // test(
+        //     vec![
+        //         Push(1),
+        //         Match(Location::Stack),
+        //         Case(0),
+        //         Print(Value::Immediate(b'0')),
+        //         Case(1),
+        //         Print(Value::Immediate(b'1')),
+        //         Case(2),
+        //         Print(Value::Immediate(b'2')),
+        //         CaseDefault,
+        //         Print(Value::Immediate(b'D')),
+        //         EndMatch,
+        //     ],
+        //     "",
+        // );
+
+
+
+        test(
+            vec![
+                Push(4),
+                Match(Location::Stack),
+                CaseDefault,
+                Case(1),
+                Case(0),
+                EndMatch,
+            ],
+            ">++++>+<[-[[-]>-default#<]>[-1#]<]>[-0#]<",
+        );
     }
 }
