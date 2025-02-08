@@ -6,6 +6,8 @@ The output is not executable immediately, and needs to be piped into a tool such
 The ultimate goal for this semi-esoteric language is to be able to write itself in a readable way, with syntax similar
 to rust and operation similar to C.
 
+The internals are explained in the DESIGN.md document.
+
 ## Syntax
 
 The only valid file extension is .🍺 (U+1F37A).
