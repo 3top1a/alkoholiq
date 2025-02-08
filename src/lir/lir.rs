@@ -62,7 +62,7 @@ impl Instruction {
                 modified,
                 consumed,
             } => format!("{:?}", op),
-            Instruction::Copy { from, to } => format!("C{:?}{:?}", from, to),
+            Instruction::Copy { from, to } => format!("Copy {:?} to {:?}", from, to),
             Instruction::Read(loc) => format!("Read {:?}", loc),
             Instruction::Print(val) => format!("Print {:?}", val),
             Instruction::Match(loc) => format!("Match {:?}", loc),

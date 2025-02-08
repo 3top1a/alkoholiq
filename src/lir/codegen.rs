@@ -1,6 +1,6 @@
 use crate::lir::instructions::Instructions;
 use crate::lir::lir::Instruction::*;
-use crate::lir::lir::{Location, Value};
+use crate::lir::lir::{BinaryOp, Location, Value};
 
 #[derive(Debug, Clone)]
 pub struct Codegen {
@@ -26,20 +26,31 @@ impl Codegen {
 
         // Allocate memory for variables
         // One less because stack ops go right once
-        let number_left = (self.variables - 1).min(0);
+        let number_left = self.variables.checked_sub(1).unwrap_or(0);
+        self.code += format!("Variables: {} ", number_left).as_str();
         self.code += ">".repeat(number_left).as_str();
         self.code += "\n";
         self.ptr = number_left;
 
         for instr in instructions.0 {
-            self.code += format!("{}", instr.debug()).as_str();
+            self.code += format!("{} ", instr.debug()).as_str();
 
             match instr {
                 Push(n) => self.push(n),
                 Pop => self.pop(),
                 Dup => self.dup(),
 
+                Binary {
+                    op,
+                    modified,
+                    consumed,
+                } => self.binary(op, modified, consumed),
+
                 Copy { from, to } => self.copy(from, to),
+
+                Read(loc) => self.read(loc),
+
+                Print(val) => self.print(val),
 
                 _ => unimplemented!(),
             }
@@ -51,6 +62,8 @@ impl Codegen {
     }
 
     fn goto_stack(&mut self) {
+        // Ensure we're at the top of the stack
+        // That means pointer at the last populated cell (my drunk future self)
         // TODO
     }
 
@@ -74,6 +87,7 @@ impl Codegen {
     }
 
     fn copy(&mut self, from: Value, to: Location) {
+        // TODO Refactor > Extract Method
         match from {
             Value::Immediate(n) => {
                 match to {
@@ -85,7 +99,7 @@ impl Codegen {
                         self.code += "<".repeat(self.ptr - var).as_str();
                         // Add n
                         // TODO Optim for n = 0
-                        self.code += "[-]+".repeat(n as usize).as_str();
+                        self.code += "+".repeat(n as usize).as_str();
                         // Go back
                         self.code += ">".repeat(self.ptr - var).as_str();
                     }
@@ -111,6 +125,81 @@ impl Codegen {
                     }
                     Location::Variable(_) => {
                         unimplemented!()
+                    }
+                }
+            }
+        }
+    }
+
+    fn binary(&mut self, operation: BinaryOp, modified: Location, consumed: Value) {
+        let ops = (modified, consumed);
+        match operation {
+            BinaryOp::Add => match ops {
+                (Location::Stack, Value::Immediate(n)) => {
+                    self.goto_stack();
+                    self.code += "+".repeat(n as usize).as_str();
+                }
+                (Location::Stack, Value::Location(Location::Stack)) => {
+                    self.goto_stack();
+                    self.code += "[-<+>]<";
+                }
+                _ => unimplemented!(),
+            },
+            BinaryOp::Sub => match ops {
+                (Location::Stack, Value::Immediate(n)) => {
+                    self.goto_stack();
+                    self.code += "-".repeat(n as usize).as_str();
+                }
+                (Location::Stack, Value::Location(Location::Stack)) => {
+                    self.goto_stack();
+                    self.code += "[-<->]<";
+                }
+                _ => unimplemented!(),
+            },
+            BinaryOp::Mul => {}
+            BinaryOp::Div => {}
+            BinaryOp::Eq => {}
+        }
+    }
+
+    fn read(&mut self, loc: Location) {
+        match loc {
+            Location::Stack => {
+                self.goto_stack();
+                self.code += ">,";
+            }
+            Location::Variable(var) => {
+                self.goto_stack(); // So that the math works out
+                                   // Goto var
+                self.code += "<".repeat(self.ptr - var).as_str();
+                // Read
+                self.code += ",";
+                // Go back
+                self.code += ">".repeat(self.ptr - var).as_str();
+            }
+        }
+    }
+
+    fn print(&mut self, val: Value) {
+        match val {
+            Value::Immediate(n) => {
+                self.goto_stack();
+                self.push(n);
+                self.code += ".[-]<";
+            }
+            Value::Location(loc) => {
+                match loc {
+                    Location::Stack => {
+                        self.goto_stack();
+                        self.code += ".[-]<";
+                    }
+                    Location::Variable(var) => {
+                        // Goto var
+                        self.code += "<".repeat(self.ptr - var).as_str();
+                        // Print
+                        self.code += ".";
+                        // Go back
+                        self.code += ">".repeat(self.ptr - var).as_str();
                     }
                 }
             }
