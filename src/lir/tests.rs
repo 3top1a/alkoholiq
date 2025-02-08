@@ -7,7 +7,7 @@ mod tests {
 
     fn eq(code: String, b: &str) {
         println!("{}", code);
-        assert_eq!(remove_nonbf(code), b);
+        assert_eq!(remove_nonbf(code), remove_nonbf(b.to_string()));
     }
 
     fn gen(instructions: Vec<Instruction>) -> String {
@@ -134,35 +134,30 @@ mod tests {
 
     #[test]
     fn test_match() {
-        // test(
-        //     vec![
-        //         Push(1),
-        //         Match(Location::Stack),
-        //         Case(0),
-        //         Print(Value::Immediate(b'0')),
-        //         Case(1),
-        //         Print(Value::Immediate(b'1')),
-        //         Case(2),
-        //         Print(Value::Immediate(b'2')),
-        //         CaseDefault,
-        //         Print(Value::Immediate(b'D')),
-        //         EndMatch,
-        //     ],
-        //     "",
-        // );
-
-
-
         test(
             vec![
                 Push(4),
-                Match(Location::Stack),
-                CaseDefault,
-                Case(1),
-                Case(0),
-                EndMatch,
+                Match {
+                    source: Location::Stack,
+                    cases: vec![(0, vec![].into()), (1, vec![].into())],
+                },
             ],
             ">++++>+<[-[[-]>-default#<]>[-1#]<]>[-0#]<",
+        );
+
+        test(
+            vec![
+                Push(1),
+                Match {
+                    source: Location::Stack,
+                    cases: vec![
+                        (0, vec![Print(Value::Immediate(b'0'))].into()),
+                        (1, vec![Print(Value::Immediate(b'1'))].into()),
+                        (2, vec![Print(Value::Immediate(b'2'))].into()),
+                    ]
+                }
+            ],
+            "",
         );
     }
 }

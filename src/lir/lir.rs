@@ -1,3 +1,5 @@
+use crate::lir::instructions::Instructions;
+
 type Immediate = u8;
 
 #[derive(Debug, Clone)]
@@ -38,12 +40,10 @@ pub enum Instruction {
     Print(Value),
 
     // Control flow
-    Match(Location),
-    Case(Immediate),
-    EndCase,
-    CaseDefault,
-    EndCaseDefault,
-    EndMatch,
+    Match {
+        source: Location,
+        cases: Vec<(Immediate, Instructions)>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -70,12 +70,9 @@ impl Instruction {
             Instruction::Copy { from, to } => format!("Copy {:?} to {:?}", from, to),
             Instruction::Read(loc) => format!("Read {:?}", loc),
             Instruction::Print(val) => format!("Print {:?}", val),
-            Instruction::Match(loc) => format!("Match {:?}", loc),
-            Instruction::Case(n) => format!("Case {}", n),
-            Instruction::CaseDefault => "CaseDefault".to_string(),
-            Instruction::EndMatch => "EndMatch".to_string(),
-            Instruction::EndCase => "EndCase".to_string(),
-            Instruction::EndCaseDefault => "EndCaseDefault".to_string(),
+            Instruction::Match { source, cases } => {
+                format!("Match")
+            }
         }
     }
 }

@@ -1,38 +1,11 @@
 use crate::lir::lir::{Instruction, Location, Value};
 
+#[derive(Debug, Clone)]
 pub struct Instructions(pub Vec<Instruction>);
+
 impl Instructions {
     /// Validates instructions and panics if invalid.
     pub fn validate(&self) -> bool {
-        // Check for equal match and unmatch
-        let mut match_count = 0;
-        for instr in &self.0 {
-            match instr {
-                Instruction::Match(_) => match_count += 1,
-                Instruction::EndMatch => match_count -= 1,
-                _ => (),
-            }
-        }
-        if match_count != 0 {
-            panic!("Unmatched match");
-        }
-
-        // Check that case (x) are ordered from n to 0
-        let mut highest_case = 255;
-        for instr in &self.0 {
-            match instr {
-                Instruction::Case(x) => {
-                    if *x < highest_case {
-                        highest_case = *x;
-                    } else {
-                        panic!("Case not ordered");
-                    }
-                }
-                Instruction::Match(_) => highest_case = 255,
-                _ => (),
-            }
-        }
-
         // Check that all variables are declared before use
         let variables = self.get_variable_indexes();
         for instr in &self.0 {

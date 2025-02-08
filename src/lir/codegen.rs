@@ -34,6 +34,12 @@ impl Codegen {
         self.code += "\n";
         self.ptr = number_left;
 
+        self.parse_instructions(instructions);
+
+        self.code
+    }
+
+    fn parse_instructions(&mut self, instructions: Instructions) {
         for instr in instructions.0 {
             self.code += format!("{} ", instr.debug()).as_str();
 
@@ -51,20 +57,12 @@ impl Codegen {
                 Read(loc) => self.read(loc),
                 Print(val) => self.print(val),
 
-                Match(loc) => self.startmatch(loc),
-                EndCaseDefault => self.endcasedefault(),
-                CaseDefault => self.casedefault(),
-                Case(n) => self.case(n),
-                EndCase => self.endcase(),
-                EndMatch => self.endmatch(),
-
+                Match { source, cases } => self.startmatch(source, cases),
                 // _ => unimplemented!("Instruction not implemented: {:?}", instr),
             }
 
             self.code += "\n";
         }
-
-        self.code
     }
 
     fn goto_stack(&mut self) {
@@ -217,7 +215,7 @@ impl Codegen {
         }
     }
 
-    fn startmatch(&mut self, loc: Location) {
+    fn startmatch(&mut self, loc: Location, cases: Vec<(u8, Instructions)>) {
         /*
         For example:
 
@@ -235,30 +233,38 @@ impl Codegen {
         match loc {
             Location::Stack => {
                 self.goto_stack();
-                self.code += ">+<[";
+                self.code += ">+<";
                 self.ptr += 1;
+
+                // Sort cases by number, n .. 0
+                let mut cases = cases;
+                cases.sort_by(|a, b| b.0.cmp(&a.0));
+
+                let mut highest_num = 0;
+                for c in cases.iter().rev() {
+                    self.code += &"-".repeat((c.0 as usize - highest_num));
+                    self.code += "[";
+                    highest_num = c.0 as usize;
+                }
+
+                // Default case
+                self.code += "[-]>-default#<";
+
+                let mut prev = 255;
+                for case in cases {
+                    let num = case.0;
+                    debug_assert!(num < prev);
+                    self.code += "]>[-";
+
+                    // Code
+                    self.parse_instructions(case.1);
+
+                    self.code += "]<";
+
+                    prev = num;
+                }
             }
             _ => unimplemented!(),
         }
-    }
-
-    fn endmatch(&mut self) {
-        // TODO
-    }
-
-    fn case(&mut self, n: u8) {
-        // TODO
-    }
-
-    fn endcase(&mut self) {
-        // TODO
-    }
-
-    fn casedefault(&mut self) {
-        // TODO
-    }
-
-    fn endcasedefault(&mut self) {
-        // TODO
     }
 }
