@@ -1,10 +1,12 @@
 mod tests {
     use crate::bf::optim::remove_nonbf;
     use crate::lir::codegen::Codegen;
-    
-    
-    
-    use crate::lir::lir::Instruction;
+    use crate::lir::lir::{BinaryOp, Instruction, Location, Value};
+    use crate::lir::lir::Instruction::{
+        Binary, Copy, Dup, Match, Pop, Print, Push, Read, Swap, While,
+    };
+    use crate::lir::lir::Location::{Stack, Variable};
+    use crate::lir::lir::Value::Immediate;
 
     fn eq(code: String, b: &str) {
         println!("{}", code);
@@ -25,7 +27,7 @@ mod tests {
             Push(4),
             Push(9),
             Copy {
-                from: Value::Location(Location::Stack),
+                from: Value::Location(Stack),
                 to: Variable(0),
             },
         ]);
@@ -36,7 +38,7 @@ mod tests {
         let c = gen(vec![
             Push(2),
             Copy {
-                from: Value::Immediate(4),
+                from: Immediate(4),
                 to: Variable(0),
             },
         ]);
@@ -65,8 +67,8 @@ mod tests {
                 Push(9),
                 Binary {
                     op: BinaryOp::Add,
-                    modified: Location::Stack,
-                    consumed: Value::Location(Location::Stack),
+                    modified: Stack,
+                    consumed: Value::Location(Stack),
                 },
             ],
             ">++++>+++++++++[-<+>]<",
@@ -80,8 +82,8 @@ mod tests {
                 Push(4),
                 Binary {
                     op: BinaryOp::Sub,
-                    modified: Location::Stack,
-                    consumed: Value::Location(Location::Stack),
+                    modified: Stack,
+                    consumed: Value::Location(Stack),
                 },
             ],
             ">+++++++++>++++[-<->]<",
