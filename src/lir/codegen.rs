@@ -56,13 +56,12 @@ impl Codegen {
                 Copy { from, to } => self.copy(from, to),
                 Read(loc) => self.read(loc),
                 Print(val) => self.print(val),
-
                 Match {
                     source,
                     cases,
                     default,
-                } => self.startmatch(source, cases, default),
-                // _ => unimplemented!("Instruction not implemented: {:?}", instr),
+                } => self.match_lir(source, cases, default),
+                While { source, body } => self.while_lir(source, body),
             }
 
             self.code += "\n";
@@ -167,6 +166,14 @@ impl Codegen {
                     self.goto_stack();
                     self.code += "[-<->]<";
                 }
+                (Location::Variable(var), Value::Immediate(n)) => {
+                    // Goto var
+                    self.code += "<".repeat(self.ptr - var).as_str();
+                    // Subtract n
+                    self.code += "-".repeat(n as usize).as_str();
+                    // Go back
+                    self.code += ">".repeat(self.ptr - var).as_str();
+                }
                 _ => unimplemented!(),
             },
             BinaryOp::Mul => {
@@ -225,7 +232,7 @@ impl Codegen {
         }
     }
 
-    fn startmatch(&mut self, loc: Location, cases: Vec<(u8, Instructions)>, default: Instructions) {
+    fn match_lir(&mut self, loc: Location, cases: Vec<(u8, Instructions)>, default: Instructions) {
         /*
         For example:
 
@@ -279,6 +286,46 @@ impl Codegen {
                 self.ptr -= 1;
             }
             _ => unimplemented!(),
+        }
+    }
+
+    fn while_lir(&mut self, loc: Location, body: Instructions) {
+        match loc {
+            Location::Stack => {
+                // This is so retarded
+                // But works great as an infinite loop so sure
+                // Also so unsafe lmao
+                // This might need to get deleted
+                self.goto_stack();
+
+                self.code += "[";
+
+                self.parse_instructions(body);
+
+                self.code += "]";
+            },
+            Location::Variable(var) => {
+                // Goto variable
+                self.code += "<".repeat(self.ptr - var).as_str();
+                
+                // Start loop
+                self.code += "[\n";
+                
+                // Go to stack
+                self.code += ">".repeat(self.ptr - var).as_str();
+                
+                // Code
+                self.parse_instructions(body);
+                
+                // Go back
+                self.code += "<".repeat(self.ptr - var).as_str();
+                
+                // Loop end
+                self.code += "]\n";
+                
+                // Go back to top
+                self.code += ">".repeat(self.ptr - var).as_str();
+            }
         }
     }
 }

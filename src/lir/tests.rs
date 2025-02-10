@@ -186,4 +186,26 @@ Copy Immediate(120) to Variable(1) <++++++++++++++++++++++++++++++++++++++++++++
 Print Location(Variable(1)) <.>"
         )
     }
+
+    #[test]
+    fn test_while() {
+        // Simple decrement and print loop
+        test(
+            vec![
+                Copy {from: Immediate(b'z'), to: Variable(0)},
+                While {
+                    source: Variable(0),
+                    body: vec![
+                        Print(Value::Location(Variable(0))),
+                        Binary {
+                            op: BinaryOp::Sub,
+                            modified: Variable(0),
+                            consumed: Immediate(1),
+                        },
+                    ].into()
+                }
+            ],
+            "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[.-]"
+        );
+    }
 }

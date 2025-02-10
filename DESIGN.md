@@ -23,11 +23,10 @@ This step will also ensure that brainfuck can be generated.
 The LIR does not have a concept of functions, instead a function switch like in os.bf is implemented in LIR form.
 A function can be viewed as a set of instructions that has a side effect on the stack, just like a single instruction.
 
-If, else and while are implemented with `match` `case` instructions.
-?? Is this optimal? Might make implementation easier but runtime slower.
+If, if else, else are implemented with the `match` instruction.
 
 Most operations should consume the top of the stack.
-Inefficiencies caused by this should be optimized in the next step.
+Inefficiencies caused by this should be optimized away by the optimizer.
 
 The memory layout looks like this:
 
@@ -61,9 +60,8 @@ LIR therefore only needs a few instructions:
 - print <from: var OR stack OR immidiate>
 
 5) Control loops
-- match <i: var OR stack> - match works both as a if and while
-- case <c: var OR stack OR immidiate OR *>
-- endmatch
+- match <i: var OR stack> - match works both as a if, if else, else
+- While <i: var OR stack> - run while `i` isn't zero
 
 
 For efficiency, instructions can modify the stack or variables without copying.
@@ -78,15 +76,23 @@ Dup ; [5] [5]
 Eq ; [1] Tests for equality
 
 Match (Stack) ; Consumes top of stack
-CaseDefault
-Print (67)
-Case (1)
-Print (66)
-Case (0)
-Print (65)
+    CaseDefault
+        Print (67)
+    Case (1)
+        Print (66)
+    Case (0)
+        Print (65)
 EndMatch
 
 Read (Stack) ; Pushes one byte of used input to stack
 Copy (from: Stack) (to: Variable 0 ) ; Pops and puts it into variable storage
-```
 
+; This will print all ASCII characters from z to 0
+Copy ('z') (Variable 0)
+While (Variable 0)
+    Print (Variable 0)
+    Sub (Variable 0) (1)
+EndWhile
+
+```
+NOTE: Match and while statements are defined in a recursive manner, not linear, this has been simplified for reading.

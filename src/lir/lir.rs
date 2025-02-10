@@ -45,6 +45,11 @@ pub enum Instruction {
         cases: Vec<(Immediate, Instructions)>,
         default: Instructions,
     },
+
+    While {
+        source: Location,
+        body: Instructions,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -59,24 +64,23 @@ pub enum BinaryOp {
 impl Instruction {
     pub fn debug(&self) -> String {
         match self {
-            Instruction::Push(n) => format!("Push({})", n),
-            Instruction::Pop => "pop".to_string(),
-            Instruction::Dup => "Dup".to_string(),
-            Instruction::Swap => "Swap".to_string(),
+            Instruction::Push(n) => format!("(Push {})", n),
+            Instruction::Pop => "(Pop)".to_string(),
+            Instruction::Dup => "(Dup)".to_string(),
+            Instruction::Swap => "(Swap)".to_string(),
             Instruction::Binary {
                 op,
                 modified,
                 consumed,
-            } => format!("{:?} {:?} {:?}", op, modified, consumed),
-            Instruction::Copy { from, to } => format!("Copy {:?} to {:?}", from, to),
-            Instruction::Read(loc) => format!("Read {:?}", loc),
-            Instruction::Print(val) => format!("Print {:?}", val),
-            Instruction::Match {
-                source,
-                cases,
-                default,
-            } => {
-                format!("Match")
+            } => format!("({:?} {:?} {:?})", op, modified, consumed),
+            Instruction::Copy { from, to } => format!("(Copy {:?} {:?})", from, to),
+            Instruction::Read(loc) => format!("(Read {:?})", loc),
+            Instruction::Print(val) => format!("(Print {:?})", val),
+            Instruction::Match { source, .. } => {
+                format!("(Match {:?})", source)
+            }
+            Instruction::While { source, .. } => {
+                format!("(While {:?})", source)
             }
         }
     }
