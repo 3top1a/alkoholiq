@@ -28,7 +28,7 @@ impl Codegen {
 
         // Allocate memory for variables
         // One less because stack ops go right once
-        let number_left = self.variables.checked_sub(1).unwrap_or(0);
+        let number_left = self.variables.saturating_sub(1);
         self.code += format!("Variables: {} ", self.variables).as_str();
         self.code += ">".repeat(number_left).as_str();
         self.code += "\n";
@@ -259,7 +259,7 @@ impl Codegen {
 
                 let mut highest_num = 0;
                 for c in cases.iter().rev() {
-                    self.code += &"-".repeat((c.0 as usize - highest_num));
+                    self.code += &"-".repeat(c.0 as usize - highest_num);
                     self.code += "[";
                     highest_num = c.0 as usize;
                 }
@@ -303,26 +303,26 @@ impl Codegen {
                 self.parse_instructions(body);
 
                 self.code += "]";
-            },
+            }
             Location::Variable(var) => {
                 // Goto variable
                 self.code += "<".repeat(self.ptr - var).as_str();
-                
+
                 // Start loop
                 self.code += "[\n";
-                
+
                 // Go to stack
                 self.code += ">".repeat(self.ptr - var).as_str();
-                
+
                 // Code
                 self.parse_instructions(body);
-                
+
                 // Go back
                 self.code += "<".repeat(self.ptr - var).as_str();
-                
+
                 // Loop end
                 self.code += "]\n";
-                
+
                 // Go back to top
                 self.code += ">".repeat(self.ptr - var).as_str();
             }

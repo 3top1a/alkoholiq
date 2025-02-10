@@ -1,10 +1,10 @@
 mod tests {
     use crate::bf::optim::remove_nonbf;
     use crate::lir::codegen::Codegen;
-    use crate::lir::lir::Instruction::*;
-    use crate::lir::lir::Location::{Stack, Variable};
-    use crate::lir::lir::Value::Immediate;
-    use crate::lir::lir::{BinaryOp, Instruction, Location, Value};
+    
+    
+    
+    use crate::lir::lir::Instruction;
 
     fn eq(code: String, b: &str) {
         println!("{}", code);

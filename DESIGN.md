@@ -88,6 +88,7 @@ Read (Stack) ; Pushes one byte of used input to stack
 Copy (from: Stack) (to: Variable 0 ) ; Pops and puts it into variable storage
 
 ; This will print all ASCII characters from z to 0
+; 'z' is 122, just simplified for reading
 Copy ('z') (Variable 0)
 While (Variable 0)
     Print (Variable 0)

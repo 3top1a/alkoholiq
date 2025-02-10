@@ -1,5 +1,4 @@
 use crate::lir::lir::{Instruction, Location, Value};
-use std::env::var;
 
 #[derive(Debug, Clone)]
 pub struct Instructions(pub Vec<Instruction>);
@@ -15,30 +14,30 @@ impl Instructions {
                     modified, consumed, ..
                 } => {
                     if let Location::Variable(idx) = modified {
-                        if !variables.contains(&idx) {
+                        if !variables.contains(idx) {
                             return false;
                         }
                     }
                     if let Value::Location(Location::Variable(idx)) = consumed {
-                        if !variables.contains(&idx) {
+                        if !variables.contains(idx) {
                             return false;
                         }
                     }
                 }
                 Instruction::Copy { from, to } => {
                     if let Value::Location(Location::Variable(idx)) = from {
-                        if !variables.contains(&idx) {
+                        if !variables.contains(idx) {
                             return false;
                         }
                     }
                     if let Location::Variable(idx) = to {
-                        if !variables.contains(&idx) {
+                        if !variables.contains(idx) {
                             return false;
                         }
                     }
                 }
                 Instruction::Read(Location::Variable(idx)) => {
-                    if !variables.contains(&idx) {
+                    if !variables.contains(idx) {
                         return false;
                     }
                 }
@@ -47,7 +46,7 @@ impl Instructions {
                     cases,
                     default,
                 } => {
-                    if cases.iter().map(|x| x.1.validate()).any(|x| x == false)
+                    if cases.iter().map(|x| x.1.validate()).any(|x| !x)
                         || !default.validate()
                     {
                         return false;
