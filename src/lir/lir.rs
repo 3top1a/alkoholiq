@@ -30,7 +30,7 @@ pub enum Instruction {
     },
 
     // Variable modification
-    Copy {
+    Move {
         from: Value,
         to: Location,
     },
@@ -73,7 +73,7 @@ impl Instruction {
                 modified,
                 consumed,
             } => format!("({:?} {:?} {:?})", op, modified, consumed),
-            Instruction::Copy { from, to } => format!("(Copy {:?} {:?})", from, to),
+            Instruction::Move { from, to } => format!("(Move {:?} {:?})", from, to),
             Instruction::Read(loc) => format!("(Read {:?})", loc),
             Instruction::Print(val) => format!("(Print {:?})", val),
             Instruction::Match { source, .. } => {

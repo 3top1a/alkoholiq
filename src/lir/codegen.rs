@@ -7,6 +7,10 @@ pub struct Codegen {
     code: String,
     variables: usize,
     ptr: usize,
+    /// Tracks assigned variables
+    ///
+    /// This is so that when variables are reassigned, we can zero them out, but not unassigned variables
+    assigned_vars: Vec<usize>,
 }
 
 impl Codegen {
@@ -15,6 +19,7 @@ impl Codegen {
             code: String::new(),
             variables: 0,
             ptr: 0,
+            assigned_vars: Vec::new(),
         }
     }
 
@@ -53,7 +58,7 @@ impl Codegen {
                     modified,
                     consumed,
                 } => self.binary(op, modified, consumed),
-                Copy { from, to } => self.copy(from, to),
+                Move { from, to } => self.lir_move(from, to),
                 Read(loc) => self.read(loc),
                 Print(val) => self.print(val),
                 Match {
@@ -98,8 +103,9 @@ impl Codegen {
         self.code += "[->+<]<[->+<]>>[-<<+>>]<";
     }
 
-    fn copy(&mut self, from: Value, to: Location) {
-        // TODO Refactor > Extract Method
+    fn lir_move(&mut self, from: Value, to: Location) {
+        // TODO Refactor > Extract Method, there is a lot of the same kind of code in this file
+        // Stuff like going to a var and back could be a closure
         match from {
             Value::Immediate(n) => {
                 match to {
@@ -109,9 +115,18 @@ impl Codegen {
                     Location::Variable(var) => {
                         // Goto var
                         self.code += "<".repeat(self.ptr - var).as_str();
+
+                        // Make sure it's empty
+                        if self.assigned_vars.contains(&var) {
+                            self.code += "[-]";
+                        } else {
+                            self.assigned_vars.push(var);
+                        }
+
                         // Add n
                         // TODO Optim for n = 0
                         self.code += "+".repeat(n as usize).as_str();
+
                         // Go back
                         self.code += ">".repeat(self.ptr - var).as_str();
                     }
@@ -125,6 +140,15 @@ impl Codegen {
                                 unimplemented!("Are you dump")
                             }
                             Location::Variable(var) => {
+                                // Make sure it's empty
+                                if self.assigned_vars.contains(&var) {
+                                    self.code += "<".repeat(self.ptr - var).as_str();
+                                    self.code += "[-]";
+                                    self.code += ">".repeat(self.ptr - var).as_str();
+                                } else {
+                                    self.assigned_vars.push(var);
+                                }
+                                
                                 // [- << + >> ]<
                                 self.code += "[-";
                                 self.code += "<".repeat(self.ptr - var).as_str();

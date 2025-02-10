@@ -23,7 +23,7 @@ This step will also ensure that brainfuck can be generated.
 The LIR does not have a concept of functions, instead a function switch like in os.bf is implemented in LIR form.
 A function can be viewed as a set of instructions that has a side effect on the stack, just like a single instruction.
 
-If, if else, else are implemented with the `match` instruction.
+If, if else, else are implemented with the `Match` instruction.
 
 Most operations should consume the top of the stack.
 Inefficiencies caused by this should be optimized away by the optimizer.
@@ -31,7 +31,7 @@ Inefficiencies caused by this should be optimized away by the optimizer.
 The memory layout looks like this:
 
 ```
-[+variable storage] [+working stack]
+[+Variable storage] [+Working stack]
 ```
 
 The variable storage stores variables and are retrieved and stored at runtime by their index of insertion. The size is fixed and must be known at compile time.
@@ -40,31 +40,28 @@ Temporary cells are used for duplicating cells safely.
 
 LIR therefore only needs a few instructions:
 1) Stack operations modifying the stack
-- Push <value: immidiate> - Push a value on top of the stack
-- Pop - Remove top value from stack
-- Dup - Duplicate top value
+    - `Push <value: immidiate>` - Push a value on top of the stack
+    - `Pop` - Remove top value from stack
+    - `Dup` - Duplicate top value
 
 2) Data manipulation (with a modified and a consumed atom)
-- Add <modified: var OR stack> <con: immidiate OR var OR stack>
-- Sub <modified: var OR stack> <con: immidiate OR var OR stack>
-- Mul ...
-- Div ...
-- Eq <modified: var OR stack> <con: immidiate OR var OR stack>
+    - `Add <modified: var OR stack> <con: immidiate OR var OR stack>`
+    - `Sub <modified: var OR stack> <con: immidiate OR var OR stack>`
+    - `Mul` ... same as above
+    - `Div` ... same as above
+    - `Eq <modified: var OR stack> <con: immidiate OR var OR stack>` - Equality check, 1 if equal, 0 if not
 
 3) Variable modification
-- Copy <to: var OR stack> <from: immidiate OR var OR stack>
-?? Maybe one instruction is all I need?
+    - `Move <to: var OR stack> <from: immidiate OR var OR stack>` - Moves a value from one place to another
 
 4) I/O
-- read <to: var OR stack>
-- print <from: var OR stack OR immidiate>
+    - `Read <to: var OR stack>` - Read from stdin
+    - `Print <from: var OR stack OR immidiate>` - Print to stdout
 
 5) Control loops
-- match <i: var OR stack> - match works both as a if, if else, else
-- While <i: var OR stack> - run while `i` isn't zero
+    - `Match <i: var OR stack>` - match works both as an if, if else, else
+    - `While <i: var OR stack>` - run while `i` isn't zero
 
-
-For efficiency, instructions can modify the stack or variables without copying.
 
 For example:
 ```asm
@@ -85,11 +82,11 @@ Match (Stack) ; Consumes top of stack
 EndMatch
 
 Read (Stack) ; Pushes one byte of used input to stack
-Copy (from: Stack) (to: Variable 0 ) ; Pops and puts it into variable storage
+Move (from: Stack) (to: Variable 0 ) ; Pops and puts it into variable storage
 
 ; This will print all ASCII characters from z to 0
-; 'z' is 122, just simplified for reading
-Copy ('z') (Variable 0)
+; Assign to variable, 'z' is 122
+Move (122) (Variable 0)
 While (Variable 0)
     Print (Variable 0)
     Sub (Variable 0) (1)

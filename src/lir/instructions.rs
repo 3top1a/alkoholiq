@@ -24,7 +24,7 @@ impl Instructions {
                         }
                     }
                 }
-                Instruction::Copy { from, to } => {
+                Instruction::Move { from, to } => {
                     if let Value::Location(Location::Variable(idx)) = from {
                         if !variables.contains(idx) {
                             return false;
@@ -74,7 +74,7 @@ impl Instructions {
                         variables.push(*idx);
                     }
                 }
-                Instruction::Copy { from, to } => {
+                Instruction::Move { from, to } => {
                     if let Value::Location(Location::Variable(idx)) = from {
                         variables.push(*idx);
                     }

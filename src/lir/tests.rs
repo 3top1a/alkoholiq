@@ -1,12 +1,12 @@
 mod tests {
     use crate::bf::optim::remove_nonbf;
     use crate::lir::codegen::Codegen;
-    use crate::lir::lir::{BinaryOp, Instruction, Location, Value};
     use crate::lir::lir::Instruction::{
-        Binary, Copy, Dup, Match, Pop, Print, Push, Read, Swap, While,
+        Binary, Dup, Match, Move, Pop, Print, Push, Read, Swap, While,
     };
     use crate::lir::lir::Location::{Stack, Variable};
     use crate::lir::lir::Value::Immediate;
+    use crate::lir::lir::{BinaryOp, Instruction, Location, Value};
 
     fn eq(code: String, b: &str) {
         println!("{}", code);
@@ -22,11 +22,11 @@ mod tests {
     }
 
     #[test]
-    fn test_copy() {
+    fn test_move() {
         let c = gen(vec![
             Push(4),
             Push(9),
-            Copy {
+            Move {
                 from: Value::Location(Stack),
                 to: Variable(0),
             },
@@ -34,16 +34,33 @@ mod tests {
         eq(c, ">++++>+++++++++[-<<+>>]<");
         // The stack should be [9] [4] [0]
 
-        // Copy immidiate to variable
+        // Move immediate to variable
         let c = gen(vec![
             Push(2),
-            Copy {
+            Move {
                 from: Immediate(4),
                 to: Variable(0),
             },
         ]);
         eq(c, ">++<++++>");
         // The stack should be [4] [2]
+
+        // Test reassignment
+        // It should empty it out first
+        test(
+            vec![
+                Move {
+                    from: Immediate(b'E'),
+                    to: Variable(0),
+                },
+                Move {
+                    from: Immediate(b'A'),
+                    to: Variable(0),
+                },
+                Print(Value::Location(Variable(0))),
+            ],
+            "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.",
+        )
     }
 
     #[test]
@@ -117,7 +134,7 @@ mod tests {
         // Test print variable
         test(
             vec![
-                Copy {
+                Move {
                     from: Immediate(4),
                     to: Variable(0),
                 },
@@ -166,7 +183,7 @@ mod tests {
         // Test that variables and pointer math works
         test(
             vec![
-                Copy {from: Immediate(b'0'), to: Variable(0)},
+                Move {from: Immediate(b'0'), to: Variable(0)},
                 Read(Stack),
                 Match {
                     source: Stack,
@@ -175,7 +192,7 @@ mod tests {
                         (b'A', vec![Print(Value::Location(Variable(0)))].into()),
                     ]
                 },
-                Copy {from: Immediate(b'x'), to: Variable(1)},
+                Move {from: Immediate(b'x'), to: Variable(1)},
                 Print(Value::Location(Variable(1)))
             ],
             "Variables: 2 >
@@ -194,7 +211,7 @@ Print Location(Variable(1)) <.>"
         // Simple decrement and print loop
         test(
             vec![
-                Copy {from: Immediate(b'z'), to: Variable(0)},
+                Move {from: Immediate(b'z'), to: Variable(0)},
                 While {
                     source: Variable(0),
                     body: vec![
