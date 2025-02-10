@@ -2,7 +2,8 @@ mod tests {
     use crate::bf::optim::remove_nonbf;
     use crate::lir::codegen::Codegen;
     use crate::lir::lir::Instruction::*;
-    use crate::lir::lir::Location::Variable;
+    use crate::lir::lir::Location::{Stack, Variable};
+    use crate::lir::lir::Value::Immediate;
     use crate::lir::lir::{BinaryOp, Instruction, Location, Value};
 
     fn eq(code: String, b: &str) {
@@ -91,7 +92,7 @@ mod tests {
     #[test]
     fn test_read() {
         // Test read to stack
-        test(vec![Read(Location::Stack)], ">,");
+        test(vec![Read(Stack)], ">,");
 
         // Test read to variable
         test(vec![Read(Variable(0)), Read(Variable(1))], "><,>,");
@@ -109,16 +110,13 @@ mod tests {
     #[test]
     fn test_print() {
         // Test print stack
-        test(
-            vec![Push(4), Print(Value::Location(Location::Stack))],
-            ">++++.[-]<",
-        );
+        test(vec![Push(4), Print(Value::Location(Stack))], ">++++.[-]<");
 
         // Test print variable
         test(
             vec![
                 Copy {
-                    from: Value::Immediate(4),
+                    from: Immediate(4),
                     to: Variable(0),
                 },
                 Print(Value::Location(Variable(0))),
@@ -127,7 +125,7 @@ mod tests {
         );
 
         test(
-            vec![Print(Value::Immediate(72))],
+            vec![Print(Immediate(72))],
             ">++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<",
         )
     }
@@ -138,7 +136,7 @@ mod tests {
             vec![
                 Push(4),
                 Match {
-                    source: Location::Stack,
+                    source: Stack,
                     cases: vec![(0, vec![].into()), (1, vec![].into())],
                     default: vec![].into(),
                 },
@@ -150,19 +148,42 @@ mod tests {
             vec![
                 Push(1),
                 Match {
-                    source: Location::Stack,
+                    source: Stack,
                     cases: vec![
-                        (0, vec![Print(Value::Immediate(b'0'))].into()),
-                        (1, vec![Print(Value::Immediate(b'1'))].into()),
-                        (2, vec![Print(Value::Immediate(b'2'))].into()),
-                        (5, vec![Print(Value::Immediate(b'5'))].into()),
+                        (0, vec![Print(Immediate(b'0'))].into()),
+                        (1, vec![Print(Immediate(b'1'))].into()),
+                        (2, vec![Print(Immediate(b'2'))].into()),
+                        (5, vec![Print(Immediate(b'5'))].into()),
                     ],
-                    default: vec![Print(Value::Immediate(b'E'))].into(),
+                    default: vec![Print(Immediate(b'E'))].into(),
                 }
             ],
             "Push(1) >+Match >+<[-[-[---[[-]>-Print Immediate(69) >+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<]>[-Print Immediate(53) >+++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]<]>[-Print Immediate(50) >++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]<]>[-Print Immediate(49) >+++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]<]>[-Print Immediate(48) >++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]<",
         );
 
         // Test that variables and pointer math works
+        test(
+            vec![
+                Copy {from: Immediate(b'0'), to: Variable(0)},
+                Read(Stack),
+                Match {
+                    source: Stack,
+                    default: vec![Print(Immediate(b'E'))].into(),
+                    cases: vec![
+                        (b'A', vec![Print(Value::Location(Variable(0)))].into()),
+                    ]
+                },
+                Copy {from: Immediate(b'x'), to: Variable(1)},
+                Print(Value::Location(Variable(1)))
+            ],
+            "Variables: 2 >
+Copy Immediate(48) to Variable(0) <++++++++++++++++++++++++++++++++++++++++++++++++>
+Read Stack >,
+Match >+<-----------------------------------------------------------------[[-]>-Print Immediate(69) >+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<
+<]>[-Print Location(Variable(0)) <<<.>>>
+]<
+Copy Immediate(120) to Variable(1) <++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++>
+Print Location(Variable(1)) <.>"
+        )
     }
 }

@@ -29,7 +29,7 @@ impl Codegen {
         // Allocate memory for variables
         // One less because stack ops go right once
         let number_left = self.variables.checked_sub(1).unwrap_or(0);
-        self.code += format!("Variables: {} ", number_left).as_str();
+        self.code += format!("Variables: {} ", self.variables).as_str();
         self.code += ">".repeat(number_left).as_str();
         self.code += "\n";
         self.ptr = number_left;
@@ -244,7 +244,7 @@ impl Codegen {
             Location::Stack => {
                 self.goto_stack();
                 self.code += ">+<";
-                self.ptr += 2;
+                self.ptr += 1;
 
                 // Sort cases by number, n .. 0
                 let mut cases = cases;
@@ -276,7 +276,7 @@ impl Codegen {
                     prev = num;
                 }
 
-                self.ptr -= 2;
+                self.ptr -= 1;
             }
             _ => unimplemented!(),
         }

@@ -1,4 +1,5 @@
 use crate::lir::lir::{Instruction, Location, Value};
+use std::env::var;
 
 #[derive(Debug, Clone)]
 pub struct Instructions(pub Vec<Instruction>);
@@ -41,6 +42,17 @@ impl Instructions {
                         return false;
                     }
                 }
+                Instruction::Match {
+                    source: _source,
+                    cases,
+                    default,
+                } => {
+                    if cases.iter().map(|x| x.1.validate()).any(|x| x == false)
+                        || !default.validate()
+                    {
+                        return false;
+                    }
+                }
                 _ => (),
             }
         }
@@ -73,6 +85,19 @@ impl Instructions {
                 }
                 Instruction::Read(Location::Variable(idx)) => {
                     variables.push(*idx);
+                }
+                Instruction::Match {
+                    source: _source,
+                    cases,
+                    default,
+                } => {
+                    variables.extend(default.get_variable_indexes());
+                    let vars = cases
+                        .iter()
+                        .map(|x| x.1.get_variable_indexes())
+                        .reduce(|acc, x| [acc, x].concat())
+                        .unwrap();
+                    variables.extend(vars);
                 }
                 _ => (),
             }
