@@ -57,7 +57,11 @@ impl Codegen {
                 Read(loc) => self.read(loc),
                 Print(val) => self.print(val),
 
-                Match { source, cases } => self.startmatch(source, cases),
+                Match {
+                    source,
+                    cases,
+                    default,
+                } => self.startmatch(source, cases, default),
                 // _ => unimplemented!("Instruction not implemented: {:?}", instr),
             }
 
@@ -165,9 +169,15 @@ impl Codegen {
                 }
                 _ => unimplemented!(),
             },
-            BinaryOp::Mul => {}
-            BinaryOp::Div => {}
-            BinaryOp::Eq => {}
+            BinaryOp::Mul => {
+                unimplemented!()
+            }
+            BinaryOp::Div => {
+                unimplemented!()
+            }
+            BinaryOp::Eq => {
+                unimplemented!()
+            }
         }
     }
 
@@ -215,7 +225,7 @@ impl Codegen {
         }
     }
 
-    fn startmatch(&mut self, loc: Location, cases: Vec<(u8, Instructions)>) {
+    fn startmatch(&mut self, loc: Location, cases: Vec<(u8, Instructions)>, default: Instructions) {
         /*
         For example:
 
@@ -234,7 +244,7 @@ impl Codegen {
             Location::Stack => {
                 self.goto_stack();
                 self.code += ">+<";
-                self.ptr += 1;
+                self.ptr += 2;
 
                 // Sort cases by number, n .. 0
                 let mut cases = cases;
@@ -248,7 +258,9 @@ impl Codegen {
                 }
 
                 // Default case
-                self.code += "[-]>-default#<";
+                self.code += "[-]>-";
+                self.parse_instructions(default);
+                self.code += "<";
 
                 let mut prev = 255;
                 for case in cases {
@@ -263,6 +275,8 @@ impl Codegen {
 
                     prev = num;
                 }
+
+                self.ptr -= 2;
             }
             _ => unimplemented!(),
         }

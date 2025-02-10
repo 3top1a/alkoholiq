@@ -140,6 +140,7 @@ mod tests {
                 Match {
                     source: Location::Stack,
                     cases: vec![(0, vec![].into()), (1, vec![].into())],
+                    default: vec![].into(),
                 },
             ],
             ">++++>+<[-[[-]>-default#<]>[-1#]<]>[-0#]<",
@@ -154,10 +155,14 @@ mod tests {
                         (0, vec![Print(Value::Immediate(b'0'))].into()),
                         (1, vec![Print(Value::Immediate(b'1'))].into()),
                         (2, vec![Print(Value::Immediate(b'2'))].into()),
-                    ]
+                        (5, vec![Print(Value::Immediate(b'5'))].into()),
+                    ],
+                    default: vec![Print(Value::Immediate(b'E'))].into(),
                 }
             ],
-            "",
+            "Push(1) >+Match >+<[-[-[---[[-]>-Print Immediate(69) >+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<]>[-Print Immediate(53) >+++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]<]>[-Print Immediate(50) >++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]<]>[-Print Immediate(49) >+++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]<]>[-Print Immediate(48) >++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]<",
         );
+
+        // Test that variables and pointer math works
     }
 }

@@ -43,6 +43,7 @@ pub enum Instruction {
     Match {
         source: Location,
         cases: Vec<(Immediate, Instructions)>,
+        default: Instructions,
     },
 }
 
@@ -70,7 +71,11 @@ impl Instruction {
             Instruction::Copy { from, to } => format!("Copy {:?} to {:?}", from, to),
             Instruction::Read(loc) => format!("Read {:?}", loc),
             Instruction::Print(val) => format!("Print {:?}", val),
-            Instruction::Match { source, cases } => {
+            Instruction::Match {
+                source,
+                cases,
+                default,
+            } => {
                 format!("Match")
             }
         }
