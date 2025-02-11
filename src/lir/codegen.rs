@@ -270,6 +270,9 @@ impl Codegen {
         Every iteration we decrement and if it's zero we don't recurse further.
 
         see https://brainfuck.org/function_tutorial.b
+
+        However, we need to account for the fact that it moves the pointer two to the right
+
          */
         match loc {
             Location::Stack => {
@@ -289,9 +292,9 @@ impl Codegen {
                 }
 
                 // Default case
-                self.code += "[-]>-";
+                self.code += "[-]>-<<";
                 self.parse_instructions(default);
-                self.code += "<";
+                self.code += ">><";
 
                 let mut prev = 255;
                 for case in cases {

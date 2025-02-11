@@ -82,8 +82,11 @@ impl Instructions {
                         variables.push(*idx);
                     }
                 }
-                Instruction::Read(Location::Variable(idx)) => {
-                    variables.push(*idx);
+                Instruction::Read(val) => {
+                    match val {
+                        Location::Variable(idx) => variables.push(*idx),
+                        _ => (),
+                    }
                 }
                 Instruction::Match {
                     source: _source,
@@ -98,7 +101,18 @@ impl Instructions {
                         .unwrap();
                     variables.extend(vars);
                 }
-                _ => (),
+                Instruction::Push(_) | Instruction::Pop | Instruction::Dup | Instruction::Swap => (),
+                Instruction::Print(val) => {
+                    if let Value::Location(Location::Variable(idx)) = val {
+                        variables.push(*idx);
+                    }
+                }
+                Instruction::While { source: x, body } => {
+                    if let Location::Variable(idx) = x {
+                        variables.push(*idx);
+                    }
+                    variables.extend(body.get_variable_indexes());
+                }
             }
         }
 

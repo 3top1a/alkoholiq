@@ -227,4 +227,36 @@ Print Location(Variable(1)) <.>"
             "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[.-]"
         );
     }
+
+    #[test]
+    fn test_interpreted() {
+        let c = gen(vec![
+            Move {
+                from: Immediate(1),
+                to: Variable(0),
+            },
+            While {
+                source: Variable(0),
+                body: vec![
+                    Read(Stack),
+                    Dup,
+                    Match {
+                        source: Stack,
+                        cases: vec![(
+                            0,
+                            vec![Move {
+                                from: Immediate(0),
+                                to: Variable(0),
+                            }]
+                            .into(),
+                        )],
+                        default: vec![Print(Value::Location(Stack))].into(),
+                    },
+                ]
+                .into(),
+            },
+        ]);
+
+        println!("{}", c);
+    }
 }
