@@ -1,5 +1,4 @@
 pub mod optim;
-mod interpreter;
 
 pub fn add_header(s: String) -> String {
     let header = format!(

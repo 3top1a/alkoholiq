@@ -1,4 +1,8 @@
 mod tests {
+    use std::io;
+    use brainfuck::Interpreter;
+    use brainfuck::program::Program;
+    use brainfuck::tape::ArrayTape;
     use crate::bf::optim::remove_nonbf;
     use crate::lir::codegen::Codegen;
     use crate::lir::lir::Instruction::{
@@ -229,7 +233,8 @@ Print Location(Variable(1)) <.>"
     }
 
     #[test]
-    fn test_interpreted() {
+    fn test_interpreted_cat() {
+        // Worst `cat(1)` implementation ever
         let c = gen(vec![
             Move {
                 from: Immediate(1),
@@ -257,6 +262,11 @@ Print Location(Variable(1)) <.>"
             },
         ]);
 
-        println!("{}", c);
+        let mut stdin = "Hello, World!".as_bytes();
+        let mut stdout = Vec::new();
+        let program = Program::parse(&c).unwrap();
+        let mut interp = Interpreter::<ArrayTape>::new(program, &mut stdin, &mut stdout);
+        interp.run().unwrap();
+        assert_eq!(stdout, "Hello, World!".as_bytes());
     }
 }

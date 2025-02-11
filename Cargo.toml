@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+brainfuck = "0.2.1"
 #logos = { version = "0.15.0", features = [] }
