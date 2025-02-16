@@ -1,6 +1,7 @@
 use crate::lir::lir::{Instruction, Location, Value};
 
 #[derive(Debug, Clone)]
+#[derive(PartialEq)]
 pub struct Instructions(pub Vec<Instruction>);
 
 impl Instructions {

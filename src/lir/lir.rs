@@ -2,19 +2,19 @@ use crate::lir::instructions::Instructions;
 
 type Immediate = u8;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Location {
     Stack,
     Variable(usize),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Immediate(Immediate),
     Location(Location),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Instruction {
     // Stack operations
     Push(Immediate),
@@ -52,13 +52,15 @@ pub enum Instruction {
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOp {
     Add,
     Sub,
     Mul,
     Div,
     Eq,
+    Le,
+    Ge,
 }
 
 impl Instruction {

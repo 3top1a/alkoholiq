@@ -209,6 +209,12 @@ impl Codegen {
             BinaryOp::Eq => {
                 unimplemented!()
             }
+            BinaryOp::Le => {
+                unimplemented!()
+            }
+            BinaryOp::Ge => {
+                unimplemented!()
+            }
         }
     }
 

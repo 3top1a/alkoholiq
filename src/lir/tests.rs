@@ -4,12 +4,14 @@ mod tests {
     use brainfuck::tape::ArrayTape;
     use crate::bf::optim::remove_nonbf;
     use crate::lir::codegen::Codegen;
+    use crate::lir::instructions::Instructions;
     use crate::lir::lir::Instruction::{
         Binary, Dup, Match, Move, Pop, Print, Push, Read, Swap, While,
     };
     use crate::lir::lir::Location::{Stack, Variable};
     use crate::lir::lir::Value::Immediate;
     use crate::lir::lir::{BinaryOp, Instruction, Location, Value};
+    use crate::lir::parser::parse;
 
     fn eq(code: String, b: &str) {
         println!("{}", code);
@@ -18,6 +20,21 @@ mod tests {
 
     fn gen(instructions: Vec<Instruction>) -> String {
         Codegen::new().codegen(instructions.into())
+    }
+
+    fn gen_instrs(instructions: Instructions) -> String {
+        Codegen::new().codegen(instructions.into())
+    }
+
+    fn interp(code: String, input: String) -> String {
+        let mut stdin = input.as_bytes();
+        let mut stdout = Vec::new();
+        let program = Program::parse(&code).unwrap();
+        let mut interp = Interpreter::<ArrayTape>::new(program, &mut stdin, &mut stdout);
+        interp.run().unwrap();
+        let str = String::from_utf8(stdout).unwrap();
+        println!("{}", str);
+        str
     }
 
     fn test(instruction: Vec<Instruction>, expected: &str) {
@@ -268,11 +285,35 @@ mod tests {
             },
         ]);
 
-        let mut stdin = "Hello, World!".as_bytes();
-        let mut stdout = Vec::new();
-        let program = Program::parse(&c).unwrap();
-        let mut interp = Interpreter::<ArrayTape>::new(program, &mut stdin, &mut stdout);
-        interp.run().unwrap();
-        assert_eq!(stdout, "Hello, World!".as_bytes());
+        interp(c, "Hello, World!".to_string());
+
+
+        // Another cat impl
+        let input = "
+read stack
+while stack
+print stack
+read stack
+end
+        ";
+
+        let c = parse(input).unwrap();
+        let output = interp(gen_instrs(c), "Hello, World!".to_string());
+        assert_eq!(output, "Hello, World!".to_string());
+    }
+
+    #[test]
+    fn test_interpreted_rot13() {
+        let input = "
+mov 1, $0
+while $0
+    read stack
+    dup
+    // If it's too low
+    dup
+
+
+";
+
     }
 }

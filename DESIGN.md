@@ -1,12 +1,14 @@
 # Alkoholiq design document
 
 Let's start from the bottom and work up to a usable language
-As the compexity grows n^2 where n is the number of features, each pass should be the simplest it can be, relying on the power of abstraction.
+As the compexity grows n^2 where n is the number of features, each pass should be the simplest it can be, relying on the
+power of abstraction.
 
 ## Lower IR
 
 Due to the design of brainfuck, multiple limitations are imposed on the design of further passes.
-For example, the absence of jump instructions means function calls must be implemented as a recursive match case statement.
+For example, the absence of jump instructions means function calls must be implemented as a recursive match case
+statement.
 
 It is imperative that both the generated brainfuck code and LIR code leave the stack size determenistic.
 
@@ -34,11 +36,14 @@ The memory layout looks like this:
 [+Variable storage] [+Working stack]
 ```
 
-The variable storage stores variables and are retrieved and stored at runtime by their index of insertion. The size is fixed and must be known at compile time.
-The working stack is what the functions use for their computation. It can be as big as possible, allowing using it as a heap for functions.
+The variable storage stores variables and are retrieved and stored at runtime by their index of insertion. The size is
+fixed and must be known at compile time.
+The working stack is what the functions use for their computation. It can be as big as possible, allowing using it as a
+heap for functions.
 Temporary cells are used for duplicating cells safely.
 
 LIR therefore only needs a few instructions:
+
 1) Stack operations modifying the stack
     - `Push <value: immidiate>` - Push a value on top of the stack
     - `Pop` - Remove top value from stack
@@ -62,8 +67,8 @@ LIR therefore only needs a few instructions:
     - `Match <i: var OR stack>` - match works both as an if, if else, else
     - `While <i: var OR stack>` - run while `i` isn't zero
 
-
 For example:
+
 ```asm
 Push 65 ; [65]
 Print (Stack) ; Consumes 65, leaving stack empty
@@ -91,6 +96,23 @@ While (Variable 0)
     Print (Variable 0)
     Sub (Variable 0) (1)
 EndWhile
-
 ```
+
 NOTE: Match and while statements are defined in a recursive manner, not linear, this has been simplified for reading.
+
+For simpler testing and development, a simple parser has been written.
+
+```asm
+// Move from -> to
+mov 1, $0
+while $0
+    read stack
+    dup
+    match stack
+    case 0
+        mov 0, $0
+    default
+        print stack
+    end
+end
+```
