@@ -1,7 +1,7 @@
-use std::string::ToString;
 use crate::lir::instructions::InstructionsParsed;
 use crate::lir::lir::{Immediate, Instruction, Variable};
 use anyhow::Result;
+use std::string::ToString;
 
 #[derive(Debug, Clone)]
 pub struct Codegen {
@@ -34,13 +34,15 @@ impl Codegen {
     fn instruction(&mut self, instruction: Instruction) -> Result<()> {
         match instruction {
             Instruction::Copy { a, b } => self.copy(&a, &b),
-            Instruction::Inc(a) => {self.inc_by(&a, &1)},
-            Instruction::Dec(a) => {self.dec_by(&a, &1)},
+            Instruction::Inc(a) => self.inc_by(&a, &1),
+            Instruction::Dec(a) => self.dec_by(&a, &1),
+            Instruction::IncBy(a, b) => self.inc_by(&a, &b),
+            Instruction::DecBy(a, b) => self.dec_by(&a, &b),
             Instruction::Set(a, b) => self.set(&a, &b),
             Instruction::Read(a) => self.read(&a),
             Instruction::Print(a) => self.print(&a),
-            Instruction::Add { .. } => todo!(),
-            Instruction::Sub { .. } => todo!(),
+            Instruction::Add { a, b } => self.add(&a, &b),
+            Instruction::Sub { a, b } => self.sub(&a, &b),
             Instruction::Raw(raw) => self.code += &*raw,
         }
 
@@ -53,6 +55,7 @@ impl Codegen {
         self.inc_by(a, b);
     }
 
+    /// Copy variable `from` to `to`
     fn copy(&mut self, from: &Variable, to: &Variable) {
         self.zero(to);
 
@@ -86,11 +89,75 @@ impl Codegen {
         self.goto(to);
     }
 
+    /// Add variable `from` to variable `to`
+    fn add(&mut self, to: &Variable, from: &Variable) {
+        self.goto(from);
+
+        // Move `from` to temp0 and temp1
+        self.code += "[-"; // TODO Use self. methods
+        self.goto(&"0".to_string());
+        self.code += "+>+";
+        self.ptr += 1;
+        self.goto(from);
+        self.code += "]";
+
+        // Move `temp0` to `from`
+        self.goto(&"0".to_string());
+        self.code += "[-"; // TODO Use self. methods
+        self.goto(from);
+        self.code += "+";
+        self.goto(&"0".to_string());
+        self.code += "]";
+
+        // Move `temp1` to `to`
+        self.goto(&"1".to_string());
+        self.code += "[-"; // TODO Use self. methods
+        self.goto(to);
+        self.code += "+";
+        self.goto(&"1".to_string());
+        self.code += "]";
+
+        // Temp0 and temp1 are zeroed automatically
+        self.goto(to);
+    }
+
+    /// Subtract variable `from` from variable `to`
+    fn sub(&mut self, to: &Variable, from: &Variable) {
+        self.goto(from);
+
+        // Move `from` to temp0 and temp1
+        self.code += "[-"; // TODO Use self. methods
+        self.goto(&"0".to_string());
+        self.code += "+>+";
+        self.ptr += 1;
+        self.goto(from);
+        self.code += "]";
+
+        // Move `temp0` to `from`
+        self.goto(&"0".to_string());
+        self.code += "[-"; // TODO Use self. methods
+        self.goto(from);
+        self.code += "+";
+        self.goto(&"0".to_string());
+        self.code += "]";
+
+        // Move `temp1` to `to`
+        self.goto(&"1".to_string());
+        self.code += "[-"; // TODO Use self. methods
+        self.goto(to);
+        self.code += "-";
+        self.goto(&"1".to_string());
+        self.code += "]";
+
+        // Temp0 and temp1 are zeroed automatically
+        self.goto(to);
+    }
+
     fn read(&mut self, a: &Variable) {
         self.goto(a);
         self.code += ",";
     }
-    
+
     fn print(&mut self, a: &Variable) {
         self.goto(a);
         self.code += ".";

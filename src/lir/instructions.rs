@@ -63,6 +63,8 @@ impl InstructionsParsed {
                 }
                 Instruction::Inc(a) => var(a)?,
                 Instruction::Dec(a) => var(a)?,
+                Instruction::IncBy(a, ..) => var(a)?,
+                Instruction::DecBy(a, ..) => var(a)?,
                 Instruction::Set(a, ..) => var(a)?,
                 Instruction::Read(a) => var(a)?,
                 Instruction::Print(a) => var(a)?,
