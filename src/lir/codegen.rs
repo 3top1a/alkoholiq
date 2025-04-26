@@ -8,7 +8,7 @@ enum BlockStack {
     IfEqual { a: Variable, b: Variable },
     IfNotEqual { a: Variable, b: Variable },
     UntilEqual { a: Variable, b: Variable },
-    WhileNotZero(),
+    WhileNotZero(Variable),
 }
 
 #[derive(Debug, Clone)]
@@ -73,44 +73,36 @@ impl Codegen {
 
     /// Compare two variables and store the result in a third variable
     fn compare(&mut self, a: &Variable, b: &Variable, res: &Variable) {
-        self.if_equal(a, b);
-        self.set(res, &6);
+        self.set(res, &0);
+        // self.if_equal(a, b); // Does nothing
+        // self.end();
+
+
+        self.if_not_equal(a, b);
+
+        self.set(res, &8);
+        self.set(&"-1".to_string(), &0);
+        self.set(&"-2".to_string(), &1);
+
+        self.while_not_zero(&"-2".to_string());
+
+        self.dec_by(a, &1);
+        self.dec_by(b, &1);
+
+        self.if_equal(a, &"-1".to_string());
+        self.set(res, &1);
+        self.set(&"-2".to_string(), &0);
         self.end();
         
-        self.if_not_equal(a, b);
-        self.set(res, &7);
+        self.if_equal(b, &"-1".to_string());
+        self.set(res, &2);
+        self.set(&"-2".to_string(), &0);
+        self.end();
+
         self.end();
 
 
-        // self.while_not_zero(res);
-        //
-        // self.dec_by(a, &1);
-        // self.dec_by(b, &1);
-        // self.inc_by(&"2".to_string(), &1);
-        //
-        // self.end();
-
-        // // Act as an early return
-        // self.while_not_zero(&"2".to_string());
-        //
-        // self.if_equal(a, &"0".to_string());
-        // self.set(res, &1);
-        // self.set(&"2".to_string(), &0);
-        // self.end();
-        //
-        // self.if_equal(a, &"1".to_string());
-        // self.set(res, &2);
-        // self.set(&"2".to_string(), &0);
-        // self.end();
-        //
-        // self.dec_by(&"0".to_string(), &1);
-        // self.dec_by(&"1".to_string(), &1);
-        //
-        // self.end();
-        //
-        // self.zero(&"0".to_string());
-        // self.zero(&"1".to_string());
-
+        self.end();
     }
 
     /// If a variable is equal to another variable, execute the code
@@ -180,14 +172,15 @@ impl Codegen {
     fn while_not_zero(&mut self, a: &Variable) {
         self.goto(a);
         self.code += "[";
-        self.block_stack.push(BlockStack::WhileNotZero());
+        self.block_stack.push(BlockStack::WhileNotZero(a.clone()));
     }
 
     /// End blocks
     fn end(&mut self) {
         let b = self.block_stack.pop().unwrap();
         match b {
-            BlockStack::WhileNotZero() => {
+            BlockStack::WhileNotZero(a) => {
+                self.goto(&a);
                 self.code += "]";
             }
             BlockStack::IfNotEqual { a, b } => {

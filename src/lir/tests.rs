@@ -84,12 +84,14 @@ mod tests {
             Read("a".to_string()),
             WhileNotZero("a".to_string()),
             Dec("a".to_string()),
+            Inc("b".to_string()),
             Print("a".to_string()),
             Raw("ASDF".to_string()),
             End,
+            Print("b".to_string()),
         ];
         let bf = Codegen::new(code).codegen().unwrap();
-        assert_eq!(bf, ">>>[-],[-.ASDF]");
+        assert_eq!(bf, ">>>[-],[->+<.ASDF]>.");
 
         let code = vec![
             Read("a".to_string()),
