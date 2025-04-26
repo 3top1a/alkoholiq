@@ -9,6 +9,7 @@ mod tests {
             Set("asdf".to_string(), 10),
             Dec("another".to_string()),
             Inc("asdf".to_string()),
+            DecBy("another".to_string(), 5),
             Copy {
                 a: "asdf".to_string(),
                 b: "newasdf".to_string(),
@@ -17,7 +18,7 @@ mod tests {
         let bf = Codegen::new(code).codegen().unwrap();
         assert_eq!(
             bf,
-            ">>>[-]++++++++++>-<+>>[-]<<[-<<<+>+>>]<<<[->>>+<<<]>[->>>>+<<<<]>>>>"
+            ">>>[-]++++++++++>-<+>----->[-]<<[-<<<+>+>>]<<<[->>>+<<<]>[->>>>+<<<<]>>>>"
         );
 
         let code = vec![
@@ -69,15 +70,23 @@ mod tests {
         let code = vec![End];
         assert!(Codegen::new(code).codegen().is_err());
 
+        // This should error
+        let code = vec![IfEqual {
+            a: "a".to_string(),
+            b: "b".to_string(),
+        }];
+        assert!(Codegen::new(code).codegen().is_err());
+
         let code = vec![
             Read("a".to_string()),
             WhileNotZero("a".to_string()),
             Dec("a".to_string()),
             Print("a".to_string()),
+            Raw("ASDF".to_string()),
             End,
         ];
         let bf = Codegen::new(code).codegen().unwrap();
-        assert_eq!(bf, ">>>[-],[-.]");
+        assert_eq!(bf, ">>>[-],[-.ASDF]");
 
         let code = vec![
             Read("a".to_string()),
