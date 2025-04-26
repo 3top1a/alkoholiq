@@ -7,6 +7,7 @@ use std::string::ToString;
 enum BlockStack {
     WhileNotZero(),
     IfNotEqual { a: Variable, b: Variable },
+    UntilEqual { a: Variable, b: Variable },
 }
 
 #[derive(Debug, Clone)]
@@ -53,7 +54,7 @@ impl Codegen {
             Sub { a, b } => self.sub(&a, &b),
             Raw(raw) => self.code += &*raw,
             IfEqual { a, b } => todo!(),
-            UntilEqual => todo!(),
+            UntilEqual { a, b } => self.until_equal(&a, &b),
             IfNotEqual { a, b } => self.if_not_equal(&a, &b),
             WhileNotZero(a) => self.while_not_zero(&a),
             End => self.end(),
@@ -75,6 +76,20 @@ impl Codegen {
         self.block_stack.push(BlockStack::WhileNotZero());
     }
 
+    /// Until a variable is equal to another variable, execute the code
+    fn until_equal(&mut self, a: &Variable, b: &Variable) {
+        self.sub(a, b);
+        self.goto(a);
+        self.code += "[";
+        self.add(a, b);
+
+        self.block_stack.push(BlockStack::UntilEqual {
+            a: a.clone(),
+            b: b.clone(),
+        })
+    }
+
+    /// If a variable is not equal to another variable, execute the code
     fn if_not_equal(&mut self, a: &Variable, b: &Variable) {
         self.sub(a, b);
         self.goto(a);
@@ -97,6 +112,12 @@ impl Codegen {
             BlockStack::IfNotEqual { a, b } => {
                 self.sub(&a, &b);
                 self.goto(&"0".to_string());
+                self.code += "]";
+                self.add(&a, &b);
+            }
+            BlockStack::UntilEqual { a, b } => {
+                self.sub(&a, &b);
+                self.goto(&a);
                 self.code += "]";
                 self.add(&a, &b);
             }

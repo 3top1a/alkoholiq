@@ -90,5 +90,19 @@ mod tests {
         ];
         let bf = Codegen::new(code).codegen().unwrap();
         assert_eq!(bf, ">>>,>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>-<<]>>[>[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>+<<]>>.>[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>-<<]>><<<]>>>>[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>+<<]>>");
+
+        let code = vec![
+            Instruction::Read("a".to_string()),
+            Instruction::Set("b".to_string(), b'A'),
+            Instruction::UntilEqual {
+                a: "a".to_string(),
+                b: "b".to_string(),
+            },
+            Instruction::Dec("a".to_string()),
+            Instruction::Print("a".to_string()),
+            Instruction::End,
+        ];
+        let bf = Codegen::new(code).codegen().unwrap();
+        assert_eq!(bf, ">>>,[-.]");
     }
 }

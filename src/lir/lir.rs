@@ -57,7 +57,10 @@ pub enum Instruction {
         b: Variable,
     },
 
-    UntilEqual,
+    UntilEqual {
+        a: Variable,
+        b: Variable,
+    },
 
     WhileNotZero(Variable),
 
