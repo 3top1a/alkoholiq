@@ -83,17 +83,19 @@ impl Codegen {
         self.set(res, &8);
         self.set(&"-1".to_string(), &0);
         self.set(&"-2".to_string(), &1);
+        self.set(&"-3".to_string(), &0);
 
         self.while_not_zero(&"-2".to_string());
 
         self.dec_by(a, &1);
         self.dec_by(b, &1);
+        self.inc_by(&"-3".to_string(), &1);
 
-        self.if_equal(a, &"-1".to_string());
+        self.if_equal(a, &"-1".to_string()); // FIXME Would be cleaner if `if` supported immediate
         self.set(res, &1);
         self.set(&"-2".to_string(), &0);
         self.end();
-        
+
         self.if_equal(b, &"-1".to_string());
         self.set(res, &2);
         self.set(&"-2".to_string(), &0);
@@ -101,14 +103,28 @@ impl Codegen {
 
         self.end();
 
+        // Add numbers back up to original
+        self.while_not_zero(&"-3".to_string());
+        self.inc_by(a, &1);
+        self.inc_by(b, &1);
+        self.dec_by(&"-3".to_string(), &1);
+        self.end();
 
         self.end();
+
+        // Should be zeroed automatically
     }
 
     /// If a variable is equal to another variable, execute the code
     ///
-    /// Uses temporary variable `2` and `1` to store the result
+    /// Uses temporary variable `2`, `1` and `-1` to store the result
     fn if_equal(&mut self, a: &Variable, b: &Variable) {
+        debug_assert_ne!(a, b);
+        debug_assert_ne!(a, &"1".to_string());
+        debug_assert_ne!(a, &"2".to_string());
+        debug_assert_ne!(b, &"1".to_string());
+        debug_assert_ne!(b, &"2".to_string());
+
         // TODO Too long code for such a common operation
         // Set flag temp2 to 1
         self.set(&"2".to_string(), &1);
@@ -257,7 +273,13 @@ impl Codegen {
     // }
 
     /// Add variable `from` to variable `to`
+    ///
+    /// Uses temporary variables `0` and `1` to store the value
     fn add(&mut self, to: &Variable, from: &Variable) {
+        debug_assert_ne!(from, to);
+        debug_assert_ne!(to, &"0".to_string());
+        debug_assert_ne!(to, &"1".to_string());
+
         self.goto(from);
 
         // Move `from` to temp0 and temp1
@@ -289,7 +311,13 @@ impl Codegen {
     }
 
     /// Subtract variable `from` from variable `to`
+    ///
+    /// Uses temporary variables `0` and `1` to store the value
     fn sub(&mut self, to: &Variable, from: &Variable) {
+        debug_assert_ne!(from, to);
+        debug_assert_ne!(to, &"0".to_string());
+        debug_assert_ne!(to, &"1".to_string());
+
         self.goto(from);
 
         // Move `from` to temp0 and temp1

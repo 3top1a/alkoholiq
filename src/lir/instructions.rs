@@ -45,6 +45,7 @@ impl InstructionsParsed {
     fn build_variable_hashmap(input: Vec<Instruction>) -> Result<HashMap<String, i32>> {
         let mut variables = HashMap::new();
         // Register the first two temp vars
+        variables.insert("-3".to_string(), -3);
         variables.insert("-2".to_string(), -2);
         variables.insert("-1".to_string(), -1);
         variables.insert("0".to_string(), 0);

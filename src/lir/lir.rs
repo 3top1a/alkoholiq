@@ -58,8 +58,8 @@ pub enum Instruction {
     ///
     /// Third variable is the result of the comparison:
     /// - 0 if equal
-    /// - 1 if a > b
-    /// - 2 if a < b
+    /// - 1 if a < b
+    /// - 2 if a > b
     Compare {
         a: Variable,
         b: Variable,
