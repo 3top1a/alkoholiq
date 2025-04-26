@@ -62,6 +62,7 @@ impl Codegen {
             WhileNotZero(a) => self.while_not_zero(&a),
             End => self.end(),
             Compare { a, b, res } => self.compare(&a, &b, &res),
+            PrintMsg(msg) => self.print_msg(msg),
         }
 
         Ok(())
@@ -140,9 +141,8 @@ impl Codegen {
         self.goto(&"2".to_string());
         self.code += "[";
 
-        self.block_stack.push(BlockStack::IfEqualConst {
-            a: a.clone(),
-        });
+        self.block_stack
+            .push(BlockStack::IfEqualConst { a: a.clone() });
     }
 
     /// If a variable is equal to another variable, execute the code
@@ -246,7 +246,7 @@ impl Codegen {
                 self.goto(&"2".to_string());
                 self.code += "]";
                 self.zero(&"2".to_string());
-            }            
+            }
             BlockStack::IfEqualConst { a } => {
                 self.zero(&"2".to_string());
                 self.goto(&"2".to_string());
@@ -396,6 +396,23 @@ impl Codegen {
     fn print(&mut self, a: &Variable) {
         self.goto(a);
         self.code += ".";
+    }
+
+    fn print_msg(&mut self, msg: String) {
+        let mut last = 0;
+        self.zero(&"0".to_string());
+        for c in msg.chars() {
+            let diff = c as i32 - last;
+            if diff > 0 {
+                self.inc_by(&"0".to_string(), &(diff as u8));
+            } else {
+                self.dec_by(&"0".to_string(), &(-diff as u8));
+            }
+
+            self.code += ".";
+            last = c as i32;
+        }
+        self.zero(&"0".to_string());
     }
 
     /// Increment a variable by number

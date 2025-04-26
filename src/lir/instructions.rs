@@ -117,6 +117,7 @@ impl InstructionsParsed {
                     var(b, true)?;
                     var(res, false)?
                 }
+                PrintMsg(_) => {}
             }
         }
 

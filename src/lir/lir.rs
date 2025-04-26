@@ -28,6 +28,9 @@ pub enum Instruction {
     /// Print variable to STDOUT
     Print(Variable),
 
+    /// Print a string to STDOUT
+    PrintMsg(String),
+
     /// Add variable `b` to variable `a`
     ///
     /// Equivalent to `a += b`.
