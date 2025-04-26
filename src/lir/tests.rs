@@ -71,10 +71,13 @@ mod tests {
         assert!(Codegen::new(code).codegen().is_err());
 
         // This should error
-        let code = vec![IfEqual {
-            a: "a".to_string(),
-            b: "b".to_string(),
-        }];
+        let code = vec![
+            IfEqual {
+                a: "a".to_string(),
+                b: "b".to_string(),
+            },
+            End,
+        ];
         assert!(Codegen::new(code).codegen().is_err());
 
         let code = vec![
