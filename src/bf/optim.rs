@@ -1,6 +1,24 @@
 /// Optimizes series of instructions that have no effect, e.g. <><> or +-+-
-/// TODO
-pub fn optimize_no_effect() {}
+pub fn optimize_no_effect(bf: String) -> String {
+    // Literally remove <> and >< and +- and -+ until nothing changes
+
+    let mut new = bf.clone();
+
+    loop {
+        let old = new.clone();
+        new = new
+            .replace("><", "")
+            .replace("<>", "")
+            .replace("+-", "")
+            .replace("[-][-]", "[-]")
+            .replace("-+", "");
+        if old == new {
+            break;
+        }
+    }
+
+    new
+}
 
 /// Removes all non-brainfuck characters from the input
 pub fn remove_nonbf(bf: String) -> String {

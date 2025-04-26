@@ -9,8 +9,8 @@ pub fn add_header(s: String) -> String {
 }
 
 pub fn optimize(bf: String) -> String {
+    let bf = optim::optimize_no_effect(bf);
     let bf = optim::remove_nonbf(bf);
     let bf = add_header(bf);
-    // let bf = optim::optimize_no_effect(bf);
     bf
 }
