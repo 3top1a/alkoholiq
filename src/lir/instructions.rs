@@ -23,6 +23,9 @@ enum InstructionError {
     #[error("Invalid variable name: {v}")]
     InvalidVariableName { v: Variable },
 
+    #[error("Variable {v} must be assigned before use")]
+    VariableMustBeAssigned{ v: Variable },
+
     #[error("Uneven amount of blocks")]
     UnevenAmountOfBlocks(),
 }
@@ -48,7 +51,13 @@ impl InstructionsParsed {
         // As there are temporary variables in the front, index starts at 3
         let mut index = 3;
 
-        let mut var = |v: Variable| {
+        let mut var = |v: Variable, must_be_defined: bool| {
+            if must_be_defined {
+                if !variables.contains_key(&v) {
+                    return Err(InstructionError::VariableMustBeAssigned { v });
+                }
+            }
+
             if variables.contains_key(&v) {
                 return Ok(());
             }
@@ -64,37 +73,37 @@ impl InstructionsParsed {
         for i in input {
             match i {
                 Copy { a, b } => {
-                    var(a)?;
-                    var(b)?
+                    var(a, true)?;
+                    var(b, false)?
                 }
-                Inc(a) => var(a)?,
-                Dec(a) => var(a)?,
-                IncBy(a, ..) => var(a)?,
-                DecBy(a, ..) => var(a)?,
-                Set(a, ..) => var(a)?,
-                Read(a) => var(a)?,
-                Print(a) => var(a)?,
+                Inc(a) => var(a, false)?,
+                Dec(a) => var(a, false)?,
+                IncBy(a, ..) => var(a, false)?,
+                DecBy(a, ..) => var(a, false)?,
+                Set(a, ..) => var(a, false)?,
+                Read(a) => var(a, false)?,
+                Print(a) => var(a, true)?,
                 Add { a, b } => {
-                    var(a)?;
-                    var(b)?
+                    var(a, true)?;
+                    var(b, true)?
                 }
                 Sub { a, b } => {
-                    var(a)?;
-                    var(b)?
+                    var(a, true)?;
+                    var(b, true)?
                 }
                 IfEqual { a, b } => {
-                    var(a)?;
-                    var(b)?
+                    var(a, true)?;
+                    var(b, true)?
                 }
                 IfNotEqual { a, b } => {
-                    var(a)?;
-                    var(b)?
+                    var(a, true)?;
+                    var(b, true)?
                 }
                 UntilEqual { a, b } => {
-                    var(a)?;
-                    var(b)?
+                    var(a, true)?;
+                    var(b, true)?
                 }
-                WhileNotZero(a) => var(a)?,
+                WhileNotZero(a) => var(a, true)?,
                 End => {}
                 Raw(_) => {}
             }
