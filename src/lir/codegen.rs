@@ -77,37 +77,36 @@ impl Codegen {
         // self.if_equal(a, b); // Does nothing
         // self.end();
 
-
         self.if_not_equal(a, b);
 
         self.set(res, &8);
-        self.set(&"-1".to_string(), &0);
-        self.set(&"-2".to_string(), &1);
-        self.set(&"-3".to_string(), &0);
+        self.set(&"3".to_string(), &0);
+        self.set(&"4".to_string(), &1);
+        self.set(&"5".to_string(), &0);
 
-        self.while_not_zero(&"-2".to_string());
+        self.while_not_zero(&"4".to_string());
 
         self.dec_by(a, &1);
         self.dec_by(b, &1);
-        self.inc_by(&"-3".to_string(), &1);
+        self.inc_by(&"5".to_string(), &1);
 
-        self.if_equal(a, &"-1".to_string()); // FIXME Would be cleaner if `if` supported immediate
+        self.if_equal(a, &"3".to_string()); // FIXME Would be cleaner if `if` supported immediate
         self.set(res, &1);
-        self.set(&"-2".to_string(), &0);
+        self.set(&"4".to_string(), &0);
         self.end();
 
-        self.if_equal(b, &"-1".to_string());
+        self.if_equal(b, &"3".to_string());
         self.set(res, &2);
-        self.set(&"-2".to_string(), &0);
+        self.set(&"4".to_string(), &0);
         self.end();
 
         self.end();
 
         // Add numbers back up to original
-        self.while_not_zero(&"-3".to_string());
+        self.while_not_zero(&"5".to_string());
         self.inc_by(a, &1);
         self.inc_by(b, &1);
-        self.dec_by(&"-3".to_string(), &1);
+        self.dec_by(&"5".to_string(), &1);
         self.end();
 
         self.end();
@@ -117,7 +116,7 @@ impl Codegen {
 
     /// If a variable is equal to another variable, execute the code
     ///
-    /// Uses temporary variable `2`, `1` and `-1` to store the result
+    /// Uses temporary variable `1`, `2` and `3
     fn if_equal(&mut self, a: &Variable, b: &Variable) {
         debug_assert_ne!(a, b);
         debug_assert_ne!(a, &"1".to_string());
@@ -130,12 +129,12 @@ impl Codegen {
         self.set(&"2".to_string(), &1);
 
         self.sub(a, b);
-        self.copy(a, &"-1".to_string());
-        self.goto(&"-1".to_string());
+        self.copy(a, &"3".to_string());
+        self.goto(&"3".to_string());
         self.code += "[";
         self.set(&"2".to_string(), &0);
-        self.goto(&"-1".to_string());
-        self.zero(&"-1".to_string());
+        self.goto(&"3".to_string());
+        self.zero(&"3".to_string());
         self.code += "]";
         self.add(a, b);
 
@@ -229,14 +228,14 @@ impl Codegen {
         debug_assert_ne!(to, &"1".to_string());
 
         self.zero(to);
-
         self.goto(from);
 
         // Move `from` to temp0 and temp1
         self.code += "[-"; // TODO Use self. methods
         self.goto(&"0".to_string());
-        self.code += "+>+";
-        self.ptr += 1;
+        self.code += "+";
+        self.goto(&"1".to_string());
+        self.code += "+";
         self.goto(from);
         self.code += "]";
 
@@ -285,8 +284,9 @@ impl Codegen {
         // Move `from` to temp0 and temp1
         self.code += "[-"; // TODO Use self. methods
         self.goto(&"0".to_string());
-        self.code += "+>+";
-        self.ptr += 1;
+        self.code += "+";
+        self.goto(&"1".to_string());
+        self.code += "+";
         self.goto(from);
         self.code += "]";
 
@@ -323,8 +323,9 @@ impl Codegen {
         // Move `from` to temp0 and temp1
         self.code += "[-"; // TODO Use self. methods
         self.goto(&"0".to_string());
-        self.code += "+>+";
-        self.ptr += 1;
+        self.code += "+";
+        self.goto(&"1".to_string());
+        self.code += "+";
         self.goto(from);
         self.code += "]";
 
@@ -382,7 +383,13 @@ impl Codegen {
 
     /// Move pointer to a variable
     fn goto(&mut self, a: &Variable) {
-        self.move_by(self.parsed.variables.get(a).unwrap() - self.ptr)
+        self.move_by(
+            self.parsed
+                .variables
+                .get(a)
+                .expect(&format!("Unable to retrieve position of variable {a}"))
+                - self.ptr,
+        )
     }
 
     /// Move pointer by `diff`

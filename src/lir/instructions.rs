@@ -45,14 +45,14 @@ impl InstructionsParsed {
     fn build_variable_hashmap(input: Vec<Instruction>) -> Result<HashMap<String, i32>> {
         let mut variables = HashMap::new();
         // Register the first two temp vars
-        variables.insert("-3".to_string(), -3);
-        variables.insert("-2".to_string(), -2);
-        variables.insert("-1".to_string(), -1);
-        variables.insert("0".to_string(), 0);
-        variables.insert("1".to_string(), 1);
-        variables.insert("2".to_string(), 2); // TODO make all of these in -
+        variables.insert("5".to_string(), -6);
+        variables.insert("4".to_string(), -5);
+        variables.insert("3".to_string(), -4);
+        variables.insert("2".to_string(), -3);
+        variables.insert("1".to_string(), -2);
+        variables.insert("0".to_string(), -1);
         // As there are temporary variables in the front, index starts at 3
-        let mut index = 3;
+        let mut index = 0;
 
         let mut var = |v: Variable, must_be_defined: bool| {
             if must_be_defined {
