@@ -68,7 +68,6 @@ mod tests {
         let code = vec![Instruction::End];
         assert!(Codegen::new(code).codegen().is_err());
 
-
         let code = vec![
             Instruction::Read("a".to_string()),
             Instruction::WhileNotZero("a".to_string()),
@@ -77,9 +76,19 @@ mod tests {
             Instruction::End,
         ];
         let bf = Codegen::new(code).codegen().unwrap();
-        assert_eq!(
-            bf,
-            ">>>,[-.]"
-        );
+        assert_eq!(bf, ">>>,[-.]");
+
+        let code = vec![
+            Instruction::Read("a".to_string()),
+            Instruction::Set("b".to_string(), b'A'),
+            Instruction::IfNotEqual {
+                a: "a".to_string(),
+                b: "b".to_string(),
+            },
+            Instruction::Print("a".to_string()),
+            Instruction::End,
+        ];
+        let bf = Codegen::new(code).codegen().unwrap();
+        assert_eq!(bf, ">>>,>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>-<<]>>[>[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>+<<]>>.>[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>-<<]>><<<]>>>>[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>+<<]>>");
     }
 }

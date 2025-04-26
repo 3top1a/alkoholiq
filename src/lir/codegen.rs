@@ -4,12 +4,18 @@ use anyhow::Result;
 use std::string::ToString;
 
 #[derive(Debug, Clone)]
+enum BlockStack {
+    WhileNotZero(),
+    IfNotEqual { a: Variable, b: Variable },
+}
+
+#[derive(Debug, Clone)]
 pub struct Codegen {
     code: String,
     ptr: i32,
     pub instructions: Vec<Instruction>,
     parsed: InstructionsParsed,
-    block_stack: Vec<usize>,
+    block_stack: Vec<BlockStack>,
 }
 
 impl Codegen {
@@ -47,7 +53,8 @@ impl Codegen {
             Sub { a, b } => self.sub(&a, &b),
             Raw(raw) => self.code += &*raw,
             IfEqual { a, b } => todo!(),
-            IfNotEqual | UntilEqual => todo!(),
+            UntilEqual => todo!(),
+            IfNotEqual { a, b } => self.if_not_equal(&a, &b),
             WhileNotZero(a) => self.while_not_zero(&a),
             End => self.end(),
         }
@@ -65,16 +72,34 @@ impl Codegen {
     fn while_not_zero(&mut self, a: &Variable) {
         self.goto(a);
         self.code += "[";
-        self.block_stack.push(4);
+        self.block_stack.push(BlockStack::WhileNotZero());
+    }
+
+    fn if_not_equal(&mut self, a: &Variable, b: &Variable) {
+        self.sub(a, b);
+        self.goto(a);
+        self.code += "[";
+        self.add(a, b);
+
+        self.block_stack.push(BlockStack::IfNotEqual {
+            a: a.clone(),
+            b: b.clone(),
+        });
     }
 
     /// End blocks
     fn end(&mut self) {
         let b = self.block_stack.pop().unwrap();
-        if b == 4 {
-            self.code += "]";
-        } else {
-            panic!("Unmatched block");
+        match b {
+            BlockStack::WhileNotZero() => {
+                self.code += "]";
+            }
+            BlockStack::IfNotEqual { a, b } => {
+                self.sub(&a, &b);
+                self.goto(&"0".to_string());
+                self.code += "]";
+                self.add(&a, &b);
+            }
         }
     }
 

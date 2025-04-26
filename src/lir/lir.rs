@@ -46,19 +46,20 @@ pub enum Instruction {
     },
 
     // TODO Mul Div
-
-
     /// Execute code only if `a` equals `b`
     IfEqual {
         a: Variable,
         b: Variable,
     },
 
-    IfNotEqual,
+    IfNotEqual {
+        a: Variable,
+        b: Variable,
+    },
 
     UntilEqual,
-    
-    WhileNotZero (Variable),
+
+    WhileNotZero(Variable),
 
     /// End clause to end if/until blocks
     End,
