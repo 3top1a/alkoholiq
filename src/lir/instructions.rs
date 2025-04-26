@@ -98,6 +98,9 @@ impl InstructionsParsed {
                     var(a, true)?;
                     var(b, true)?
                 }
+                IfEqualConst { a, .. } => {
+                    var(a, true)?;
+                }
                 IfNotEqual { a, b } => {
                     var(a, true)?;
                     var(b, true)?
@@ -124,9 +127,11 @@ impl InstructionsParsed {
         let mut nesting = 0i32;
         for i in instructions {
             match i {
-                IfEqual { .. } | IfNotEqual { .. } | UntilEqual { .. } | WhileNotZero(..) => {
-                    nesting += 1
-                }
+                IfEqual { .. }
+                | IfNotEqual { .. }
+                | UntilEqual { .. }
+                | WhileNotZero(..)
+                | IfEqualConst { .. } => nesting += 1,
                 End => nesting -= 1,
                 _ => {}
             }

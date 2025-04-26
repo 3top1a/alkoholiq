@@ -137,12 +137,23 @@ mod tests {
         assert_eq!(bf, "[-],>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++<<<<[-]+>>>>[-<<+<+>>>]<<[->>+<<]<[->>-<<]>><<<<[-]>>>>[-<+<+>>]<[->+<]<[-<<+>>]<<[>[-]<[-]]>>>>>[-<<+<+>>>]<<[->>+<<]<[->>+<<]>><<<[>>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.<<<[-]][-]>>>.");
 
         let code = vec![
+            Read("a".to_string()),
+            IfEqualConst {
+                a: "a".to_string(),
+                b: b'A',
+            },
+            Set("a".to_string(), b'B'),
+            Print("a".to_string()),
+            End,
+            Print("a".to_string()),
+        ];
+        let bf = Codegen::new(code).codegen().unwrap();
+        assert_eq!(bf, "[-],<<<[-]+>>>-----------------------------------------------------------------<<<<[-]>>>>[-<+<+>>]<[->+<]<[-<<+>>]<<[>[-]<[-]]>>>>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++<<<[>>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.<<<[-]][-]>>>.");
+
+        let code = vec![
             Set("E".to_string(), b'='),
             Set("L".to_string(), b'<'),
             Set("G".to_string(), b'>'),
-            Set("z".to_string(), 0),
-            Set("o".to_string(), 1),
-            Set("t".to_string(), 2),
             Read("a".to_string()),
             Read("b".to_string()),
             Compare {
@@ -150,23 +161,23 @@ mod tests {
                 b: "b".to_string(),
                 res: "res".to_string(),
             },
-            IfEqual {
+            IfEqualConst {
                 a: "res".to_string(),
-                b: "o".to_string(),
+                b: 0,
+            },
+            Print("E".to_string()),
+            End,
+            IfEqualConst {
+                a: "res".to_string(),
+                b: 1,
             },
             Print("L".to_string()),
             End,
-            IfEqual {
+            IfEqualConst {
                 a: "res".to_string(),
-                b: "t".to_string(),
+                b: 2,
             },
             Print("G".to_string()),
-            End,
-            IfEqual {
-                a: "res".to_string(),
-                b: "z".to_string(),
-            },
-            Print("E".to_string()),
             End,
         ];
         let bf = Codegen::new(code).codegen().unwrap();

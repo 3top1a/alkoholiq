@@ -6,6 +6,7 @@ use std::string::ToString;
 #[derive(Debug, Clone)]
 enum BlockStack {
     IfEqual { a: Variable, b: Variable },
+    IfEqualConst { a: Variable },
     IfNotEqual { a: Variable, b: Variable },
     UntilEqual { a: Variable, b: Variable },
     WhileNotZero(Variable),
@@ -55,6 +56,7 @@ impl Codegen {
             Sub { a, b } => self.sub(&a, &b),
             Raw(raw) => self.code += &*raw,
             IfEqual { a, b } => self.if_equal(&a, &b),
+            IfEqualConst { a, b } => self.if_equal_const(&a, &b),
             IfNotEqual { a, b } => self.if_not_equal(&a, &b),
             UntilEqual { a, b } => self.until_equal(&a, &b),
             WhileNotZero(a) => self.while_not_zero(&a),
@@ -114,9 +116,38 @@ impl Codegen {
         // Should be zeroed automatically
     }
 
+    /// If a variable is equal to a constant, execute the code
+    fn if_equal_const(&mut self, a: &Variable, b: &Immediate) {
+        debug_assert_ne!(a, &"1".to_string());
+        debug_assert_ne!(a, &"2".to_string());
+
+        // TODO Too long code for such a common operation
+
+        // Set flag temp2 to 1
+        self.set(&"2".to_string(), &1);
+
+        self.dec_by(a, b);
+        self.copy(a, &"3".to_string());
+        self.goto(&"3".to_string());
+        self.code += "[";
+        self.set(&"2".to_string(), &0);
+        self.goto(&"3".to_string());
+        self.zero(&"3".to_string());
+        self.code += "]";
+        self.inc_by(a, b);
+
+        // Check execution flag
+        self.goto(&"2".to_string());
+        self.code += "[";
+
+        self.block_stack.push(BlockStack::IfEqualConst {
+            a: a.clone(),
+        });
+    }
+
     /// If a variable is equal to another variable, execute the code
     ///
-    /// Uses temporary variable `1`, `2` and `3
+    /// Uses temporary variable `1`, `2` and `3`
     fn if_equal(&mut self, a: &Variable, b: &Variable) {
         debug_assert_ne!(a, b);
         debug_assert_ne!(a, &"1".to_string());
@@ -211,6 +242,12 @@ impl Codegen {
                 self.add(&a, &b);
             }
             BlockStack::IfEqual { a, b } => {
+                self.zero(&"2".to_string());
+                self.goto(&"2".to_string());
+                self.code += "]";
+                self.zero(&"2".to_string());
+            }            
+            BlockStack::IfEqualConst { a } => {
                 self.zero(&"2".to_string());
                 self.goto(&"2".to_string());
                 self.code += "]";
