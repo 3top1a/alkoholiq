@@ -59,6 +59,7 @@ impl Codegen {
             UntilEqual { a, b } => self.until_equal(&a, &b),
             WhileNotZero(a) => self.while_not_zero(&a),
             End => self.end(),
+            Compare { a, b, res } => self.compare(&a, &b, &res),
         }
 
         Ok(())
@@ -70,24 +71,69 @@ impl Codegen {
         self.inc_by(a, b);
     }
 
+    /// Compare two variables and store the result in a third variable
+    fn compare(&mut self, a: &Variable, b: &Variable, res: &Variable) {
+        self.if_equal(a, b);
+        self.set(res, &6);
+        self.end();
+        
+        self.if_not_equal(a, b);
+        self.set(res, &7);
+        self.end();
+
+
+        // self.while_not_zero(res);
+        //
+        // self.dec_by(a, &1);
+        // self.dec_by(b, &1);
+        // self.inc_by(&"2".to_string(), &1);
+        //
+        // self.end();
+
+        // // Act as an early return
+        // self.while_not_zero(&"2".to_string());
+        //
+        // self.if_equal(a, &"0".to_string());
+        // self.set(res, &1);
+        // self.set(&"2".to_string(), &0);
+        // self.end();
+        //
+        // self.if_equal(a, &"1".to_string());
+        // self.set(res, &2);
+        // self.set(&"2".to_string(), &0);
+        // self.end();
+        //
+        // self.dec_by(&"0".to_string(), &1);
+        // self.dec_by(&"1".to_string(), &1);
+        //
+        // self.end();
+        //
+        // self.zero(&"0".to_string());
+        // self.zero(&"1".to_string());
+
+    }
+
     /// If a variable is equal to another variable, execute the code
+    ///
+    /// Uses temporary variable `2` and `1` to store the result
     fn if_equal(&mut self, a: &Variable, b: &Variable) {
-        // TODO Too long code for such a simple operation
+        // TODO Too long code for such a common operation
         // Set flag temp2 to 1
         self.set(&"2".to_string(), &1);
 
         self.sub(a, b);
-        self.goto(a);
+        self.copy(a, &"-1".to_string());
+        self.goto(&"-1".to_string());
         self.code += "[";
         self.set(&"2".to_string(), &0);
-        self.add(a, b);
-        self.goto(a);
+        self.goto(&"-1".to_string());
+        self.zero(&"-1".to_string());
         self.code += "]";
+        self.add(a, b);
 
         // Check execution flag
         self.goto(&"2".to_string());
         self.code += "[";
-        self.add(a, b);
 
         self.block_stack.push(BlockStack::IfEqual {
             a: a.clone(),
@@ -96,10 +142,15 @@ impl Codegen {
     }
 
     /// If a variable is not equal to another variable, execute the code
+    ///
+    /// Does not use any temporary variables
     fn if_not_equal(&mut self, a: &Variable, b: &Variable) {
         self.sub(a, b);
         self.goto(a);
+        self.copy(a, &"2".to_string());
+        self.goto(&"2".to_string());
         self.code += "[";
+        self.zero(&"2".to_string());
         self.add(a, b);
 
         self.block_stack.push(BlockStack::IfNotEqual {
@@ -109,6 +160,8 @@ impl Codegen {
     }
 
     /// Until a variable is equal to another variable, execute the code
+    ///
+    /// Does not use any temporary variables
     fn until_equal(&mut self, a: &Variable, b: &Variable) {
         self.sub(a, b);
         self.goto(a);
@@ -122,6 +175,8 @@ impl Codegen {
     }
 
     /// While a variable is not zero, execute the code
+    ///
+    /// Does not use any temporary variables
     fn while_not_zero(&mut self, a: &Variable) {
         self.goto(a);
         self.code += "[";
@@ -137,7 +192,7 @@ impl Codegen {
             }
             BlockStack::IfNotEqual { a, b } => {
                 self.sub(&a, &b);
-                self.goto(&"0".to_string());
+                self.goto(&"2".to_string());
                 self.code += "]";
                 self.add(&a, &b);
             }
@@ -148,16 +203,22 @@ impl Codegen {
                 self.add(&a, &b);
             }
             BlockStack::IfEqual { a, b } => {
-                self.sub(&a, &b);
                 self.zero(&"2".to_string());
+                self.goto(&"2".to_string());
                 self.code += "]";
-                self.add(&a, &b);
+                self.zero(&"2".to_string());
             }
         }
     }
 
     /// Copy variable `from` to `to`
+    ///
+    /// Uses temporary variables `0` and `1` to store the value
     fn copy(&mut self, from: &Variable, to: &Variable) {
+        debug_assert_ne!(from, to);
+        debug_assert_ne!(to, &"0".to_string());
+        debug_assert_ne!(to, &"1".to_string());
+
         self.zero(to);
 
         self.goto(from);

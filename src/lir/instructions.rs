@@ -45,9 +45,11 @@ impl InstructionsParsed {
     fn build_variable_hashmap(input: Vec<Instruction>) -> Result<HashMap<String, i32>> {
         let mut variables = HashMap::new();
         // Register the first two temp vars
+        variables.insert("-2".to_string(), -2);
+        variables.insert("-1".to_string(), -1);
         variables.insert("0".to_string(), 0);
         variables.insert("1".to_string(), 1);
-        variables.insert("2".to_string(), 2);
+        variables.insert("2".to_string(), 2); // TODO make all of these in -
         // As there are temporary variables in the front, index starts at 3
         let mut index = 3;
 
@@ -106,6 +108,11 @@ impl InstructionsParsed {
                 WhileNotZero(a) => var(a, true)?,
                 End => {}
                 Raw(_) => {}
+                Compare { a, b, res } => {
+                    var(a, true)?;
+                    var(b, true)?;
+                    var(res, false)?
+                }
             }
         }
 

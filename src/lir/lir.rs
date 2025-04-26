@@ -6,10 +6,7 @@ pub type Variable = String;
 #[derive(Debug, Clone, PartialEq)]
 pub enum Instruction {
     /// Copy from variable a to variable b
-    Copy {
-        a: Variable,
-        b: Variable,
-    },
+    Copy { a: Variable, b: Variable },
 
     /// Increment variable by one
     Inc(Variable),
@@ -34,40 +31,40 @@ pub enum Instruction {
     /// Add variable `b` to variable `a`
     ///
     /// Equivalent to `a += b`.
-    Add {
-        a: Variable,
-        b: Variable,
-    },
+    Add { a: Variable, b: Variable },
 
     /// Subtract variable `b` from variable `a`
     ///
     /// Equivalent to `a -= b`.
-    Sub {
-        a: Variable,
-        b: Variable,
-    },
+    Sub { a: Variable, b: Variable },
 
     // TODO Mul Div
     /// Execute code only if `a` equals `b`
-    IfEqual {
-        a: Variable,
-        b: Variable,
-    },
+    IfEqual { a: Variable, b: Variable },
 
-    IfNotEqual {
-        a: Variable,
-        b: Variable,
-    },
+    /// Execute code only if `a` does not equal `b`
+    IfNotEqual { a: Variable, b: Variable },
 
-    UntilEqual {
-        a: Variable,
-        b: Variable,
-    },
+    /// Execute code until `a` equals `b`
+    UntilEqual { a: Variable, b: Variable },
 
+    /// Execute code while `a` is not zero
     WhileNotZero(Variable),
 
     /// End clause to end if/until blocks
     End,
+
+    /// Compare two variables, `a` and `b`, and store result into `res`
+    ///
+    /// Third variable is the result of the comparison:
+    /// - 0 if equal
+    /// - 1 if a > b
+    /// - 2 if a < b
+    Compare {
+        a: Variable,
+        b: Variable,
+        res: Variable,
+    },
 
     /// Insert raw brainfuck
     ///
