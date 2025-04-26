@@ -3,6 +3,7 @@
 ## The Stack Architecture
 
 - Two "temp" cells empty for copying
+  - The two temporary cells must be at 0 after every instruction!
 - Variables
   - All variables and their sizes are known at compile time
 - Stack
