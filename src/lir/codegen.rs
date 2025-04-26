@@ -269,7 +269,7 @@ impl Codegen {
     fn read(&mut self, a: &Variable) {
         self.goto(a);
         self.zero(a); // Depends on implementation, but the debugger I'm using needs this
-        // Also should check if it has been accessed before
+                      // Also should check if it has been accessed before
         self.code += ",";
     }
 

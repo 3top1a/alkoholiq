@@ -24,7 +24,7 @@ enum InstructionError {
     InvalidVariableName { v: Variable },
 
     #[error("Variable {v} must be assigned before use")]
-    VariableMustBeAssigned{ v: Variable },
+    VariableMustBeAssigned { v: Variable },
 
     #[error("Uneven amount of blocks")]
     UnevenAmountOfBlocks(),
