@@ -68,15 +68,15 @@ read b
 // `res` is defined here, but a and b must be defined beforehand
 compare a b res
 
-if_eq_const res 0
+if_eq res 0
     print_msg "Numbers are equal"
 end
 
-if_eq_const res 1
+if_eq res 1
     print_msg "Right number is greater"
 end
 
-if_eq_const res 2
+if_eq res 2
     print_msg "Left number is greater"
 end
 ```

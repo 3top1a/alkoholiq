@@ -76,9 +76,11 @@ impl Codegen {
 
     /// Compare two variables and store the result in a third variable
     fn compare(&mut self, a: &Variable, b: &Variable, res: &Variable) {
-        self.set(res, &0);
+        self.zero(res);
         // self.if_equal(a, b); // Does nothing
         // self.end();
+
+        // TODO probably could be optimized
 
         self.if_not_equal(a, b);
 
@@ -296,17 +298,16 @@ impl Codegen {
         self.goto(to);
     }
 
-    // Might implement as an instruction one day
-    // // Helper: Move value from one cell to another
-    // fn move_value(&mut self, from: &Variable, to: &Variable) {
-    //     self.zero(to);
-    //     self.goto(from);
-    //     self.code += "[-";
-    //     self.goto(to);
-    //     self.code += "+";
-    //     self.goto(from);
-    //     self.code += "]";
-    // }
+    // Helper: Move value from one cell to another
+    fn move_value(&mut self, from: &Variable, to: &Variable) {
+        self.zero(to);
+        self.goto(from);
+        self.code += "[-";
+        self.goto(to);
+        self.code += "+";
+        self.goto(from);
+        self.code += "]";
+    }
 
     /// Add variable `from` to variable `to`
     ///
