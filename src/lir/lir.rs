@@ -1,5 +1,3 @@
-use crate::lir::instructions::InstructionsParsed;
-
 pub type Immediate = u8;
 pub type Variable = String;
 
@@ -7,6 +5,9 @@ pub type Variable = String;
 pub enum Instruction {
     /// Copy from variable a to variable b
     Copy { a: Variable, b: Variable },
+
+    /// Set variable to value
+    Set(Variable, Immediate),
 
     /// Increment variable by one
     Inc(Variable),
@@ -16,9 +17,6 @@ pub enum Instruction {
     IncBy(Variable, Immediate),
     /// Decrement variable by value
     DecBy(Variable, Immediate),
-
-    /// Set variable to value
-    Set(Variable, Immediate),
 
     /// Read STDIN into variable
     ///

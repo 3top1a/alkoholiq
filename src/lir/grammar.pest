@@ -2,61 +2,52 @@
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
 COMMENT = _{ ("//"|"#") ~ (!"\n" ~ ANY)* }
 
-// program = _{ SOI ~ instruction* ~ EOI }
 program = { SOI ~ (instruction)* ~ EOI }
 
 instruction = {
-    push_instr |
-    pop_instr |
-    dup_instr |
-    swap_instr |
-    mov_instr |
-    binary_instr |
+    copy_instr |
+    inc_instr |
+    dec_instr |
+    inc_by_instr |
+    dec_by_instr |
+    set_instr |
     read_instr |
     print_instr |
-    match_instr |
-    while_instr
+    print_msg_instr |
+    add_instr |
+    sub_instr |
+    if_equal_instr |
+    if_equal_const_instr |
+    if_not_equal_instr |
+    until_equal_instr |
+    while_not_zero_instr |
+    compare_instr |
+    raw_instr |
+    end_instr
 }
 
-// Values and locations
-number = @{ ASCII_DIGIT+ }
-char_literal = @{ "'" ~ ANY ~ "'" }
-variable = @{ "$" ~ ASCII_DIGIT+ }
-stack = { "stack" }
+// Basic types
+variable = @{ ASCII_ALPHA+ }
+immediate = @{ ASCII_DIGIT+ }
+string_literal = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 
-source = _{ number | char_literal | variable | stack }
-destination = _{ variable | stack }
-
-// Basic stack operations
-push_instr = { "push" ~ source }
-pop_instr = { "pop" }
-dup_instr = { "dup" }
-swap_instr = { "swap" }
-
-// Move instruction
-mov_instr = { "mov" ~ source ~ "," ~ destination }
-
-// Binary operations
-binary_op = @{ "add" | "sub" | "mul" | "div" | "eq" }
-binary_instr = { binary_op ~ destination ~ "," ~ source }
-
-// I/O instructions
-read_instr = { "read" ~ destination }
-print_instr = { "print" ~ source }
-
-// Control flow
-match_instr = {
-    "match" ~ destination ~
-    case_block* ~
-    default_block? ~
-    "end"
-}
-
-case_block = { "case" ~ number ~ instruction* }
-default_block = { "default" ~ instruction* }
-
-while_instr = {
-    "while" ~ destination ~
-    instruction* ~
-    "end"
-}
+// Instructions
+copy_instr = { "copy" ~ variable ~ "," ~ variable }
+inc_instr = { "inc" ~ variable }
+dec_instr = { "dec" ~ variable }
+inc_by_instr = { "inc_by" ~ variable ~ "," ~ immediate }
+dec_by_instr = { "dec_by" ~ variable ~ "," ~ immediate }
+set_instr = { "set" ~ variable ~ "," ~ immediate }
+read_instr = { "read" ~ variable }
+print_instr = { "print" ~ variable }
+print_msg_instr = { "print_msg" ~ string_literal }
+add_instr = { "add" ~ variable ~ "," ~ variable }
+sub_instr = { "sub" ~ variable ~ "," ~ variable }
+if_equal_instr = { "if_eq" ~ variable ~ "," ~ variable }
+if_equal_const_instr = { "if_eq_const" ~ variable ~ "," ~ immediate }
+if_not_equal_instr = { "if_neq" ~ variable ~ "," ~ variable }
+until_equal_instr = { "until_eq" ~ variable ~ "," ~ variable }
+while_not_zero_instr = { "while_nz" ~ variable }
+compare_instr = { "compare" ~ variable ~ "," ~ variable ~ "," ~ variable }
+raw_instr = { "raw" ~ string_literal }
+end_instr = { "end" }

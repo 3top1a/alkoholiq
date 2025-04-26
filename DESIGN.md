@@ -1,118 +1,120 @@
 # Alkoholiq design document
 
 Let's start from the bottom and work up to a usable language
-As the compexity grows n^2 where n is the number of features, each pass should be the simplest it can be, relying on the
+As the complexity grows n^2 where n is the number of features, each pass should be the simplest it can be, relying on
+the
 power of abstraction.
 
-## Lower IR
+## Lower Intermediate Representation (LIR)
 
-Due to the design of brainfuck, multiple limitations are imposed on the design of further passes.
+Due to the design of brainfuck, several limitations are imposed on the design of further passes.
 For example, the absence of jump instructions means function calls must be implemented as a recursive match case
 statement.
-
-It is imperative that both the generated brainfuck code and LIR code leave the stack size determenistic.
-
-Function calls can be implemented as a flag and switch case statement.
-See [os.bf](https://github.com/bf-enterprise-solutions/os.bf/blob/master/os.bf).
-
-For control structure design, see [bf.style](https://github.com/bf-enterprise-solutions/bf.style).
-For if statements, see [bottom of this gist](https://gist.github.com/roachhd/dce54bec8ba55fb17d3a).
-
-Brainfuck forces you to think about the memory layout before any code is written. The code gen is no different.
-Before any code can be generated, the LIR needs to be analyzed and a concrete memory layout generated.
-This step will also ensure that brainfuck can be generated.
-
-The LIR does not have a concept of functions, instead a function switch like in os.bf is implemented in LIR form.
-A function can be viewed as a set of instructions that has a side effect on the stack, just like a single instruction.
-
-If, if else, else are implemented with the `Match` instruction.
-
-Most operations should consume the top of the stack.
-Inefficiencies caused by this should be optimized away by the optimizer.
 
 The memory layout looks like this:
 
 ```
-[+Variable storage] [+Working stack]
+[ Temporary variables used by instructions] [ 0 ] [+Variable storage]
 ```
 
-The variable storage stores variables and are retrieved and stored at runtime by their index of insertion. The size is
-fixed and must be known at compile time.
-The working stack is what the functions use for their computation. It can be as big as possible, allowing using it as a
-heap for functions.
-Temporary cells are used for duplicating cells safely.
+Simply using a variable name will automatically reserve space for it. Some instructions need to have the variable be
+used beforehand.
 
-LIR therefore only needs a few instructions:
+### Instructions
 
-1) Stack operations modifying the stack
-    - `Push <value: immidiate>` - Push a value on top of the stack
-    - `Pop` - Remove top value from stack
-    - `Dup` - Duplicate top value
+- `set <var>, <value>` - Set a variable to a value
+- `copy <var>, <var>` - Copy from variable a to variable b
 
-2) Data manipulation (with a modified and a consumed atom)
-    - `Add <modified: var OR stack> <con: immidiate OR var OR stack>`
-    - `Sub <modified: var OR stack> <con: immidiate OR var OR stack>`
-    - `Mul` ... same as above
-    - `Div` ... same as above
-    - `Eq <modified: var OR stack> <con: immidiate OR var OR stack>` - Equality check, 1 if equal, 0 if not
+- `inc <var>` - Increment a variable by one
+- `dec <var>` - Decrement a variable by one
+- `inc_by <var>, <value>` - Increment a variable by a value
+- `dec_by <var>, <value>` - Decrement a variable by a value
 
-3) Variable modification
-    - `Move <to: var OR stack> <from: immidiate OR var OR stack>` - Moves a value from one place to another
+- `add <var>, <var>` - Add two variables together
+- `sub <var>, <var>` - Subtract two variables
+- `compare <var>, <var>, <var>` - Compare two variables, store the result in a third variable
 
-4) I/O
-    - `Read <to: var OR stack>` - Read from stdin
-    - `Print <from: var OR stack OR immidiate>` - Print to stdout
+- `read <var>` - Read one byte from stdin and store it in a variable
+- `print <var>` - Print a variable to stdout
+- `print_msg <string>` - Print a string to stdout
 
-5) Control loops
-    - `Match <i: var OR stack>` - match works both as an if, if else, else
-    - `While <i: var OR stack>` - run while `i` isn't zero
+- `if_eq <var>, <var>` - If two variables are equal, run the next block
+- `if_neq <var>, <var>` - If two variables are not equal, run the next block
+- `if_eq <var>, <const>` - If a variable is equal to a constant, run the next block
+- `until_eq <var>, <var>` - Run until a variables are equal
+- `while_nz <var>` - Run while a variable is not zero
+- `end` - End the current block
 
-For example:
+- `raw` - Insert raw brainfuck code
 
-```asm
-Push 65 ; [65]
-Print (Stack) ; Consumes 65, leaving stack empty
 
-Push 5 ; [5]
-Dup ; [5] [5]
-Eq ; [1] Tests for equality
+### Examples
 
-Match (Stack) ; Consumes top of stack
-    CaseDefault
-        Print (67)
-    Case (1)
-        Print (66)
-    Case (0)
-        Print (65)
-EndMatch
+A simple `cat` program:
 
-Read (Stack) ; Pushes one byte of used input to stack
-Move (from: Stack) (to: Variable 0 ) ; Pops and puts it into variable storage
-
-; This will print all ASCII characters from z to 0
-; Assign to variable, 'z' is 122
-Move (122) (Variable 0)
-While (Variable 0)
-    Print (Variable 0)
-    Sub (Variable 0) (1)
-EndWhile
-```
-
-NOTE: Match and while statements are defined in a recursive manner, not linear, this has been simplified for reading.
-
-For simpler testing and development, a simple parser has been written.
-
-```asm
-// Move from -> to
-mov 1, $0
-while $0
-    read stack
-    dup
-    match stack
-    case 0
-        mov 0, $0
-    default
-        print stack
-    end
+```js
+read data // Read from stdin into a variable called data
+while_nz data // While data is not zero
+print data // Print data
+read data // Read again, if the buffer is empty, it will return zero and exit the loop
 end
+```
+
+A program that takes in two characters and compares their ASCII values:
+
+```js
+read a
+read b
+
+compare a, b, res
+
+if_eq_const res, 0
+    print_msg "Numbers are equal"
+end
+
+if_eq_const res, 1
+    print_msg "Right number is greater"
+end
+
+if_eq_const res, 2
+    print_msg "Left number is greater"
+end
+```
+
+
+Here is fibonacci's sequence:
+
+```js
+// Initialize first two numbers of the sequence
+set a, 1  // F(1) = 1
+set b, 1  // F(2) = 1
+set count, 10  // How many numbers to generate
+
+// Print first two numbers
+print a
+print_msg " "
+print b
+print_msg " "
+
+// Decrement count by 2 since we've printed two numbers
+dec_by count, 2
+
+// Generate remaining numbers
+while_nz count
+    // temp = a + b
+    copy a, temp
+    add temp, b
+
+    // Print the new number
+    print temp
+    print_msg " "
+
+    // Shift numbers: a = b, b = temp
+    copy b, a
+    copy temp, b
+
+    // Decrement counter
+    dec count
+end
+
 ```

@@ -1,5 +1,32 @@
-// No arrays for now
+// Initialize first two numbers of the sequence
+set a, 1  // F(1) = 1
+set b, 1  // F(2) = 1
+set count, 10  // How many numbers to generate
 
-x = 1
-y = 2
-z = + x y
+// Print first two numbers
+print a
+print_msg " "
+print b
+print_msg " "
+
+// Decrement count by 2 since we've printed two numbers
+dec_by count, 2
+
+// Generate remaining numbers
+while_nz count
+    // temp = a + b
+    copy a, temp
+    add temp, b
+
+    // Print the new number
+    print temp
+    print_msg " "
+
+    // Shift numbers: a = b, b = temp
+    copy b, a
+    copy temp, b
+
+    // Decrement counter
+    dec count
+end
+
