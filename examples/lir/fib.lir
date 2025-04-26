@@ -1,0 +1,23 @@
+set a 1
+set b 1
+set count 10
+
+print a
+print_msg " "
+print b
+print_msg " "
+
+dec_by count 2
+
+while_nz count
+    copy a temp
+    add temp b
+
+    print temp
+    print_msg " "
+
+    copy b a
+    copy temp b
+
+    dec count
+end

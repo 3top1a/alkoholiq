@@ -14,6 +14,7 @@ fn main() {
 
     let codegen = lir::codegen::Codegen::new(parsed);
     let instructions = codegen.codegen().unwrap();
+    let optimized = bf::optimize(instructions);
 
-    println!("{}", instructions);
+    println!("{}", optimized);
 }

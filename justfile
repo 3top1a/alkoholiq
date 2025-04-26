@@ -10,7 +10,7 @@ lint:
 
 test: build
     cargo test
-    for x in examples/*; do cargo run --release -- $x; done
+    for x in examples/lir/*; do cargo run --release < $x; done
 
 ci: test
 
