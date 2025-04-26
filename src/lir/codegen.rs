@@ -1,414 +1,85 @@
-use crate::lir::instructions::Instructions;
-use crate::lir::lir::Instruction::*;
-use crate::lir::lir::{BinaryOp, Location, Value};
+use crate::lir::instructions::InstructionsParsed;
+use crate::lir::lir::{Immediate, Instruction, Variable};
+use anyhow::Result;
 
 #[derive(Debug, Clone)]
 pub struct Codegen {
     code: String,
-    variables: usize,
-    ptr: usize,
-    /// Tracks assigned variables
-    ///
-    /// This is so that when variables are reassigned, we can zero them out, but not unassigned variables
-    assigned_vars: Vec<usize>,
+    ptr: i32,
+    pub instructions: Vec<Instruction>,
+    parsed: InstructionsParsed,
 }
 
 impl Codegen {
-    pub fn new() -> Self {
+    pub fn new(instructions: Vec<Instruction>) -> Self {
         Self {
             code: String::new(),
-            variables: 0,
             ptr: 0,
-            assigned_vars: Vec::new(),
+            instructions,
+            parsed: InstructionsParsed::default(),
         }
     }
 
-    /// Generate code from instructions.
-    ///
-    /// This consumes the Codegen instance and returns the generated code.
-    pub fn codegen(mut self, instructions: Instructions) -> String {
-        instructions.validate();
+    pub fn codegen(mut self) -> Result<String> {
+        self.parsed = InstructionsParsed::new(self.instructions.clone())?;
 
-        self.variables = instructions.get_variable_indexes().len();
-
-        // Allocate memory for variables
-        // One less because stack ops go right once
-        let number_left = self.variables.saturating_sub(1);
-        self.code += format!("Variables: {} ", self.variables).as_str();
-        self.code += ">".repeat(number_left).as_str();
-        self.code += "\n";
-        self.ptr = number_left;
-
-        self.parse_instructions(instructions);
-
-        self.code
-    }
-
-    fn parse_instructions(&mut self, instructions: Instructions) {
-        for instr in instructions.0 {
-            self.code += format!("{} ", instr.debug()).as_str();
-
-            match instr {
-                Push(n) => self.push(n),
-                Pop => self.pop(),
-                Dup => self.dup(),
-                Swap => self.swap(),
-                Binary {
-                    op,
-                    modified,
-                    consumed,
-                } => self.binary(op, modified, consumed),
-                Move { from, to } => self.lir_move(from, to),
-                Read(loc) => self.read(loc),
-                Print(val) => self.print(val),
-                Match {
-                    source,
-                    cases,
-                    default,
-                } => self.match_lir(source, cases, default),
-                While { source, body } => self.while_lir(source, body),
-            }
-
-            self.code += "\n";
+        for instruction in self.instructions.clone() {
+            self.instruction(instruction)?
         }
+
+        Ok(self.code)
     }
 
-    fn goto_stack(&mut self) {
-        // Ensure we're at the top of the stack
-        // That means pointer at the last populated cell (my drunk future self)
-        // TODO
-    }
-
-    fn push(&mut self, n: u8) {
-        self.goto_stack();
-        self.code += ">";
-        self.code += "+".repeat(n as usize).as_str();
-        self.ptr += 1;
-    }
-
-    fn pop(&mut self) {
-        self.goto_stack();
-        self.code += "[-]<";
-        self.ptr -= 1;
-    }
-
-    fn dup(&mut self) {
-        self.goto_stack();
-        self.code += "[->+>+<<]>>[-<<+>>]<";
-        self.ptr += 1;
-    }
-
-    fn swap(&mut self) {
-        self.goto_stack();
-        self.code += "[->+<]<[->+<]>>[-<<+>>]<";
-    }
-
-    fn lir_move(&mut self, from: Value, to: Location) {
-        // TODO Refactor > Extract Method, there is a lot of the same kind of code in this file
-        // Stuff like going to a var and back could be a closure
-        match from {
-            Value::Immediate(n) => {
-                match to {
-                    Location::Stack => {
-                        self.push(n);
-                    }
-                    Location::Variable(var) => {
-                        // Goto var
-                        self.code += "<".repeat(self.ptr - var).as_str();
-
-                        // Make sure it's empty
-                        if self.assigned_vars.contains(&var) {
-                            self.code += "[-]";
-                        } else {
-                            self.assigned_vars.push(var);
-                        }
-
-                        // Add n
-                        // TODO Optim for n = 0
-                        self.code += "+".repeat(n as usize).as_str();
-
-                        // Go back
-                        self.code += ">".repeat(self.ptr - var).as_str();
-                    }
-                }
-            }
-            Value::Location(loc) => {
-                match loc {
-                    Location::Stack => {
-                        match to {
-                            Location::Stack => {
-                                unimplemented!("Are you dump")
-                            }
-                            Location::Variable(var) => {
-                                // Make sure it's empty
-                                if self.assigned_vars.contains(&var) {
-                                    self.code += "<".repeat(self.ptr - var).as_str();
-                                    self.code += "[-]";
-                                    self.code += ">".repeat(self.ptr - var).as_str();
-                                } else {
-                                    self.assigned_vars.push(var);
-                                }
-                                
-                                // [- << + >> ]<
-                                self.code += "[-";
-                                self.code += "<".repeat(self.ptr - var).as_str();
-                                self.code += "+";
-                                self.code += ">".repeat(self.ptr - var).as_str();
-                                self.code += "]<";
-                                self.ptr -= 1;
-                            }
-                        }
-                    }
-                    Location::Variable(_) => {
-                        unimplemented!()
-                    }
-                }
-            }
+    fn instruction(&mut self, instruction: Instruction) -> Result<()> {
+        match instruction {
+            Instruction::Copy { .. } => todo!(),
+            Instruction::Inc(a) => {self.incby(&a, &1)},
+            Instruction::Dec(a) => {self.decby(&a, &1)},
+            Instruction::Set(a, b) => self.set(&a, &b),
+            Instruction::Read(_) => todo!(),
+            Instruction::Print(_) => todo!(),
+            Instruction::Add { .. } => todo!(),
+            Instruction::Sub { .. } => todo!(),
+            Instruction::Raw(raw) => self.code += &*raw,
         }
+
+        Ok(())
     }
 
-    fn binary(&mut self, operation: BinaryOp, modified: Location, consumed: Value) {
-        let ops = (modified, consumed);
-        match operation {
-            BinaryOp::Add => match ops {
-                (Location::Stack, Value::Immediate(n)) => {
-                    self.goto_stack();
-                    self.code += "+".repeat(n as usize).as_str();
-                }
-                (Location::Stack, Value::Location(Location::Stack)) => {
-                    self.goto_stack();
-                    self.code += "[-<+>]<";
-                }
-                _ => unimplemented!(),
-            },
-            BinaryOp::Sub => match ops {
-                (Location::Stack, Value::Immediate(n)) => {
-                    self.goto_stack();
-                    self.code += "-".repeat(n as usize).as_str();
-                }
-                (Location::Stack, Value::Location(Location::Stack)) => {
-                    self.goto_stack();
-                    self.code += "[-<->]<";
-                }
-                (Location::Variable(var), Value::Immediate(n)) => {
-                    // Goto var
-                    self.code += "<".repeat(self.ptr - var).as_str();
-                    // Subtract n
-                    self.code += "-".repeat(n as usize).as_str();
-                    // Go back
-                    self.code += ">".repeat(self.ptr - var).as_str();
-                }
-                _ => unimplemented!(),
-            },
-            BinaryOp::Mul => {
-                unimplemented!()
-            }
-            BinaryOp::Div => {
-                unimplemented!()
-            }
-            BinaryOp::Eq => {
-                unimplemented!()
-            }
-            BinaryOp::Le => {
-                /*
->
->+
->
->+++ a ends at 4
->+++++ b ends at 3
+    fn set(&mut self, a: &Variable, b: &Immediate) {
+        self.zero(a);
+        self.incby(a, b);
+    }
 
-<
-+>+<
+    fn incby(&mut self, a: &Variable, b: &Immediate) {
+        self.goto(a);
+        self.code += &*"+".repeat(*b as usize);
+    }
 
-a = 4
-b = 2
+    fn decby(&mut self, a: &Variable, b: &Immediate) {
+        self.goto(a);
+        self.code += &*"-".repeat(*b as usize);
+    }
 
+    /// Zero out a variable
+    fn zero(&mut self, a: &Variable) {
+        self.goto(a);
+        self.code += "[-]";
+    }
 
-[->-[>]<<]
+    /// Move pointer to a variable
+    fn goto(&mut self, a: &Variable) {
+        self.moveby(self.parsed.variables.get(a).unwrap() - self.ptr)
+    }
 
-                 */
-                
-                unimplemented!()
-            }
-            BinaryOp::Ge => {
-                unimplemented!()
-            }
-            BinaryOp::Ne => {
-                /*
-                Accidentally made not equal when trying to make less
-                ```
-                LESS
-                >++a 
-                >+b
-                >res
-
-                << move tmp1
-
-                [->-<] subtract
-
-                #
-                > move to tmp2
-                [[-]
-                >
-                +
-                <
-                ]
-                #
-                > move to res
-
-
-                Move res to start
-                + need to add one or it doesn't move
-                [-<<+>>]
-                <<-
-                ```
-                 */
-                unimplemented!()
-            }
+    /// Move pointer by `diff`
+    fn moveby(&mut self, diff: i32) {
+        self.ptr += diff;
+        if diff < 0 {
+            self.code += &*"<".repeat(diff.abs() as usize);
         }
-    }
-
-    fn read(&mut self, loc: Location) {
-        match loc {
-            Location::Stack => {
-                self.goto_stack();
-                self.code += ">,";
-            }
-            Location::Variable(var) => {
-                self.goto_stack(); // So that the math works out
-                                   // Goto var
-                self.code += "<".repeat(self.ptr - var).as_str();
-                // Read
-                self.code += ",";
-                // Go back
-                self.code += ">".repeat(self.ptr - var).as_str();
-            }
-        }
-    }
-
-    fn print(&mut self, val: Value) {
-        match val {
-            Value::Immediate(n) => {
-                self.goto_stack();
-                self.push(n);
-                self.code += ".[-]<";
-            }
-            Value::Location(loc) => {
-                match loc {
-                    Location::Stack => {
-                        self.goto_stack();
-                        self.code += ".[-]<";
-                    }
-                    Location::Variable(var) => {
-                        // Goto var
-                        self.code += "<".repeat(self.ptr - var).as_str();
-                        // Print
-                        self.code += ".";
-                        // Go back
-                        self.code += ">".repeat(self.ptr - var).as_str();
-                    }
-                }
-            }
-        }
-    }
-
-    fn match_lir(&mut self, loc: Location, cases: Vec<(u8, Instructions)>, default: Instructions) {
-        /*
-        For example:
-
-        ++++
-        >+<[
-            -[
-                [-]>-default#<
-            ]>[-1#]<
-        ]>[-0#]<
-
-        Every iteration we decrement and if it's zero we don't recurse further.
-
-        see https://brainfuck.org/function_tutorial.b
-
-        However, we need to account for the fact that it moves the pointer two to the right
-
-         */
-        match loc {
-            Location::Stack => {
-                self.goto_stack();
-                self.code += ">+<";
-                self.ptr += 1;
-
-                // Sort cases by number, n .. 0
-                let mut cases = cases;
-                cases.sort_by(|a, b| b.0.cmp(&a.0));
-
-                let mut highest_num = 0;
-                for c in cases.iter().rev() {
-                    self.code += &"-".repeat(c.0 as usize - highest_num);
-                    self.code += "[";
-                    highest_num = c.0 as usize;
-                }
-
-                // Default case
-                self.code += "[-]>-<<";
-                self.parse_instructions(default);
-                self.code += ">><";
-
-                let mut prev = 255;
-                for case in cases {
-                    let num = case.0;
-                    debug_assert!(num < prev);
-                    self.code += "]>[-";
-
-                    // Code
-                    self.parse_instructions(case.1);
-
-                    self.code += "]<";
-
-                    prev = num;
-                }
-
-                self.ptr -= 1;
-            }
-            _ => unimplemented!(),
-        }
-    }
-
-    fn while_lir(&mut self, loc: Location, body: Instructions) {
-        match loc {
-            Location::Stack => {
-                // This is so retarded
-                // But works great as an infinite loop so sure
-                // Also so unsafe lmao
-                // This might need to get deleted
-                self.goto_stack();
-
-                self.code += "[";
-
-                self.parse_instructions(body);
-
-                self.code += "]";
-            }
-            Location::Variable(var) => {
-                // Goto variable
-                self.code += "<".repeat(self.ptr - var).as_str();
-
-                // Start loop
-                self.code += "[\n";
-
-                // Go to stack
-                self.code += ">".repeat(self.ptr - var).as_str();
-
-                // Code
-                self.parse_instructions(body);
-
-                // Go back
-                self.code += "<".repeat(self.ptr - var).as_str();
-
-                // Loop end
-                self.code += "]\n";
-
-                // Go back to top
-                self.code += ">".repeat(self.ptr - var).as_str();
-            }
+        if diff > 0 {
+            self.code += &*">".repeat(diff.abs() as usize);
         }
     }
 }

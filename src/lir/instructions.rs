@@ -1,132 +1,80 @@
-use crate::lir::lir::{Instruction, Location, Value};
+use crate::lir::lir::{Instruction, Variable};
+use anyhow::Result;
+use std::collections::HashMap;
+use thiserror::Error;
 
-#[derive(Debug, Clone)]
-#[derive(PartialEq)]
-pub struct Instructions(pub Vec<Instruction>);
+#[derive(Debug, Clone, PartialEq)]
+pub struct InstructionsParsed {
+    instructions: Vec<Instruction>,
+    pub variables: HashMap<String, i32>,
+}
 
-impl Instructions {
-    /// Validates instructions and panics if invalid.
-    pub fn validate(&self) -> bool {
-        // Check that all variables are declared before use
-        let variables = self.get_variable_indexes();
-        for instr in &self.0 {
-            match instr {
-                Instruction::Binary {
-                    modified, consumed, ..
-                } => {
-                    if let Location::Variable(idx) = modified {
-                        if !variables.contains(idx) {
-                            return false;
-                        }
-                    }
-                    if let Value::Location(Location::Variable(idx)) = consumed {
-                        if !variables.contains(idx) {
-                            return false;
-                        }
-                    }
-                }
-                Instruction::Move { from, to } => {
-                    if let Value::Location(Location::Variable(idx)) = from {
-                        if !variables.contains(idx) {
-                            return false;
-                        }
-                    }
-                    if let Location::Variable(idx) = to {
-                        if !variables.contains(idx) {
-                            return false;
-                        }
-                    }
-                }
-                Instruction::Read(Location::Variable(idx)) => {
-                    if !variables.contains(idx) {
-                        return false;
-                    }
-                }
-                Instruction::Match {
-                    source: _source,
-                    cases,
-                    default,
-                } => {
-                    if cases.iter().map(|x| x.1.validate()).any(|x| !x)
-                        || !default.validate()
-                    {
-                        return false;
-                    }
-                }
-                _ => (),
-            }
+impl Default for InstructionsParsed {
+    fn default() -> Self {
+        InstructionsParsed {
+            instructions: Vec::new(),
+            variables: HashMap::new(),
         }
-
-        true
-    }
-
-    pub fn get_variable_indexes(&self) -> Vec<usize> {
-        // Gather all variable indexes into Vec
-        let mut variables = Vec::new();
-        for instr in &self.0 {
-            match instr {
-                Instruction::Binary {
-                    modified, consumed, ..
-                } => {
-                    if let Location::Variable(idx) = modified {
-                        variables.push(*idx);
-                    }
-                    if let Value::Location(Location::Variable(idx)) = consumed {
-                        variables.push(*idx);
-                    }
-                }
-                Instruction::Move { from, to } => {
-                    if let Value::Location(Location::Variable(idx)) = from {
-                        variables.push(*idx);
-                    }
-                    if let Location::Variable(idx) = to {
-                        variables.push(*idx);
-                    }
-                }
-                Instruction::Read(val) => {
-                    match val {
-                        Location::Variable(idx) => variables.push(*idx),
-                        _ => (),
-                    }
-                }
-                Instruction::Match {
-                    source: _source,
-                    cases,
-                    default,
-                } => {
-                    variables.extend(default.get_variable_indexes());
-                    let vars = cases
-                        .iter()
-                        .map(|x| x.1.get_variable_indexes())
-                        .reduce(|acc, x| [acc, x].concat())
-                        .unwrap();
-                    variables.extend(vars);
-                }
-                Instruction::Push(_) | Instruction::Pop | Instruction::Dup | Instruction::Swap => (),
-                Instruction::Print(val) => {
-                    if let Value::Location(Location::Variable(idx)) = val {
-                        variables.push(*idx);
-                    }
-                }
-                Instruction::While { source: x, body } => {
-                    if let Location::Variable(idx) = x {
-                        variables.push(*idx);
-                    }
-                    variables.extend(body.get_variable_indexes());
-                }
-            }
-        }
-
-        // Return unique count
-        variables.sort();
-        variables.dedup();
-        variables
     }
 }
 
-// From Vec<Instruction> to Instructions
-impl From<Vec<Instruction>> for Instructions {
-    fn from(instructions: Vec<Instruction>) -> Self {
-        Instructions(instructions)
+#[derive(Debug, Clone, Error)]
+enum InstructionError {
+    #[error("Invalid variable name: {v}")]
+    InvalidVariableName { v: Variable },
+}
+
+impl InstructionsParsed {
+    pub fn new(instructions: Vec<Instruction>) -> Result<Self> {
+        let variables = Self::build_variable_hashmap(instructions.clone())?;
+
+        Ok(Self {
+            instructions,
+            variables,
+        })
+    }
+
+    fn build_variable_hashmap(input: Vec<Instruction>) -> Result<HashMap<String, i32>> {
+        let mut variables = HashMap::new();
+        // As there are two temporary variables in the front, index starts at 2
+        let mut index = 2;
+
+        let mut var = |v: Variable| {
+            if variables.contains_key(&v) {
+                return Ok(());
+            }
+
+            if !v.chars().all(char::is_alphabetic) {
+                return Err(InstructionError::InvalidVariableName { v });
+            }
+            variables.insert(v, index);
+            index += 1;
+            Ok(())
+        };
+
+        for i in input {
+            match i {
+                Instruction::Copy { a, b } => {
+                    var(a)?;
+                    var(b)?
+                }
+                Instruction::Inc(a) => var(a)?,
+                Instruction::Dec(a) => var(a)?,
+                Instruction::Set(a, ..) => var(a)?,
+                Instruction::Read(a) => var(a)?,
+                Instruction::Print(a) => var(a)?,
+                Instruction::Add { a, b } => {
+                    var(a)?;
+                    var(b)?
+                }
+                Instruction::Sub { a, b } => {
+                    var(a)?;
+                    var(b)?
+                }
+                Instruction::Raw(_) => {}
+            }
+        }
+
+        Ok(variables)
     }
 }

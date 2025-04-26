@@ -1,90 +1,39 @@
-use crate::lir::instructions::Instructions;
+use crate::lir::instructions::InstructionsParsed;
 
-type Immediate = u8;
+pub type Immediate = u8;
+pub type Variable = String;
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum Location {
-    Stack,
-    Variable(usize),
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Value {
-    Immediate(Immediate),
-    Location(Location),
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Instruction {
-    // Stack operations
-    Push(Immediate),
-    Pop,
-    Dup,
-    Swap,
+    /// Copy from variable a to variable b
+    /// Needs to clear b first
+    Copy {a: Variable, b: Variable},
 
-    // Data manipulation
-    Binary {
-        op: BinaryOp,
-        modified: Location,
-        consumed: Value,
-    },
+    /// Increment variable by one
+    Inc (Variable),
+    /// Decrement variable by one
+    Dec (Variable),
+    // TODO IncBy DecBy
 
-    // Variable modification
-    Move {
-        from: Value,
-        to: Location,
-    },
+    /// Set variable to value
+    Set (Variable, Immediate),
 
-    // I/O
-    Read(Location),
-    Print(Value),
 
-    // Control flow
-    Match {
-        source: Location,
-        cases: Vec<(Immediate, Instructions)>,
-        default: Instructions,
-    },
+    /// Read STDIN into variable
+    /// Needs to be cleared first
+    Read (Variable),
 
-    While {
-        source: Location,
-        body: Instructions,
-    },
-}
+    /// Print variable to STDOUT
+    Print (Variable),
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum BinaryOp {
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Eq,
-    Le,
-    Ge,
-    Ne,
-}
+    /// Add variable `b` to variable `a`
+    Add {a: Variable, b: Variable},
 
-impl Instruction {
-    pub fn debug(&self) -> String {
-        match self {
-            Instruction::Push(n) => format!("(Push {})", n),
-            Instruction::Pop => "(Pop)".to_string(),
-            Instruction::Dup => "(Dup)".to_string(),
-            Instruction::Swap => "(Swap)".to_string(),
-            Instruction::Binary {
-                op,
-                modified,
-                consumed,
-            } => format!("({:?} {:?} {:?})", op, modified, consumed),
-            Instruction::Move { from, to } => format!("(Move {:?} {:?})", from, to),
-            Instruction::Read(loc) => format!("(Read {:?})", loc),
-            Instruction::Print(val) => format!("(Print {:?})", val),
-            Instruction::Match { source, .. } => {
-                format!("(Match {:?})", source)
-            }
-            Instruction::While { source, .. } => {
-                format!("(While {:?})", source)
-            }
-        }
-    }
+    /// Subtract variable `b` from variable `a`
+    Sub {a: Variable, b: Variable},
+
+    /// Raw brainfuck
+    /// Only use if you have to, must put pointer back into position after every use
+    Raw (String)
 }
