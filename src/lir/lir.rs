@@ -24,6 +24,8 @@ pub enum Instruction {
     Set(Variable, Immediate),
 
     /// Read STDIN into variable
+    /// 
+    /// Make sure to zero out the variable if it's in a loop
     Read(Variable),
 
     /// Print variable to STDOUT

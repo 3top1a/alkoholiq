@@ -86,7 +86,17 @@ impl InstructionsParsed {
                     var(a)?;
                     var(b)?
                 }
-                _ => {}
+                IfNotEqual { a, b } => {
+                    var(a)?;
+                    var(b)?
+                }
+                UntilEqual { a, b } => {
+                    var(a)?;
+                    var(b)?
+                }
+                WhileNotZero(a) => var(a)?,
+                End => {}
+                Raw(_) => {}
             }
         }
 

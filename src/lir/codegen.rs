@@ -70,7 +70,9 @@ impl Codegen {
         self.inc_by(a, b);
     }
 
+    /// If a variable is equal to another variable, execute the code
     fn if_equal(&mut self, a: &Variable, b: &Variable) {
+        // TODO Too long code for such a simple operation
         // Set flag temp2 to 1
         self.set(&"2".to_string(), &1);
 
@@ -266,6 +268,8 @@ impl Codegen {
 
     fn read(&mut self, a: &Variable) {
         self.goto(a);
+        self.zero(a); // Depends on implementation, but the debugger I'm using needs this
+        // Also should check if it has been accessed before
         self.code += ",";
     }
 
