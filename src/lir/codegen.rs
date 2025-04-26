@@ -5,9 +5,10 @@ use std::string::ToString;
 
 #[derive(Debug, Clone)]
 enum BlockStack {
-    WhileNotZero(),
+    IfEqual { a: Variable, b: Variable },
     IfNotEqual { a: Variable, b: Variable },
     UntilEqual { a: Variable, b: Variable },
+    WhileNotZero(),
 }
 
 #[derive(Debug, Clone)]
@@ -53,9 +54,9 @@ impl Codegen {
             Add { a, b } => self.add(&a, &b),
             Sub { a, b } => self.sub(&a, &b),
             Raw(raw) => self.code += &*raw,
-            IfEqual { a, b } => todo!(),
-            UntilEqual { a, b } => self.until_equal(&a, &b),
+            IfEqual { a, b } => self.if_equal(&a, &b),
             IfNotEqual { a, b } => self.if_not_equal(&a, &b),
+            UntilEqual { a, b } => self.until_equal(&a, &b),
             WhileNotZero(a) => self.while_not_zero(&a),
             End => self.end(),
         }
@@ -69,11 +70,40 @@ impl Codegen {
         self.inc_by(a, b);
     }
 
-    /// While a variable is not zero, execute the code
-    fn while_not_zero(&mut self, a: &Variable) {
+    fn if_equal(&mut self, a: &Variable, b: &Variable) {
+        // Set flag temp2 to 1
+        self.set(&"2".to_string(), &1);
+
+        self.sub(a, b);
         self.goto(a);
         self.code += "[";
-        self.block_stack.push(BlockStack::WhileNotZero());
+        self.set(&"2".to_string(), &0);
+        self.add(a, b);
+        self.goto(a);
+        self.code += "]";
+
+        // Check execution flag
+        self.goto(&"2".to_string());
+        self.code += "[";
+        self.add(a, b);
+
+        self.block_stack.push(BlockStack::IfEqual {
+            a: a.clone(),
+            b: b.clone(),
+        });
+    }
+
+    /// If a variable is not equal to another variable, execute the code
+    fn if_not_equal(&mut self, a: &Variable, b: &Variable) {
+        self.sub(a, b);
+        self.goto(a);
+        self.code += "[";
+        self.add(a, b);
+
+        self.block_stack.push(BlockStack::IfNotEqual {
+            a: a.clone(),
+            b: b.clone(),
+        });
     }
 
     /// Until a variable is equal to another variable, execute the code
@@ -89,17 +119,11 @@ impl Codegen {
         })
     }
 
-    /// If a variable is not equal to another variable, execute the code
-    fn if_not_equal(&mut self, a: &Variable, b: &Variable) {
-        self.sub(a, b);
+    /// While a variable is not zero, execute the code
+    fn while_not_zero(&mut self, a: &Variable) {
         self.goto(a);
         self.code += "[";
-        self.add(a, b);
-
-        self.block_stack.push(BlockStack::IfNotEqual {
-            a: a.clone(),
-            b: b.clone(),
-        });
+        self.block_stack.push(BlockStack::WhileNotZero());
     }
 
     /// End blocks
@@ -118,6 +142,12 @@ impl Codegen {
             BlockStack::UntilEqual { a, b } => {
                 self.sub(&a, &b);
                 self.goto(&a);
+                self.code += "]";
+                self.add(&a, &b);
+            }
+            BlockStack::IfEqual { a, b } => {
+                self.sub(&a, &b);
+                self.zero(&"2".to_string());
                 self.code += "]";
                 self.add(&a, &b);
             }
@@ -158,16 +188,17 @@ impl Codegen {
         self.goto(to);
     }
 
-    // Helper: Move value from one cell to another
-    fn move_value(&mut self, from: &Variable, to: &Variable) {
-        self.zero(to);
-        self.goto(from);
-        self.code += "[-";
-        self.goto(to);
-        self.code += "+";
-        self.goto(from);
-        self.code += "]";
-    }
+    // Might implement as an instruction one day
+    // // Helper: Move value from one cell to another
+    // fn move_value(&mut self, from: &Variable, to: &Variable) {
+    //     self.zero(to);
+    //     self.goto(from);
+    //     self.code += "[-";
+    //     self.goto(to);
+    //     self.code += "+";
+    //     self.goto(from);
+    //     self.code += "]";
+    // }
 
     /// Add variable `from` to variable `to`
     fn add(&mut self, to: &Variable, from: &Variable) {
