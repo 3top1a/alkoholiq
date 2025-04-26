@@ -298,8 +298,16 @@ end
         ";
 
         let c = parse(input).unwrap();
-        let output = interp(gen_instrs(c), "Hello, World!".to_string());
+        let brainfuck = gen_instrs(c);
+        let output = interp(brainfuck, "Hello, World!".to_string());
         assert_eq!(output, "Hello, World!".to_string());
+        /* OUTPUT (valid BF)
+Variables: 0 
+(Read Stack) >,
+(While Stack) [(Print Location(Stack)) .[-]<
+(Read Stack) >,
+]
+         */
     }
 
     #[test]

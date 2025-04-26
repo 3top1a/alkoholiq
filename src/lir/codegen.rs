@@ -210,9 +210,59 @@ impl Codegen {
                 unimplemented!()
             }
             BinaryOp::Le => {
+                /*
+>
+>+
+>
+>+++ a ends at 4
+>+++++ b ends at 3
+
+<
++>+<
+
+a = 4
+b = 2
+
+
+[->-[>]<<]
+
+                 */
+                
                 unimplemented!()
             }
             BinaryOp::Ge => {
+                unimplemented!()
+            }
+            BinaryOp::Ne => {
+                /*
+                Accidentally made not equal when trying to make less
+                ```
+                LESS
+                >++a 
+                >+b
+                >res
+
+                << move tmp1
+
+                [->-<] subtract
+
+                #
+                > move to tmp2
+                [[-]
+                >
+                +
+                <
+                ]
+                #
+                > move to res
+
+
+                Move res to start
+                + need to add one or it doesn't move
+                [-<<+>>]
+                <<-
+                ```
+                 */
                 unimplemented!()
             }
         }

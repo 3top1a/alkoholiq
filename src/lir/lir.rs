@@ -61,6 +61,7 @@ pub enum BinaryOp {
     Eq,
     Le,
     Ge,
+    Ne,
 }
 
 impl Instruction {
