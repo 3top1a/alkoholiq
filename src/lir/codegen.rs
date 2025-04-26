@@ -1,5 +1,5 @@
 use crate::lir::instructions::InstructionsParsed;
-use crate::lir::lir::{Immediate, Instruction, Variable};
+use crate::lir::lir::{Immediate, Instruction, Instruction::*, Variable};
 use anyhow::Result;
 use std::string::ToString;
 
@@ -9,6 +9,7 @@ pub struct Codegen {
     ptr: i32,
     pub instructions: Vec<Instruction>,
     parsed: InstructionsParsed,
+    block_stack: Vec<usize>,
 }
 
 impl Codegen {
@@ -18,6 +19,7 @@ impl Codegen {
             ptr: 0,
             instructions,
             parsed: InstructionsParsed::default(),
+            block_stack: Vec::new(),
         }
     }
 
@@ -33,17 +35,21 @@ impl Codegen {
 
     fn instruction(&mut self, instruction: Instruction) -> Result<()> {
         match instruction {
-            Instruction::Copy { a, b } => self.copy(&a, &b),
-            Instruction::Inc(a) => self.inc_by(&a, &1),
-            Instruction::Dec(a) => self.dec_by(&a, &1),
-            Instruction::IncBy(a, b) => self.inc_by(&a, &b),
-            Instruction::DecBy(a, b) => self.dec_by(&a, &b),
-            Instruction::Set(a, b) => self.set(&a, &b),
-            Instruction::Read(a) => self.read(&a),
-            Instruction::Print(a) => self.print(&a),
-            Instruction::Add { a, b } => self.add(&a, &b),
-            Instruction::Sub { a, b } => self.sub(&a, &b),
-            Instruction::Raw(raw) => self.code += &*raw,
+            Copy { a, b } => self.copy(&a, &b),
+            Inc(a) => self.inc_by(&a, &1),
+            Dec(a) => self.dec_by(&a, &1),
+            IncBy(a, b) => self.inc_by(&a, &b),
+            DecBy(a, b) => self.dec_by(&a, &b),
+            Set(a, b) => self.set(&a, &b),
+            Read(a) => self.read(&a),
+            Print(a) => self.print(&a),
+            Add { a, b } => self.add(&a, &b),
+            Sub { a, b } => self.sub(&a, &b),
+            Raw(raw) => self.code += &*raw,
+            IfEqual { a, b } => todo!(),
+            IfNotEqual | UntilEqual => todo!(),
+            WhileNotZero(a) => self.while_not_zero(&a),
+            End => self.end(),
         }
 
         Ok(())
@@ -53,6 +59,23 @@ impl Codegen {
     fn set(&mut self, a: &Variable, b: &Immediate) {
         self.zero(a);
         self.inc_by(a, b);
+    }
+
+    /// While a variable is not zero, execute the code
+    fn while_not_zero(&mut self, a: &Variable) {
+        self.goto(a);
+        self.code += "[";
+        self.block_stack.push(4);
+    }
+
+    /// End blocks
+    fn end(&mut self) {
+        let b = self.block_stack.pop().unwrap();
+        if b == 4 {
+            self.code += "]";
+        } else {
+            panic!("Unmatched block");
+        }
     }
 
     /// Copy variable `from` to `to`
@@ -87,6 +110,17 @@ impl Codegen {
 
         // Temp0 and temp1 are zeroed automatically
         self.goto(to);
+    }
+
+    // Helper: Move value from one cell to another
+    fn move_value(&mut self, from: &Variable, to: &Variable) {
+        self.zero(to);
+        self.goto(from);
+        self.code += "[-";
+        self.goto(to);
+        self.code += "+";
+        self.goto(from);
+        self.code += "]";
     }
 
     /// Add variable `from` to variable `to`

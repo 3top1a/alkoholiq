@@ -6,7 +6,10 @@ pub type Variable = String;
 #[derive(Debug, Clone, PartialEq)]
 pub enum Instruction {
     /// Copy from variable a to variable b
-    Copy { a: Variable, b: Variable },
+    Copy {
+        a: Variable,
+        b: Variable,
+    },
 
     /// Increment variable by one
     Inc(Variable),
@@ -27,12 +30,41 @@ pub enum Instruction {
     Print(Variable),
 
     /// Add variable `b` to variable `a`
-    Add { a: Variable, b: Variable },
+    ///
+    /// Equivalent to `a += b`.
+    Add {
+        a: Variable,
+        b: Variable,
+    },
 
     /// Subtract variable `b` from variable `a`
-    Sub { a: Variable, b: Variable },
+    ///
+    /// Equivalent to `a -= b`.
+    Sub {
+        a: Variable,
+        b: Variable,
+    },
 
-    /// Raw brainfuck
+    // TODO Mul Div
+
+
+    /// Execute code only if `a` equals `b`
+    IfEqual {
+        a: Variable,
+        b: Variable,
+    },
+
+    IfNotEqual,
+
+    UntilEqual,
+    
+    WhileNotZero (Variable),
+
+    /// End clause to end if/until blocks
+    End,
+
+    /// Insert raw brainfuck
+    ///
     /// Only use if you have to, must put pointer back into position after every use
     Raw(String),
 }

@@ -16,7 +16,7 @@ mod tests {
         let bf = Codegen::new(code).codegen().unwrap();
         assert_eq!(
             bf,
-            ">>[-]++++++++++>-<+>>[-]<<[-<<+>+>]<<[->>+<<]>[->>>+<<<]>>>"
+            ">>>[-]++++++++++>-<+>>[-]<<[-<<<+>+>>]<<<[->>>+<<<]>[->>>>+<<<<]>>>>"
         );
 
         let code = vec![
@@ -28,30 +28,58 @@ mod tests {
             Instruction::Print("b".to_string()),
         ];
         let bf = Codegen::new(code).codegen().unwrap();
-        assert_eq!(bf, ">>,+.>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.");
+        assert_eq!(bf, ">>>,+.>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.");
 
         // This should error
         let code = vec![Instruction::Read("a1".to_string())];
         assert!(Codegen::new(code).codegen().is_err());
 
+        let code = vec![
+            Instruction::Read("a".to_string()),
+            Instruction::Set("b".to_string(), 32),
+            Instruction::Add {
+                a: "a".to_string(),
+                b: "b".to_string(),
+            },
+            Instruction::Print("a".to_string()),
+        ];
+        let bf = Codegen::new(code).codegen().unwrap();
+        assert_eq!(
+            bf,
+            ">>>,>[-]++++++++++++++++++++++++++++++++[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>+<<]>>."
+        );
 
         let code = vec![
             Instruction::Read("a".to_string()),
             Instruction::Set("b".to_string(), 32),
-            Instruction::Add{a: "a".to_string(), b: "b".to_string()},
+            Instruction::Sub {
+                a: "a".to_string(),
+                b: "b".to_string(),
+            },
             Instruction::Print("a".to_string()),
         ];
         let bf = Codegen::new(code).codegen().unwrap();
-        assert_eq!(bf, ">>,>[-]++++++++++++++++++++++++++++++++[-<<<+>+>>]<<<[->>>+<<<]>[->+<]>.");
+        assert_eq!(
+            bf,
+            ">>>,>[-]++++++++++++++++++++++++++++++++[-<<<<+>+>>>]<<<<[->>>>+<<<<]>[->>-<<]>>."
+        );
+
+        // This should error
+        let code = vec![Instruction::End];
+        assert!(Codegen::new(code).codegen().is_err());
 
 
         let code = vec![
             Instruction::Read("a".to_string()),
-            Instruction::Set("b".to_string(), 32),
-            Instruction::Sub{a: "a".to_string(), b: "b".to_string()},
+            Instruction::WhileNotZero("a".to_string()),
+            Instruction::Dec("a".to_string()),
             Instruction::Print("a".to_string()),
+            Instruction::End,
         ];
         let bf = Codegen::new(code).codegen().unwrap();
-        assert_eq!(bf, ">>,>[-]++++++++++++++++++++++++++++++++[-<<<+>+>>]<<<[->>>+<<<]>[->+<]>.");
+        assert_eq!(
+            bf,
+            ">>>,[-.]"
+        );
     }
 }

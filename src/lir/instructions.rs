@@ -1,4 +1,4 @@
-use crate::lir::lir::{Instruction, Variable};
+use crate::lir::lir::{Instruction, Instruction::*, Variable};
 use anyhow::Result;
 use std::collections::HashMap;
 use thiserror::Error;
@@ -22,10 +22,15 @@ impl Default for InstructionsParsed {
 enum InstructionError {
     #[error("Invalid variable name: {v}")]
     InvalidVariableName { v: Variable },
+
+    #[error("Uneven amount of blocks")]
+    UnevenAmountOfBlocks(),
 }
 
 impl InstructionsParsed {
     pub fn new(instructions: Vec<Instruction>) -> Result<Self> {
+        Self::sanity_check(instructions.clone())?;
+
         let variables = Self::build_variable_hashmap(instructions.clone())?;
 
         Ok(Self {
@@ -39,8 +44,9 @@ impl InstructionsParsed {
         // Register the first two temp vars
         variables.insert("0".to_string(), 0);
         variables.insert("1".to_string(), 1);
-        // As there are two temporary variables in the front, index starts at 2
-        let mut index = 2;
+        variables.insert("2".to_string(), 2);
+        // As there are temporary variables in the front, index starts at 3
+        let mut index = 3;
 
         let mut var = |v: Variable| {
             if variables.contains_key(&v) {
@@ -57,29 +63,50 @@ impl InstructionsParsed {
 
         for i in input {
             match i {
-                Instruction::Copy { a, b } => {
+                Copy { a, b } => {
                     var(a)?;
                     var(b)?
                 }
-                Instruction::Inc(a) => var(a)?,
-                Instruction::Dec(a) => var(a)?,
-                Instruction::IncBy(a, ..) => var(a)?,
-                Instruction::DecBy(a, ..) => var(a)?,
-                Instruction::Set(a, ..) => var(a)?,
-                Instruction::Read(a) => var(a)?,
-                Instruction::Print(a) => var(a)?,
-                Instruction::Add { a, b } => {
+                Inc(a) => var(a)?,
+                Dec(a) => var(a)?,
+                IncBy(a, ..) => var(a)?,
+                DecBy(a, ..) => var(a)?,
+                Set(a, ..) => var(a)?,
+                Read(a) => var(a)?,
+                Print(a) => var(a)?,
+                Add { a, b } => {
                     var(a)?;
                     var(b)?
                 }
-                Instruction::Sub { a, b } => {
+                Sub { a, b } => {
                     var(a)?;
                     var(b)?
                 }
-                Instruction::Raw(_) => {}
+                IfEqual { a, b } => {
+                    var(a)?;
+                    var(b)?
+                }
+                _ => {}
             }
         }
 
         Ok(variables)
+    }
+
+    fn sanity_check(instructions: Vec<Instruction>) -> Result<()> {
+        let mut nesting = 0i32;
+        for i in instructions {
+            match i {
+                IfEqual { .. } | IfNotEqual | UntilEqual | WhileNotZero(..) => nesting += 1,
+                End => nesting -= 1,
+                _ => {}
+            }
+        }
+
+        if nesting != 0 {
+            return Err(InstructionError::UnevenAmountOfBlocks().into());
+        }
+
+        Ok(())
     }
 }
