@@ -19,6 +19,7 @@ pub struct Codegen {
     pub instructions: Vec<Instruction>,
     parsed: InstructionsParsed,
     block_stack: Vec<BlockStack>,
+    accessed_variables: Vec<Variable>,
 }
 
 impl Codegen {
@@ -29,6 +30,7 @@ impl Codegen {
             instructions,
             parsed: InstructionsParsed::default(),
             block_stack: Vec::new(),
+            accessed_variables: Vec::new(),
         }
     }
 
@@ -430,10 +432,11 @@ impl Codegen {
 
     /// Zero out a variable
     fn zero(&mut self, a: &Variable) {
-        // TODO Fuck off if the variable has not been accessed yet
-
         self.goto(a);
-        self.code += "[-]";
+        if self.accessed_variables.contains(a) {
+            self.code += "[-]";
+        }
+        self.variable_written(a);
     }
 
     /// Move pointer to a variable
@@ -456,5 +459,14 @@ impl Codegen {
         if diff > 0 {
             self.code += &*">".repeat(diff.abs() as usize);
         }
+    }
+
+    /// Helper function to stop adding [-] to variables that have not been used before
+    fn variable_written(&mut self, v: &Variable) {
+        if self.accessed_variables.contains(v) {
+            return;
+        }
+
+        self.accessed_variables.push(v.clone());
     }
 }
