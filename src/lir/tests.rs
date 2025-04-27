@@ -1,7 +1,10 @@
+#[cfg(test)]
 mod tests {
     use crate::lir::codegen::Codegen;
     use crate::lir::lir::Instruction;
     use crate::lir::lir::Instruction::*;
+    use std::path::Path;
+    use crate::bf;
 
     #[test]
     fn basics() {
@@ -197,5 +200,30 @@ mod tests {
         ];
         let bf = Codegen::new(code).codegen().unwrap();
         assert_eq!(bf, "[-],[.[-],]");
+    }
+
+    #[test]
+    fn run_examples() {
+        let examples_dir = Path::new("examples/lir");
+
+        let entries = std::fs::read_dir(examples_dir).expect("Failed to read examples directory");
+
+        for entry in entries {
+            let entry = entry.expect("Failed to read directory entry");
+            let path = entry.path();
+
+            if path.is_file() {
+                let file_name = path.file_name().unwrap().to_str().unwrap();
+                if file_name.ends_with(".lir") {
+                    let code = std::fs::read_to_string(&path).expect("Failed to read file");
+                    let parsed = crate::lir::parser::parse(&code).expect("Failed to parse LIR");
+                    let bf = Codegen::new(parsed)
+                        .codegen()
+                        .expect("Failed to generate BF");
+                    let bf = bf::optimize(bf);
+                    println!("{}", bf);
+                }
+            }
+        }
     }
 }
