@@ -3,6 +3,56 @@
 [![codecov](https://codecov.io/gh/3top1a/alkoholiq/graph/badge.svg?token=ZSXBRAWT1M)](https://codecov.io/gh/3top1a/alkoholiq)
 ![brain? fucked.](https://img.shields.io/badge/brain-fucked-darkred?style=flat)
 
+```js
+// Set some variables
+set A 64
+set Z 91
+set a 96
+set z 123
+
+read char
+while_nz char
+    // Between A and Z
+    compare char A res
+    if_eq res 2
+        compare char Z res
+        if_eq res 1
+            // Add 13
+            dec_by char 13
+
+            // Check for underflow
+            compare char A res
+            if_eq res 1
+                // Wrap around
+                inc_by char 26
+            end
+        end
+    end
+
+
+    // Between a and z
+    compare char a res
+    if_eq res 2
+        compare char z res
+        if_eq res 1
+            // Add 13
+            dec_by char 13
+
+            // Check for underflow
+            compare char a res
+            if_eq res 1
+                // Wrap around
+                inc_by char 26
+            end
+        end
+    end
+
+    print char
+
+    read char
+end
+```
+
 
 Alkoholiq, a programming language that transpiles to Brainfuck.
 The output is not executable immediately, and needs to be piped into a tool such as [my 540 byte brainfuck interpreter](https://github.com/3top1a/sbfi-rs).
