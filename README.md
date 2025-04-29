@@ -55,10 +55,16 @@ end
 
 
 Alkoholiq, a programming language that transpiles to Brainfuck.
-The output is not executable immediately, and needs to be piped into a tool such as [my 540 byte brainfuck interpreter](https://github.com/3top1a/sbfi-rs).
 
-The ultimate goal for this semi-esoteric language is to be able to write itself in a readable way, with syntax similar
-to rust and operation similar to C.
+You can pipe the syntax above into the program.
+The output is not executable immediately, and needs to be piped into a brainfuck interpreter/compiler such as [my 540 byte brainfuck interpreter](https://github.com/3top1a/sbfi-rs) or the online [Brainfuck Debugger](https://kvbc.github.io/bf-ide/).
+
+For example, run
+```bash
+cat examples/lir/fib.lir | cargo r
+```
+and copy the output into the online Brainfuck Debugger.
+
 
 The internals are explained in the [DESIGN.md](https://github.com/3top1a/alkoholiq/blob/main/DESIGN.md) document.
 
