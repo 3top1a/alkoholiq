@@ -27,7 +27,7 @@ instruction = {
 }
 
 // Basic types
-variable = @{ ASCII_ALPHA+ }
+variable = @{ ASCII_ALPHA ~ (ASCII_ALPHA | ASCII_DIGIT | "-" | "_")* }
 immediate = @{ ASCII_DIGIT+ }
 string_literal = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 

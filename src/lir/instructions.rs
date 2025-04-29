@@ -44,17 +44,6 @@ impl InstructionsParsed {
 
     fn build_variable_hashmap(input: Vec<Instruction>) -> Result<HashMap<String, i32>> {
         let mut variables = HashMap::new();
-        // Register the first two temp vars
-        variables.insert("8".to_string(), -9);
-        variables.insert("7".to_string(), -8);
-        variables.insert("6".to_string(), -7);
-        variables.insert("5".to_string(), -6);
-        variables.insert("4".to_string(), -5);
-        variables.insert("3".to_string(), -4);
-        variables.insert("2".to_string(), -3);
-        variables.insert("1".to_string(), -2);
-        variables.insert("0".to_string(), -1);
-        // As there are temporary variables in the front, index starts at 3
         let mut index = 0;
 
         let mut var = |v: Variable, must_be_defined: bool| {
@@ -68,9 +57,17 @@ impl InstructionsParsed {
                 return Ok(());
             }
 
-            if !v.chars().all(char::is_alphabetic) {
+            // Variables must start with a letter and can contain alpha, _-, and digits
+            if !v.chars().next().unwrap().is_alphabetic() {
                 return Err(InstructionError::InvalidVariableName { v });
             }
+            if !v
+                .chars()
+                .all(|c| c.is_alphanumeric() || c == '_' || c == '-')
+            {
+                return Err(InstructionError::InvalidVariableName { v });
+            }
+
             variables.insert(v, index);
             index += 1;
             Ok(())
@@ -123,6 +120,17 @@ impl InstructionsParsed {
                 PrintMsg(_) => {}
             }
         }
+
+        // Register temporary variables
+        variables.insert("8".to_string(), -9);
+        variables.insert("7".to_string(), -8);
+        variables.insert("6".to_string(), -7);
+        variables.insert("5".to_string(), -6);
+        variables.insert("4".to_string(), -5);
+        variables.insert("3".to_string(), -4);
+        variables.insert("2".to_string(), -3);
+        variables.insert("1".to_string(), -2);
+        variables.insert("0".to_string(), -1);
 
         Ok(variables)
     }

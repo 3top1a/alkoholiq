@@ -1,23 +1,23 @@
-set a 1
-set b 1
+set f_1 1
+set f_2 1
 set count 10
 
-print a
+print f_1
 print_msg " "
-print b
+print f_2
 print_msg " "
 
 dec_by count 2
 
 while_nz count
-    copy a temp
-    add temp b
+    copy f_1 temp
+    add temp f_2
 
     print temp
     print_msg " "
 
-    copy b a
-    copy temp b
+    copy f_2 f_1
+    copy temp f_2
 
     dec count
 end

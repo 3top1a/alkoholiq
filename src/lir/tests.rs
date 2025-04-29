@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
+    use crate::bf;
     use crate::lir::codegen::Codegen;
     use crate::lir::lir::Instruction;
     use crate::lir::lir::Instruction::*;
     use std::path::Path;
-    use crate::bf;
 
     #[test]
     fn basics() {
@@ -36,7 +36,7 @@ mod tests {
         assert_eq!(bf, ",+.>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.");
 
         // This should error
-        let code = vec![Read("a1".to_string())];
+        let code = vec![Read("1".to_string())];
         assert!(Codegen::new(code).codegen().is_err());
 
         let code = vec![

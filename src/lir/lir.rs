@@ -3,7 +3,7 @@ pub type Variable = String;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Instruction {
-    /// Copy from variable a to variable b
+    /// Copy from variable a to variable b, zeroing a
     Copy { a: Variable, b: Variable },
 
     /// Set variable to value

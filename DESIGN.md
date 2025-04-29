@@ -21,6 +21,8 @@ used beforehand.
 
 ### Instructions
 
+Also see the [lir.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/lir.rs) file.
+
 - `set <var> <value>` - Set a variable to a value
 - `copy <var> <var>` - Copy from variable a to variable b
 

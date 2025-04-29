@@ -433,10 +433,7 @@ impl Codegen {
     /// Zero out a variable
     fn zero(&mut self, a: &Variable) {
         self.goto(a);
-        if self.accessed_variables.contains(a) {
-            self.code += "[-]";
-        }
-        self.variable_written(a);
+        self.code += "[-]";
     }
 
     /// Move pointer to a variable
@@ -459,14 +456,5 @@ impl Codegen {
         if diff > 0 {
             self.code += &*">".repeat(diff.abs() as usize);
         }
-    }
-
-    /// Helper function to stop adding [-] to variables that have not been used before
-    fn variable_written(&mut self, v: &Variable) {
-        if self.accessed_variables.contains(v) {
-            return;
-        }
-
-        self.accessed_variables.push(v.clone());
     }
 }
