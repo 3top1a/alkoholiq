@@ -36,6 +36,8 @@ Also see the [lir.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/lir.
 
 - `add <var> <var>` - Add two variables together
 - `sub <var> <var>` - Subtract two variables
+- `mul <var> <var>` - Multiply two variables
+- `div <var> <var> <var> <var>` - Divide two variables, store the result in a third variable and remainder in a fourth variable
 - `compare <var> <var> <var>` - Compare two variables, store the result in a third variable
 
 - `read <var>` - Read one byte from stdin and store it in a variable

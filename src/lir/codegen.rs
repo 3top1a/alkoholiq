@@ -78,7 +78,7 @@ impl Codegen {
             Compare { a, b, res } => self.compare(&a, &b, &res),
             PrintMsg(msg) => self.print_msg(msg),
             Mul { a, b } => self.mul(&a, &b),
-            Div { a, b, r, q } => todo!(),
+            Div { a, b, r, q } => self.div(&a, &b, &r, &q),
         }
 
         self.code += &self.instruction_separator;
@@ -90,6 +90,40 @@ impl Codegen {
     fn set(&mut self, a: &Variable, b: &Immediate) {
         self.zero(a);
         self.inc_by(a, b);
+    }
+
+    /// Divide two variables
+    fn div(&mut self, a: &Variable, b: &Variable, r: &Variable, q: &Variable) {
+        // Algo: Sub `a` by `b` until `a` is less than `b`
+
+        // Save for later
+        self.copy(a, &"9".to_string());
+        self.copy(b, &"8".to_string());
+        self.zero(r);
+        self.zero(q);
+
+        // While flag
+        self.set(&"7".to_string(), &1);
+        self.while_not_zero(&"7".to_string());
+
+        // Subtract `b` from `a`
+        self.sub(a, b);
+        self.inc_by(q, &1);
+
+        self.compare(a, b, &"6".to_string());
+
+        // If `a` is less than `b`, set flag to 0
+        self.if_equal_const(&"6".to_string(), &1);
+        self.set(&"7".to_string(), &0);
+        self.end();
+
+        self.end();
+
+        self.zero(&"6".to_string());
+        self.move_value(a, r);
+        self.move_value(&"9".to_string(), a);
+        self.move_value(&"8".to_string(), b);
+        self.goto(q);
     }
 
     /// Multiply two variables
@@ -122,7 +156,6 @@ impl Codegen {
         self.if_not_equal(a, b);
 
         self.set(res, &8);
-        self.set(&"3".to_string(), &0);
         self.set(&"4".to_string(), &1);
         self.set(&"5".to_string(), &0);
 
@@ -132,12 +165,12 @@ impl Codegen {
         self.dec_by(b, &1);
         self.inc_by(&"5".to_string(), &1);
 
-        self.if_equal(a, &"3".to_string()); // FIXME Would be cleaner if `if` supported immediate
+        self.if_equal_const(a, &0);
         self.set(res, &1);
         self.set(&"4".to_string(), &0);
         self.end();
 
-        self.if_equal(b, &"3".to_string());
+        self.if_equal_const(b, &0);
         self.set(res, &2);
         self.set(&"4".to_string(), &0);
         self.end();
@@ -152,8 +185,6 @@ impl Codegen {
         self.end();
 
         self.end();
-
-        // Should be zeroed automatically
     }
 
     /// If a variable is equal to a constant, execute the code

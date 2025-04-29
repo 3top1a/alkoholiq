@@ -13,6 +13,7 @@ while_nz n
     copy f_n-1 f_n
     add f_n f_n-2
 
+    // Pretty print the Fibonacci number
     print f_n
     print_msg " "
 
