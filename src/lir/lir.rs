@@ -39,7 +39,11 @@ pub enum Instruction {
     /// Equivalent to `a -= b`.
     Sub { a: Variable, b: Variable },
 
-    // TODO Mul Div
+    /// Multiply two variables
+    ///
+    /// Equivalent to `a *= b`.
+    Mul { a: Variable, b: Variable },
+    // TODO Div
     /// Execute code only if `a` equals `b`
     IfEqual { a: Variable, b: Variable },
 

@@ -118,6 +118,10 @@ impl InstructionsParsed {
                     var(res, false)?
                 }
                 PrintMsg(_) => {}
+                Mul { a, b } => {
+                    var(a, true)?;
+                    var(b, true)?
+                }
             }
         }
 

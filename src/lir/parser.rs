@@ -102,6 +102,12 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                     let b = inner.next().unwrap().as_str().to_string();
                     Instruction::Sub { a, b }
                 }
+                Rule::mul_instr => {
+                    let mut inner = inner.into_inner();
+                    let a = inner.next().unwrap().as_str().to_string();
+                    let b = inner.next().unwrap().as_str().to_string();
+                    Instruction::Mul { a, b }
+                }
                 Rule::if_equal_instr => {
                     let mut inner = inner.into_inner();
                     let a = inner.next().unwrap().as_str().to_string();

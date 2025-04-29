@@ -65,6 +65,7 @@ impl Codegen {
             End => self.end(),
             Compare { a, b, res } => self.compare(&a, &b, &res),
             PrintMsg(msg) => self.print_msg(msg),
+            Mul { a, b } => self.mul(&a, &b),
         }
 
         Ok(())
@@ -74,6 +75,21 @@ impl Codegen {
     fn set(&mut self, a: &Variable, b: &Immediate) {
         self.zero(a);
         self.inc_by(a, b);
+    }
+
+    /// Multiply two variables
+    fn mul(&mut self, a: &Variable, b: &Variable) {
+        // Algo: Add `a` to itself `b` times
+        self.copy(b, &"2".to_string());
+
+        self.while_not_zero(&"2".to_string());
+
+        self.dec_by(&"2".to_string(), &1);
+        self.add(&"3".to_string(), a);
+
+        self.end();
+
+        self.move_value(&"3".to_string(), a);
     }
 
     /// Compare two variables and store the result in a third variable
