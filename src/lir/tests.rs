@@ -197,6 +197,14 @@ mod tests {
         ];
         let bf = Codegen::new(code).codegen().unwrap();
         assert_eq!(bf, "[-]+++++++++++++++++>[-]++++<<<<[-]>>>>[-<<+<+>>>]<<[->>+<<]<[-<+>]<[->>>[-<+<+>>]<[->+<]<[-<<+>>]<<>]>>>[-]<<<<[->>>>+<<<<]>>>>.");
+
+        let code = vec![
+            Set("a".to_string(), 9),
+            Set("b".to_string(), 2),
+            // Div {a: "a".to_string(), b: "b".to_string(), r: "r".to_string(), q: "q".to_string()},
+        ];
+        let bf = Codegen::new(code).codegen().unwrap();
+        // assert_eq!(bf, "");
     }
 
     #[test]

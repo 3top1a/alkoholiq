@@ -1,3 +1,5 @@
+use thiserror::__private::Var;
+
 pub type Immediate = u8;
 pub type Variable = String;
 
@@ -43,7 +45,12 @@ pub enum Instruction {
     ///
     /// Equivalent to `a *= b`.
     Mul { a: Variable, b: Variable },
-    // TODO Div
+
+    /// Divide two variables, storing quotient in `q` and remainder in `r`
+    ///
+    /// Equivalent to `q = a / b; r = a % b`.
+    Div { a: Variable, b: Variable, q: Variable, r: Variable },
+
     /// Execute code only if `a` equals `b`
     IfEqual { a: Variable, b: Variable },
 

@@ -66,6 +66,7 @@ impl Codegen {
             Compare { a, b, res } => self.compare(&a, &b, &res),
             PrintMsg(msg) => self.print_msg(msg),
             Mul { a, b } => self.mul(&a, &b),
+            Div { a, b, r, q } => todo!(),
         }
 
         Ok(())
@@ -78,6 +79,8 @@ impl Codegen {
     }
 
     /// Multiply two variables
+    ///
+    /// Uses temporary variables `0`, `1`, `2` and `3`
     fn mul(&mut self, a: &Variable, b: &Variable) {
         // Algo: Add `a` to itself `b` times
         self.copy(b, &"2".to_string());
@@ -93,6 +96,8 @@ impl Codegen {
     }
 
     /// Compare two variables and store the result in a third variable
+    ///
+    /// Uses temporary variables `3`, `4` and `5`
     fn compare(&mut self, a: &Variable, b: &Variable, res: &Variable) {
         self.zero(res);
         // self.if_equal(a, b); // Does nothing
@@ -138,6 +143,8 @@ impl Codegen {
     }
 
     /// If a variable is equal to a constant, execute the code
+    ///
+    ///  Uses temporary variable `1`, `2` and `3`
     fn if_equal_const(&mut self, a: &Variable, b: &Immediate) {
         debug_assert_ne!(a, &"1".to_string());
         debug_assert_ne!(a, &"2".to_string());

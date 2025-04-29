@@ -122,10 +122,18 @@ impl InstructionsParsed {
                     var(a, true)?;
                     var(b, true)?
                 }
+                Div { a, b, r, q } => {
+                    var(a, true)?;
+                    var(b, true)?;
+                    var(r, false)?;
+                    var(q, false)?;
+                }
             }
         }
 
         // Register temporary variables
+        variables.insert("10".to_string(), -11);
+        variables.insert("9".to_string(), -10);
         variables.insert("8".to_string(), -9);
         variables.insert("7".to_string(), -8);
         variables.insert("6".to_string(), -7);
