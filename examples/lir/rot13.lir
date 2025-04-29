@@ -36,6 +36,7 @@ while_nz char
 
             // Check for underflow
             compare char b res
+            // TODO I could use compare char a res and if_neq once if not equal constant is implemented
             if_eq res 1
                 // Wrap around
                 inc_by char 26

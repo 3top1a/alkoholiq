@@ -160,8 +160,6 @@ impl Codegen {
     /// Uses temporary variables `3`, `4` and `5`
     fn compare(&mut self, a: &Variable, b: &Variable, res: &Variable) {
         self.zero(res);
-        // self.if_equal(a, b); // Does nothing
-        // self.end();
 
         // TODO probably could be optimized
 
