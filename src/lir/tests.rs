@@ -4,6 +4,7 @@ mod tests {
     use crate::lir::codegen::Codegen;
     use crate::lir::lir::Instruction;
     use crate::lir::lir::Instruction::*;
+    use std::io;
     use std::path::Path;
 
     #[test]
@@ -212,6 +213,48 @@ mod tests {
                     println!("{}", bf);
                 }
             }
+        }
+    }
+
+    #[test]
+    fn run_fibonacci_sequence() {
+        let code = "set f_n-1 1\n
+set f_n-2 1\n
+set n 13\n
+print f_n-1\n
+print f_n-2\n
+dec_by n 2\n
+while_nz n\n
+    copy f_n-1 f_n\n
+    add f_n f_n-2\n
+    print f_n\n
+    copy f_n-2 f_n-1\n
+    copy f_n f_n-2\n
+    dec n\n
+end";
+
+        let parsed = crate::lir::parser::parse(code).expect("Failed to parse LIR");
+        let bf = Codegen::new(parsed)
+            .codegen()
+            .expect("Failed to generate BF");
+        let bf_optim = bf::optimize(bf.clone());
+
+        // Same test for optimized and unoptimized versions
+        for code in [bf, bf_optim] {
+            // Because the interpreter complains of underflow, shift all pointers a bit
+            // TODO Custom interpreter
+            let code = ">>>>>>>>>".to_owned() + &*code;
+
+            let mut stdin = io::stdin();
+            let mut stdout = Vec::new();
+            let program = brainfuck::program::Program::parse(&*code).unwrap();
+            let mut interp = brainfuck::Interpreter::<brainfuck::tape::VecTape>::new(
+                program,
+                &mut stdin,
+                &mut stdout,
+            );
+            let _ = interp.run().unwrap();
+            assert_eq!(stdout, [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233]);
         }
     }
 }

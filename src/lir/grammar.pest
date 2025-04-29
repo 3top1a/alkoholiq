@@ -29,7 +29,7 @@ instruction = {
 // Basic types
 variable = @{ ASCII_ALPHA ~ (ASCII_ALPHA | ASCII_DIGIT | "-" | "_")* }
 immediate = @{ ASCII_DIGIT+ }
-string_literal = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+string_literal = @{ ("\"" ~ (!"\"" ~ ANY)* ~ "\"") | ("'" ~ (!"\'" ~ ANY)* ~ "'") }
 
 // Instructions
 copy_instr = { "copy" ~ variable ~ variable }

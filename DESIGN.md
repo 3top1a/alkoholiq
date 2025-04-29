@@ -16,6 +16,9 @@ The memory layout looks like this:
 [ Temporary variables used by instructions] [ 0 ] [+Variable storage]
 ```
 
+Temporary variables are used by instructions to store intermediate results, and are not accessible to the user.
+They are also stored in memory below zero, if your interpreter/compiler complains about pointer underflow, chuck ">>>>>>>>>" in front of the code.
+
 Simply using a variable name will automatically reserve space for it. Some instructions need to have the variable be
 used beforehand.
 
