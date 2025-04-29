@@ -1,7 +1,9 @@
 // Set some variables
 set A 64
+set B 65
 set Z 91
 set a 96
+set b 97
 set z 123
 
 read char
@@ -15,7 +17,7 @@ while_nz char
             dec_by char 13
 
             // Check for underflow
-            compare char A res
+            compare char B res
             if_eq res 1
                 // Wrap around
                 inc_by char 26
@@ -33,7 +35,7 @@ while_nz char
             dec_by char 13
 
             // Check for underflow
-            compare char a res
+            compare char b res
             if_eq res 1
                 // Wrap around
                 inc_by char 26

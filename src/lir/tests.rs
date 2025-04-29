@@ -347,4 +347,77 @@ print_msg '\\n'";
             );
         }
     }
+
+    #[test]
+    fn test_rot13() {
+        let code = "\
+        // Set some variables
+set A 64
+set B 65
+set Z 91
+set a 96
+set b 97
+set z 123
+
+read char
+while_nz char
+    // Between A and Z
+    compare char A res
+    if_eq res 2
+        compare char Z res
+        if_eq res 1
+            // Add 13
+            dec_by char 13
+
+            // Check for underflow
+            compare char B res
+            if_eq res 1
+                // Wrap around
+                inc_by char 26
+            end
+        end
+    end
+
+
+    // Between a and z
+    compare char a res
+    if_eq res 2
+        compare char z res
+        if_eq res 1
+            // Add 13
+            dec_by char 13
+
+            // Check for underflow
+            compare char b res
+            if_eq res 1
+                // Wrap around
+                inc_by char 26
+            end
+        end
+    end
+
+    print char
+
+    read char
+end";
+
+        let parsed = crate::lir::parser::parse(code).expect("Failed to parse LIR");
+        let bf = Codegen::new_test(parsed)
+            .codegen()
+            .expect("Failed to generate BF");
+        let bf_optimized = bf::optimize(bf.clone());
+
+        // Same test for optimized and unoptimized versions
+        for code in [bf, bf_optimized] {
+            let mut stdin = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz".as_bytes();
+            let mut stdout = Box::new(Vec::new());
+            let interpret = bf::interpreter::Interpreter::new();
+            interpret.run(&code, &mut stdin, &mut stdout);
+
+            assert_eq!(
+                String::from_utf8(*stdout.clone()).unwrap(),
+                "0123456789:;<=>?@NOPQRSTUVWXYZABCDEFGHIJKLM[]^_nopqrstuvwxyzabcdefghijklm"
+            );
+        }
+    }
 }

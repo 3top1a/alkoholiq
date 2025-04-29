@@ -1,6 +1,6 @@
 use std::io::{Read, Write};
 
-const MAX_INSTRUCTIONS: usize = 10_000_000;
+const MAX_INSTRUCTIONS: usize = 100_000_000;
 
 pub struct Interpreter {
     tape: [u8; 30000],
