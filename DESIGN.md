@@ -42,11 +42,12 @@ Also see the [lir.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/lir.
 
 - `read <var>` - Read one byte from stdin and store it in a variable
 - `print <var>` - Print a variable to stdout
-- `print_msg <string>` - Print a string to stdout
+- `printc <var>` - Print the decimal value of a variable to stdout
+- `print_msg <string>` - Print a static string to stdout
 
 - `if_eq <var> <var>` - If two variables are equal, run the next block
-- `if_neq <var> <var>` - If two variables are not equal, run the next block
 - `if_eq <var> <const>` - If a variable is equal to a constant, run the next block
+- `if_neq <var> <var>` - If two variables are not equal, run the next block
 - `until_eq <var> <var>` - Run until a variables are equal
 - `while_nz <var>` - Run while a variable is not zero
 - `end` - End the current block
