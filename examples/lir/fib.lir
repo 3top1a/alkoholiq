@@ -1,23 +1,23 @@
-set f_1 1
-set f_2 1
-set count 10
+set f_n-1 1
+set f_n-2 1
+set n 10
 
-print f_1
+print f_n-1
 print_msg " "
-print f_2
+print f_n-2
 print_msg " "
 
-dec_by count 2
+dec_by n 2
 
-while_nz count
-    copy f_1 temp
-    add temp f_2
+while_nz n
+    copy f_n-1 f_n
+    add f_n f_n-2
 
-    print temp
+    print f_n
     print_msg " "
 
-    copy f_2 f_1
-    copy temp f_2
+    copy f_n-2 f_n-1
+    copy f_n f_n-2
 
-    dec count
+    dec n
 end

@@ -87,28 +87,28 @@ end
 Here is fibonacci's sequence:
 
 ```js
-set a 1
-set b 1
-set count 10
+set f_n-1 1
+set f_n-2 1
+set n 10
 
-print a
+print f_n-1
 print_msg " "
-print b
+print f_n-2
 print_msg " "
 
-dec_by count 2
+dec_by n 2
 
-while_nz count
-    copy a temp
-    add temp b
+while_nz n
+    copy f_n-1 f_n
+    add f_n f_n-2
 
-    print temp
+    print f_n
     print_msg " "
 
-    copy b a
-    copy temp b
+    copy f_n-2 f_n-1
+    copy f_n f_n-2
 
-    dec count
+    dec n
 end
 ```
 
