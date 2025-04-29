@@ -1,3 +1,4 @@
+pub mod interpreter;
 pub mod optim;
 
 pub fn add_header(s: String) -> String {

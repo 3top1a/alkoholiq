@@ -19,7 +19,7 @@ pub struct Codegen {
     pub instructions: Vec<Instruction>,
     parsed: InstructionsParsed,
     block_stack: Vec<BlockStack>,
-    accessed_variables: Vec<Variable>,
+    instruction_separator: String,
 }
 
 impl Codegen {
@@ -30,7 +30,19 @@ impl Codegen {
             instructions,
             parsed: InstructionsParsed::default(),
             block_stack: Vec::new(),
-            accessed_variables: Vec::new(),
+            instruction_separator: String::new(),
+        }
+    }
+
+    pub fn new_test(instructions: Vec<Instruction>) -> Self {
+        // Self::new but with the instruction separator set to `%`
+        Self {
+            code: String::new(),
+            ptr: 0,
+            instructions,
+            parsed: InstructionsParsed::default(),
+            block_stack: Vec::new(),
+            instruction_separator: String::from("%"),
         }
     }
 
@@ -69,6 +81,8 @@ impl Codegen {
             Div { a, b, r, q } => todo!(),
         }
 
+        self.code += &self.instruction_separator;
+
         Ok(())
     }
 
@@ -77,8 +91,6 @@ impl Codegen {
         self.zero(a);
         self.inc_by(a, b);
     }
-
-    
 
     /// Multiply two variables
     ///
@@ -167,7 +179,12 @@ impl Codegen {
         self.move_value(a, &"3".to_string());
         self.goto(a);
         self.code += "]";
-        self.add(a, &"3".to_string());
+
+        // Move from `temp3` to `a`; this could be an Add and Zero but that's too long
+        self.while_not_zero(&"3".to_string());
+        self.dec_by(&"3".to_string(), &1);
+        self.inc_by(a, &1);
+        self.end();
 
         self.inc_by(a, b); // Preserve
 
@@ -207,6 +224,7 @@ impl Codegen {
         // Check execution flag
         self.goto(&"2".to_string());
         self.code += "[";
+        self.zero(&"2".to_string());
 
         self.block_stack.push(BlockStack::IfEqual {
             a: a.clone(),
@@ -280,12 +298,10 @@ impl Codegen {
                 self.zero(&"2".to_string());
                 self.goto(&"2".to_string());
                 self.code += "]";
-                self.zero(&"2".to_string());
             }
             BlockStack::IfEqualConst { a } => {
                 self.zero(&"2".to_string());
                 self.code += "]";
-                // self.goto(&"2".to_string());
             }
         }
     }

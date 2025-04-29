@@ -49,11 +49,17 @@ pub enum Instruction {
     /// Divide two variables, storing quotient in `q` and remainder in `r`
     ///
     /// Equivalent to `q = a / b; r = a % b`.
-    Div { a: Variable, b: Variable, q: Variable, r: Variable },
+    Div {
+        a: Variable,
+        b: Variable,
+        q: Variable,
+        r: Variable,
+    },
 
     /// Execute code only if `a` equals `b`
     ///
     /// All If and While loops CANNOT touch any temporary variables after the body ends.
+    /// They must also end at the same position no matter if the condition is true or false.
     IfEqual { a: Variable, b: Variable },
 
     /// Execute code only if `a` equals constant
