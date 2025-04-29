@@ -84,6 +84,10 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                     let var = inner.into_inner().next().unwrap().as_str().to_string();
                     Instruction::Print(var)
                 }
+                Rule::printc_instr => {
+                    let var = inner.into_inner().next().unwrap().as_str().to_string();
+                    Instruction::PrintC(var)
+                }
                 Rule::print_msg_instr => {
                     let msg = inner.into_inner().next().unwrap().as_str();
                     // Remove quotes from string literal
@@ -114,7 +118,7 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                     let b = inner.next().unwrap().as_str().to_string();
                     let r = inner.next().unwrap().as_str().to_string();
                     let q = inner.next().unwrap().as_str().to_string();
-                    Instruction::Div { a, b, r, q }
+                    Instruction::Div { a, b, remainder: r, quotient: q }
                 }
                 Rule::if_equal_instr => {
                     let mut inner = inner.into_inner();

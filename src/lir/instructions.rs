@@ -86,6 +86,7 @@ impl InstructionsParsed {
                 Set(a, ..) => var(a, false)?,
                 Read(a) => var(a, false)?,
                 Print(a) => var(a, true)?,
+                PrintC(a) => var(a, true)?,
                 Add { a, b } => {
                     var(a, true)?;
                     var(b, true)?
@@ -122,7 +123,7 @@ impl InstructionsParsed {
                     var(a, true)?;
                     var(b, true)?
                 }
-                Div { a, b, r, q } => {
+                Div { a, b, remainder: r, quotient: q } => {
                     var(a, true)?;
                     var(b, true)?;
                     var(r, false)?;
@@ -132,6 +133,13 @@ impl InstructionsParsed {
         }
 
         // Register temporary variables
+        variables.insert("17".to_string(), -18);
+        variables.insert("16".to_string(), -17);
+        variables.insert("15".to_string(), -16);
+        variables.insert("14".to_string(), -15);
+        variables.insert("13".to_string(), -14);
+        variables.insert("12".to_string(), -13);
+        variables.insert("11".to_string(), -12);
         variables.insert("10".to_string(), -11);
         variables.insert("9".to_string(), -10);
         variables.insert("8".to_string(), -9);

@@ -29,7 +29,14 @@ pub enum Instruction {
     Print(Variable),
 
     /// Print a string to STDOUT
+    /// 
+    /// Includes escapes for newlines, carriage return and tabs
     PrintMsg(String),
+
+    /// Print variable as a human-readable number
+    ///
+    /// E.g. 0x10 will print as `10`
+    PrintC(Variable),
 
     /// Add variable `b` to variable `a`
     ///
@@ -52,8 +59,8 @@ pub enum Instruction {
     Div {
         a: Variable,
         b: Variable,
-        q: Variable,
-        r: Variable,
+        quotient: Variable,
+        remainder: Variable,
     },
 
     /// Execute code only if `a` equals `b`
@@ -64,6 +71,8 @@ pub enum Instruction {
 
     /// Execute code only if `a` equals constant
     IfEqualConst { a: Variable, b: Immediate },
+
+    // TODO If not equal const
 
     /// Execute code only if `a` does not equal `b`
     IfNotEqual { a: Variable, b: Variable },

@@ -95,10 +95,11 @@ Here is fibonacci's sequence:
 set f_n-1 1
 set f_n-2 1
 set n 10
+set one 1
 
-print f_n-1
+printc f_n-1
 print_msg " "
-print f_n-2
+printc f_n-2
 print_msg " "
 
 dec_by n 2
@@ -107,14 +108,20 @@ while_nz n
     copy f_n-1 f_n
     add f_n f_n-2
 
-    print f_n
-    print_msg " "
+    // Printc will pretty print numbers
+    printc f_n
+
+    if_neq n one
+        print_msg " "
+    end
 
     copy f_n-2 f_n-1
     copy f_n f_n-2
 
     dec n
 end
+// Also include a new line; '' and "" are equivalent
+print_msg '\n'
 ```
 
 See the LIR's [example folder](https://github.com/3top1a/alkoholiq/tree/main/examples/lir) for more examples.

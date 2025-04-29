@@ -66,6 +66,7 @@ impl Codegen {
             Set(a, b) => self.set(&a, &b),
             Read(a) => self.read(&a),
             Print(a) => self.print(&a),
+            PrintC(a) => self.printc(&a),
             Add { a, b } => self.add(&a, &b),
             Sub { a, b } => self.sub(&a, &b),
             Raw(raw) => self.code += &*raw,
@@ -78,7 +79,12 @@ impl Codegen {
             Compare { a, b, res } => self.compare(&a, &b, &res),
             PrintMsg(msg) => self.print_msg(msg),
             Mul { a, b } => self.mul(&a, &b),
-            Div { a, b, r, q } => self.div(&a, &b, &r, &q),
+            Div {
+                a,
+                b,
+                remainder: r,
+                quotient: q,
+            } => self.div(&a, &b, &r, &q),
         }
 
         self.code += &self.instruction_separator;
@@ -93,24 +99,30 @@ impl Codegen {
     }
 
     /// Divide two variables
-    fn div(&mut self, a: &Variable, b: &Variable, r: &Variable, q: &Variable) {
+    ///
+    /// Uses temporary variables `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8` and `9`
+    fn div(&mut self, a: &Variable, b: &Variable, remainder: &Variable, quotient: &Variable) {
         // Algo: Sub `a` by `b` until `a` is less than `b`
+
+        // TODO use less temp variables
 
         // Save for later
         self.copy(a, &"9".to_string());
         self.copy(b, &"8".to_string());
-        self.zero(r);
-        self.zero(q);
+        self.zero(remainder);
+        self.zero(quotient);
 
         // While flag
         self.set(&"7".to_string(), &1);
         self.while_not_zero(&"7".to_string());
 
-        // Subtract `b` from `a`
-        self.sub(a, b);
-        self.inc_by(q, &1);
-
         self.compare(a, b, &"6".to_string());
+
+        // If `a` is more than `b`, subtract `b` from `a`
+        self.if_equal_const(&"6".to_string(), &2);
+        self.sub(a, b);
+        self.inc_by(quotient, &1);
+        self.end();
 
         // If `a` is less than `b`, set flag to 0
         self.if_equal_const(&"6".to_string(), &1);
@@ -120,10 +132,10 @@ impl Codegen {
         self.end();
 
         self.zero(&"6".to_string());
-        self.move_value(a, r);
+        self.move_value(a, remainder);
         self.move_value(&"9".to_string(), a);
         self.move_value(&"8".to_string(), b);
-        self.goto(q);
+        self.goto(quotient);
     }
 
     /// Multiply two variables
@@ -478,7 +490,52 @@ impl Codegen {
         self.code += ".";
     }
 
+    /// Pretty print a number
+    fn printc(&mut self, a: &Variable) {
+        self.set(&"15".to_string(), &100);
+        self.div(a, &"15".to_string(), &"10".to_string(), &"11".to_string());
+
+        self.set(&"15".to_string(), &10);
+        self.div(
+            &"10".to_string(),
+            &"15".to_string(),
+            &"12".to_string(),
+            &"14".to_string(),
+        );
+
+        // So temp11 is hundreds, temp14 is tens, temp12 is ones
+        self.set(&"15".to_string(), &0);
+
+        self.if_not_equal(&"11".to_string(), &"15".to_string());
+        self.inc_by(&"11".to_string(), &48);
+        self.print(&"11".to_string());
+        self.end();
+
+        self.if_not_equal(&"14".to_string(), &"15".to_string());
+        self.inc_by(&"14".to_string(), &48);
+        self.print(&"14".to_string());
+        self.end();
+
+        self.if_not_equal(&"12".to_string(), &"15".to_string());
+        self.inc_by(&"12".to_string(), &48);
+        self.print(&"12".to_string());
+        self.end();
+
+        // Zero out temp variables
+        self.zero(&"10".to_string());
+        self.zero(&"11".to_string());
+        self.zero(&"12".to_string());
+        self.zero(&"13".to_string());
+        self.zero(&"14".to_string());
+        self.zero(&"15".to_string());
+    }
+
     fn print_msg(&mut self, msg: String) {
+        let msg = msg
+            .replace("\\n", "\n")
+            .replace("\\t", "\t")
+            .replace("\\r", "\r");
+
         let mut last = 0;
         self.zero(&"0".to_string());
         for c in msg.chars() {
