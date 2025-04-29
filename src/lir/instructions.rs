@@ -4,19 +4,12 @@ use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Debug, Clone, PartialEq)]
+#[derive(Default)]
 pub struct InstructionsParsed {
     instructions: Vec<Instruction>,
     pub variables: HashMap<String, i32>,
 }
 
-impl Default for InstructionsParsed {
-    fn default() -> Self {
-        InstructionsParsed {
-            instructions: Vec::new(),
-            variables: HashMap::new(),
-        }
-    }
-}
 
 #[derive(Debug, Clone, Error)]
 enum InstructionError {
@@ -47,10 +40,8 @@ impl InstructionsParsed {
         let mut index = 0;
 
         let mut var = |v: Variable, must_be_defined: bool| {
-            if must_be_defined {
-                if !variables.contains_key(&v) {
-                    return Err(InstructionError::VariableMustBeAssigned { v });
-                }
+            if must_be_defined && !variables.contains_key(&v) {
+                return Err(InstructionError::VariableMustBeAssigned { v });
             }
 
             if variables.contains_key(&v) {

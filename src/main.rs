@@ -10,7 +10,7 @@ fn main() {
         .collect::<Vec<_>>()
         .join("\n");
 
-    let parsed = lir::parser::parse(&*input).unwrap();
+    let parsed = lir::parser::parse(&input).unwrap();
 
     let codegen = lir::codegen::Codegen::new(parsed);
     let instructions = codegen.codegen().unwrap();

@@ -589,7 +589,7 @@ impl Codegen {
             self.parsed
                 .variables
                 .get(a)
-                .expect(&format!("Unable to retrieve position of variable {a}"))
+                .unwrap_or_else(|| panic!("Unable to retrieve position of variable {a}"))
                 - self.ptr,
         )
     }
@@ -598,10 +598,10 @@ impl Codegen {
     fn move_by(&mut self, diff: i32) {
         self.ptr += diff;
         if diff < 0 {
-            self.code += &*"<".repeat(diff.abs() as usize);
+            self.code += &*"<".repeat(diff.unsigned_abs() as usize);
         }
         if diff > 0 {
-            self.code += &*">".repeat(diff.abs() as usize);
+            self.code += &*">".repeat(diff.unsigned_abs() as usize);
         }
     }
 }

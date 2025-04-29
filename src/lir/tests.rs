@@ -16,7 +16,7 @@ mod tests {
                 let mut stdin = input.as_bytes();
                 let mut stdout = Vec::new();
                 let interpret = bf::interpreter::Interpreter::new();
-                interpret.run(&*bf, &mut stdin, &mut stdout);
+                interpret.run(&bf, &mut stdin, &mut stdout);
             }
 
             let bf = bf::optim::remove_nonbf(bf); // To remove instruction separators
@@ -290,7 +290,7 @@ end";
             let mut stdin = "".as_bytes();
             let mut stdout = Box::new(Vec::new());
             let interpret = bf::interpreter::Interpreter::new();
-            interpret.run(&*code, &mut stdin, &mut stdout);
+            interpret.run(&code, &mut stdin, &mut stdout);
 
             assert_eq!(
                 stdout.as_slice(),
@@ -339,7 +339,7 @@ print_msg '\\n'";
             let mut stdin = "".as_bytes();
             let mut stdout = Box::new(Vec::new());
             let interpret = bf::interpreter::Interpreter::new();
-            interpret.run(&*code, &mut stdin, &mut stdout);
+            interpret.run(&code, &mut stdin, &mut stdout);
 
             assert_eq!(
                 String::from_utf8(*stdout.clone()).unwrap(),
