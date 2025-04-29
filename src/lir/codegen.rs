@@ -205,6 +205,7 @@ impl Codegen {
     fn if_equal_const(&mut self, a: &Variable, b: &Immediate) {
         debug_assert_ne!(a, &"1".to_string());
         debug_assert_ne!(a, &"2".to_string());
+        debug_assert_ne!(a, &"3".to_string());
 
         // TODO Too long code for such a common operation
 
@@ -247,8 +248,10 @@ impl Codegen {
         debug_assert_ne!(a, b);
         debug_assert_ne!(a, &"1".to_string());
         debug_assert_ne!(a, &"2".to_string());
+        debug_assert_ne!(a, &"3".to_string());
         debug_assert_ne!(b, &"1".to_string());
         debug_assert_ne!(b, &"2".to_string());
+        debug_assert_ne!(b, &"3".to_string());
 
         // TODO Too long code for such a common operation
         // Set flag temp2 to 1
@@ -277,8 +280,16 @@ impl Codegen {
 
     /// If a variable is not equal to another variable, execute the code
     ///
-    /// Does not use any temporary variables
+    /// Uses temporary variable `1`, `2` and `3`
     fn if_not_equal(&mut self, a: &Variable, b: &Variable) {
+        debug_assert_ne!(a, b);
+        debug_assert_ne!(a, &"1".to_string());
+        debug_assert_ne!(a, &"2".to_string());
+        debug_assert_ne!(a, &"3".to_string());
+        debug_assert_ne!(b, &"1".to_string());
+        debug_assert_ne!(b, &"2".to_string());
+        debug_assert_ne!(b, &"3".to_string());
+
         self.sub(a, b);
         self.goto(a);
         self.copy(a, &"2".to_string());
@@ -297,6 +308,8 @@ impl Codegen {
     ///
     /// Does not use any temporary variables
     fn until_equal(&mut self, a: &Variable, b: &Variable) {
+        debug_assert_ne!(a, b);
+
         self.sub(a, b);
         self.goto(a);
         self.code += "[";
@@ -337,12 +350,12 @@ impl Codegen {
                 self.code += "]";
                 self.add(&a, &b);
             }
-            BlockStack::IfEqual { a, b } => {
+            BlockStack::IfEqual { .. } => {
                 self.zero(&"2".to_string());
                 self.goto(&"2".to_string());
                 self.code += "]";
             }
-            BlockStack::IfEqualConst { a } => {
+            BlockStack::IfEqualConst { .. } => {
                 self.zero(&"2".to_string());
                 self.code += "]";
             }

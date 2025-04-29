@@ -1,5 +1,3 @@
-use thiserror::__private::Var;
-
 pub type Immediate = u8;
 pub type Variable = String;
 
@@ -29,7 +27,7 @@ pub enum Instruction {
     Print(Variable),
 
     /// Print a string to STDOUT
-    /// 
+    ///
     /// Includes escapes for newlines, carriage return and tabs
     PrintMsg(String),
 

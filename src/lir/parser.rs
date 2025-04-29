@@ -12,8 +12,6 @@ struct LirParser;
 
 #[derive(Debug, Error)]
 pub enum ParseError {
-    #[error("Parsing error: {0}")]
-    PestError(pest::error::Error<Rule>),
     #[error("Invalid instruction: {0}")]
     InvalidInstruction(String),
 }
