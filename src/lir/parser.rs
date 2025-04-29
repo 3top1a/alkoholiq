@@ -18,13 +18,7 @@ pub enum ParseError {
     InvalidInstruction(String),
 }
 
-impl From<pest::error::Error<Rule>> for ParseError {
-    fn from(error: pest::error::Error<Rule>) -> Self {
-        ParseError::PestError(error)
-    }
-}
-
-pub fn parse(input: &str) -> Result<Vec<Instruction>, ParseError> {
+pub fn parse(input: &str) -> Result<Vec<Instruction>> {
     let pairs = LirParser::parse(Rule::program, input)?;
     let mut instructions = Vec::new();
 
@@ -45,7 +39,7 @@ pub fn parse(input: &str) -> Result<Vec<Instruction>, ParseError> {
     Ok(instructions)
 }
 
-fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>, ParseError> {
+fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
     match pair.as_rule() {
         Rule::instruction => {
             let inner = pair.into_inner().next().unwrap();
@@ -150,10 +144,10 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>, ParseError
                     Instruction::Raw(raw)
                 }
                 Rule::end_instr => Instruction::End,
-                _ => return Err(ParseError::InvalidInstruction(inner.as_str().to_string())),
+                _ => return Err(ParseError::InvalidInstruction(inner.as_str().to_string()).into()),
             }))
         }
         Rule::EOI => Ok(None),
-        _ => Err(ParseError::InvalidInstruction(pair.as_str().to_string())),
+        _ => Err(ParseError::InvalidInstruction(pair.as_str().to_string()).into()),
     }
 }

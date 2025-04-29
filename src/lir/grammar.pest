@@ -1,10 +1,10 @@
 // grammar.pest
-WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+WHITESPACE = _{ " " | "\t" | "\r" }
 COMMENT = _{ ("//"|"#") ~ (!"\n" ~ ANY)* }
 
-program = { SOI ~ (instruction)* ~ EOI }
+program = { SOI ~ (NEWLINE | instruction | (instruction ~ NEWLINE))* ~ EOI }
 
-instruction = {
+instruction = !{
     copy_instr |
     inc_instr |
     dec_instr |
