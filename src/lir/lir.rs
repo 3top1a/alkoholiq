@@ -52,6 +52,8 @@ pub enum Instruction {
     Div { a: Variable, b: Variable, q: Variable, r: Variable },
 
     /// Execute code only if `a` equals `b`
+    ///
+    /// All If and While loops CANNOT touch any temporary variables after the body ends.
     IfEqual { a: Variable, b: Variable },
 
     /// Execute code only if `a` equals constant

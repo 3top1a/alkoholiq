@@ -78,6 +78,8 @@ impl Codegen {
         self.inc_by(a, b);
     }
 
+    
+
     /// Multiply two variables
     ///
     /// Uses temporary variables `0`, `1`, `2` and `3`
@@ -153,20 +155,26 @@ impl Codegen {
 
         // Set flag temp2 to 1
         self.set(&"2".to_string(), &1);
+        self.zero(&"3".to_string());
 
+        // Subtract `b` from `a`
         self.dec_by(a, b);
-        self.copy(a, &"3".to_string());
-        self.goto(&"3".to_string());
+
+        // If they're equal, `a` will be zero, and the following will not be run
+        self.goto(a);
         self.code += "[";
         self.set(&"2".to_string(), &0);
-        self.goto(&"3".to_string());
-        self.zero(&"3".to_string());
+        self.move_value(a, &"3".to_string());
+        self.goto(a);
         self.code += "]";
-        self.inc_by(a, b);
+        self.add(a, &"3".to_string());
+
+        self.inc_by(a, b); // Preserve
 
         // Check execution flag
         self.goto(&"2".to_string());
         self.code += "[";
+        self.zero(&"2".to_string());
 
         self.block_stack
             .push(BlockStack::IfEqualConst { a: a.clone() });
@@ -276,9 +284,8 @@ impl Codegen {
             }
             BlockStack::IfEqualConst { a } => {
                 self.zero(&"2".to_string());
-                self.goto(&"2".to_string());
                 self.code += "]";
-                self.zero(&"2".to_string());
+                // self.goto(&"2".to_string());
             }
         }
     }
