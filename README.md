@@ -3,54 +3,35 @@
 [![codecov](https://codecov.io/gh/3top1a/alkoholiq/graph/badge.svg?token=ZSXBRAWT1M)](https://codecov.io/gh/3top1a/alkoholiq)
 ![brain? fucked.](https://img.shields.io/badge/brain-fucked-darkred?style=flat)
 
-```js
-// Set some variables
-set A 64
-set Z 91
-set a 96
-set z 123
+```apache
+set f_n-1 1
+set f_n-2 1
+set n 10
+set one 1
 
-read char
-while_nz char
-    // Between A and Z
-    compare char A res
-    if_eq res 2
-        compare char Z res
-        if_eq res 1
-            // Add 13
-            dec_by char 13
+printc f_n-1
+print_msg " "
+printc f_n-2
+print_msg " "
 
-            // Check for underflow
-            compare char A res
-            if_eq res 1
-                // Wrap around
-                inc_by char 26
-            end
-        end
+dec_by n 2
+
+while_nz n
+    copy f_n-1 f_n
+    add f_n f_n-2
+
+    printc f_n
+
+    if_neq n one
+        print_msg ' '
     end
 
+    copy f_n-2 f_n-1
+    copy f_n f_n-2
 
-    // Between a and z
-    compare char a res
-    if_eq res 2
-        compare char z res
-        if_eq res 1
-            // Add 13
-            dec_by char 13
-
-            // Check for underflow
-            compare char a res
-            if_eq res 1
-                // Wrap around
-                inc_by char 26
-            end
-        end
-    end
-
-    print char
-
-    read char
+    dec n
 end
+print_msg '\n'
 ```
 
 
