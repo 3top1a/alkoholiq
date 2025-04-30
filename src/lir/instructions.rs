@@ -97,6 +97,9 @@ impl InstructionsParsed {
                     var(a, true)?;
                     var(b, true)?
                 }
+                IfNotEqualConst { a, .. } => {
+                    var(a, true)?;
+                }
                 UntilEqual { a, b } => {
                     var(a, true)?;
                     var(b, true)?
@@ -154,6 +157,7 @@ impl InstructionsParsed {
                 | IfNotEqual { .. }
                 | UntilEqual { .. }
                 | WhileNotZero(..)
+                | IfNotEqualConst { .. }
                 | IfEqualConst { .. } => nesting += 1,
                 End => nesting -= 1,
                 _ => {}

@@ -48,12 +48,15 @@ Also see the [lir.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/lir.
 - `if_eq <var> <var>` - If two variables are equal, run the next block
 - `if_eq <var> <const>` - If a variable is equal to a constant, run the next block
 - `if_neq <var> <var>` - If two variables are not equal, run the next block
+- `if_neq <var> <const>` - If a variable is not equal to a constant, run the next block
 - `until_eq <var> <var>` - Run until a variables are equal
 - `while_nz <var>` - Run while a variable is not zero
 - `end` - End the current block
 
 - `raw <string>` - Insert raw brainfuck code
 
+
+Due to how Brainfuck works, if_neq is faster than if_eq.
 
 ### Examples
 
@@ -96,7 +99,6 @@ Here is fibonacci's sequence:
 set f_n-1 1
 set f_n-2 1
 set n 10
-set one 1
 
 printc f_n-1
 print_msg " "
@@ -112,7 +114,7 @@ while_nz n
     // Printc will pretty print numbers
     printc f_n
 
-    if_neq n one
+    if_neq n 1
         print_msg " "
     end
 

@@ -70,7 +70,8 @@ pub enum Instruction {
     /// Execute code only if `a` equals constant
     IfEqualConst { a: Variable, b: Immediate },
 
-    // TODO If not equal const
+    /// Execute code only if `a` doesn't equals constant
+    IfNotEqualConst { a: Variable, b: Immediate },
 
     /// Execute code only if `a` does not equal `b`
     IfNotEqual { a: Variable, b: Variable },

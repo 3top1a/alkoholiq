@@ -59,19 +59,19 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                 Rule::inc_by_instr => {
                     let mut inner = inner.into_inner();
                     let var = inner.next().unwrap().as_str().to_string();
-                    let val = inner.next().unwrap().as_str().parse().unwrap();
+                    let val = inner.next().unwrap().as_str().parse()?;
                     Instruction::IncBy(var, val)
                 }
                 Rule::dec_by_instr => {
                     let mut inner = inner.into_inner();
                     let var = inner.next().unwrap().as_str().to_string();
-                    let val = inner.next().unwrap().as_str().parse().unwrap();
+                    let val = inner.next().unwrap().as_str().parse()?;
                     Instruction::DecBy(var, val)
                 }
                 Rule::set_instr => {
                     let mut inner = inner.into_inner();
                     let var = inner.next().unwrap().as_str().to_string();
-                    let val = inner.next().unwrap().as_str().parse().unwrap();
+                    let val = inner.next().unwrap().as_str().parse()?;
                     Instruction::Set(var, val)
                 }
                 Rule::read_instr => {
@@ -127,7 +127,7 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                 Rule::if_equal_const_instr => {
                     let mut inner = inner.into_inner();
                     let a = inner.next().unwrap().as_str().to_string();
-                    let b = inner.next().unwrap().as_str().parse().unwrap();
+                    let b = inner.next().unwrap().as_str().parse()?;
                     Instruction::IfEqualConst { a, b }
                 }
                 Rule::if_not_equal_instr => {
@@ -135,6 +135,12 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                     let a = inner.next().unwrap().as_str().to_string();
                     let b = inner.next().unwrap().as_str().to_string();
                     Instruction::IfNotEqual { a, b }
+                }
+                Rule::if_not_equal_const_instr => {
+                    let mut inner = inner.into_inner();
+                    let a = inner.next().unwrap().as_str().to_string();
+                    let b = inner.next().unwrap().as_str().parse()?;
+                    Instruction::IfNotEqualConst { a, b }
                 }
                 Rule::until_equal_instr => {
                     let mut inner = inner.into_inner();
