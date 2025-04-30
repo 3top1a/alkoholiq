@@ -7,7 +7,6 @@
 set f_n-1 1
 set f_n-2 1
 set n 10
-set one 1
 
 printc f_n-1
 print_msg " "
@@ -22,7 +21,7 @@ while_nz n
 
     printc f_n
 
-    if_neq n one
+    if_neq n 1
         print_msg ' '
     end
 
