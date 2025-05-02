@@ -8,6 +8,8 @@ mod tests {
 
     #[test]
     fn basics() {
+        // #[track_caller] makes it report the line of the caller not the func def
+        #[track_caller]
         fn assert_eq_bf(code: Vec<Instruction>, expected: &str) {
             let bf = Codegen::new_test(code).codegen().unwrap();
 

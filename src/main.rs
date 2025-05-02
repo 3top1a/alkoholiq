@@ -1,20 +1,63 @@
-use std::io::stdin;
+use anyhow::Result;
+use argh::FromArgs;
+use std::io::{stdin, Read};
+use std::path::PathBuf;
 
 mod bf;
 mod lir;
 
-fn main() {
-    let input = stdin().lines();
-    let input = input
-        .map(|line| line.unwrap())
-        .collect::<Vec<_>>()
-        .join("\n");
+#[derive(FromArgs, Debug)]
+/// Compile and/or interpret Alkoholiq
+struct CliArgs {
+    /// dump generated brainfuck instead of interpreting
+    #[argh(switch, short = 'b')]
+    brainfuck: bool,
 
-    let parsed = lir::parser::parse(&input).unwrap();
+    /// optimize the generated brainfuck
+    // TODO This is quite confusing, make it level based like gcc
+    #[argh(option, short = 'o', default = "true")]
+    optimize: bool,
+
+    /// input file
+    #[argh(positional)]
+    input: Option<PathBuf>,
+}
+
+fn main() -> Result<()> {
+    let args: CliArgs = argh::from_env();
+
+    let mut input_curor: Box<dyn Read> = Box::new(std::io::Cursor::new(Vec::new()));
+
+    if args.input.is_none() {
+        input_curor = Box::new(stdin());
+    } else {
+        let path = args.input.unwrap();
+        if path.as_os_str() == "-" {
+            input_curor = Box::new(stdin());
+        } else {
+            input_curor = Box::new(std::fs::File::open(path)?);
+        }
+    }
+    let mut input = String::new();
+    input_curor.read_to_string(&mut input)?;
+
+    let parsed = lir::parser::parse(&input)?;
 
     let codegen = lir::codegen::Codegen::new(parsed);
-    let instructions = codegen.codegen().unwrap();
-    let optimized = bf::optimize(instructions);
+    let mut code = codegen.codegen()?;
 
-    println!("{}", optimized);
+    if args.optimize {
+        code = bf::optimize(code);
+    }
+
+    if args.brainfuck {
+        println!();
+        println!("{}", code);
+        return Ok(());
+    }
+
+    let interpreter = bf::interpreter::Interpreter::new();
+    interpreter.run(&code, &mut stdin(), &mut std::io::stdout());
+
+    Ok(())
 }

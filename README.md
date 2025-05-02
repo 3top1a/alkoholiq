@@ -36,14 +36,20 @@ print_msg '\n'
 
 Alkoholiq, a programming language that transpiles to Brainfuck.
 
-You can pipe the syntax above into the program.
-The output is not executable immediately, and needs to be piped into a brainfuck interpreter/compiler such as [my 540 byte brainfuck interpreter](https://github.com/3top1a/sbfi-rs) or the online [Brainfuck Debugger](https://kvbc.github.io/bf-ide/).
+You can pipe the syntax above into the program, or put it into a file.
+The binary can either compile the code and only print it, or it can also interpret.
 
 For example, run
 ```bash
-cat examples/lir/fib.lir | cargo r
+cargo r -- examples/lir/fib.lir
+# 1 1 2 3 5 8 13 21 34 55
 ```
-and copy the output into the online Brainfuck Debugger.
+
+or to see the compiled Brainfuck code:
+```bash
+cargo r -- examples/lir/fib.lir -b
+# ... safe to say it's long
+```
 
 
 The internals are explained in the [DESIGN.md](https://github.com/3top1a/alkoholiq/blob/main/DESIGN.md) document.
