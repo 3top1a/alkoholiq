@@ -37,7 +37,7 @@ print_msg '\n'
 Alkoholiq, a programming language that transpiles to Brainfuck.
 
 You can pipe the syntax above into the program, or put it into a file.
-The binary can either compile the code and only print it, or it can also interpret.
+The binary can either compile the code and print it, or it can also interpret the code and print what it outputs.
 
 For example, run
 ```bash
