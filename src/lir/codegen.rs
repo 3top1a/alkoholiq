@@ -169,33 +169,32 @@ impl Codegen {
 
         self.if_not_equal(a, b);
 
-        self.set(res, &8);
-        self.set(&"4".to_string(), &1);
-        self.set(&"5".to_string(), &0);
+        self.set(&"1".to_string(), &0);
+        self.set(&"0".to_string(), &1);
 
-        self.while_not_zero(&"4".to_string());
+        self.while_not_zero(&"0".to_string());
 
-        self.dec_by(a, &1);
+        self.inc_by(&"1".to_string(), &1);
         self.dec_by(b, &1);
-        self.inc_by(&"5".to_string(), &1);
+        self.dec_by(a, &1);
 
         self.if_equal_const(a, &0);
         self.set(res, &1);
-        self.set(&"4".to_string(), &0);
+        self.set(&"0".to_string(), &0);
         self.end();
 
         self.if_equal_const(b, &0);
         self.set(res, &2);
-        self.set(&"4".to_string(), &0);
+        self.set(&"0".to_string(), &0);
         self.end();
 
         self.end();
 
         // Add numbers back up to original
-        self.while_not_zero(&"5".to_string());
+        self.while_not_zero(&"1".to_string());
+        self.dec_by(&"1".to_string(), &1);
         self.inc_by(a, &1);
         self.inc_by(b, &1);
-        self.dec_by(&"5".to_string(), &1);
         self.end();
 
         self.end();
@@ -389,11 +388,10 @@ impl Codegen {
 
     /// Copy variable `from` to `to`
     ///
-    /// Uses temporary variables `0` and `1` to store the value
+    /// Uses temporary variables `0` to store the value
     fn copy(&mut self, from: &Variable, to: &Variable) {
         debug_assert_ne!(from, to);
         debug_assert_ne!(to, &"0".to_string());
-        debug_assert_ne!(to, &"1".to_string());
 
         self.zero(to);
 
@@ -531,7 +529,7 @@ impl Codegen {
         );
 
         // So temp11 is hundreds, temp14 is tens, temp12 is ones
-        self.set(&"15".to_string(), &0);
+        self.set(&"15".to_string(), &0); // TODO Replace with IfNotZero
 
         self.if_not_equal(&"11".to_string(), &"15".to_string());
         self.inc_by(&"11".to_string(), &48);

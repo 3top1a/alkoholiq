@@ -22,6 +22,8 @@ impl Interpreter {
         let jump_table = Self::calculate_jumps(code);
         let mut instruction_index = 0;
         let code: Vec<char> = code.chars().collect();
+        
+        // TODO Parse BF into instructions that can execute faster `+++` -> Add(3)
 
         while instruction_index < code.len() {
             self.instructions_ran += 1;
