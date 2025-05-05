@@ -54,6 +54,8 @@ cargo r -- examples/lir/fib.lir -b
 
 The internals are explained in the [DESIGN.md](https://github.com/3top1a/alkoholiq/blob/main/DESIGN.md) document.
 
+Examples can be found in the [examples](https://github.com/3top1a/alkoholiq/tree/main/examples/lir) folder.
+
 ## The name?
 
 The name stems from alcoholism, because, well, I'm from the Czech Republic where beer is cheaper than water.
