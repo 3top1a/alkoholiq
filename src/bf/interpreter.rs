@@ -49,13 +49,18 @@ impl Interpreter {
                     let mut buf = [0; 1];
                     let read = input.read(&mut buf);
 
-                    if let Ok(0) = read {
-                        self.tape[self.pointer as usize] = 0;
-                        return;
-                    }
-
-                    if read.unwrap() > 0 {
-                        self.tape[self.pointer as usize] = buf[0];
+                    match read {
+                        Ok(0) => {
+                            self.tape[self.pointer as usize] = 0;
+                        }
+                        Ok(n) => {
+                            if n == 1 {
+                                self.tape[self.pointer as usize] = buf[0];
+                            } else {
+                                panic!("Expected 1 byte, got {}", n);
+                            }
+                        }
+                        Err(_) => panic!("Error reading input"),
                     }
                 }
                 '[' => {
@@ -68,7 +73,7 @@ impl Interpreter {
                         instruction_index = jump_table[instruction_index];
                     }
                 }
-                '%' => {
+                '#' => {
                     // Check all temporary variables are zero
                     assert!(self.tape.iter().rev().take(20).all(|&x| x == 0));
                 }

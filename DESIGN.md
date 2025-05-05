@@ -13,7 +13,7 @@ For example, the absence of jump instructions means function calls must be imple
 The memory layout looks like this:
 
 ```
-[ Temporary variables used by instructions] [ 0 ] [+Variable storage]
+[ Temporary variables used by instructions] [ 0 ] [Variable storage+] [ 0 ] [Stack+]
 ```
 
 Temporary variables are used by instructions to store intermediate results, and are not accessible to the user.
@@ -21,6 +21,9 @@ They are also stored in memory below zero, if your interpreter/compiler complain
 
 Simply using a variable name will automatically reserve space for it. Some instructions need to have the variable be
 used beforehand.
+
+An entry on the stack consists of two cells, one which denotes it is occupied, and one for its value.
+The cell denoting it is occupied might become user changeable in the future, allowing for stack "multiplexing".
 
 ### Instructions
 

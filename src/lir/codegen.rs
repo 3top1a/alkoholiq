@@ -36,14 +36,14 @@ impl Codegen {
     }
 
     pub fn new_test(instructions: Vec<Instruction>) -> Self {
-        // Self::new but with the instruction separator set to `%`
+        // Self::new but with the instruction separator set to `#`
         Self {
             code: String::new(),
             ptr: 0,
             instructions,
             parsed: InstructionsParsed::default(),
             block_stack: Vec::new(),
-            instruction_separator: String::from("%"),
+            instruction_separator: String::from("#"),
         }
     }
 
@@ -87,6 +87,8 @@ impl Codegen {
                 remainder: r,
                 quotient: q,
             } => self.div(&a, &b, &r, &q),
+            Push(a) => self.stack_push(&a),
+            Pop(a) => self.stack_pop(&a),
         }
 
         self.code += &self.instruction_separator;
@@ -253,8 +255,10 @@ impl Codegen {
         self.code += "[";
         self.zero(&"2".to_string());
 
-        self.block_stack
-            .push(BlockStack::IfNotEqualConst { a: a.clone(), b: *b });
+        self.block_stack.push(BlockStack::IfNotEqualConst {
+            a: a.clone(),
+            b: *b,
+        });
     }
 
     /// If a variable is equal to another variable, execute the code
@@ -604,6 +608,82 @@ impl Codegen {
         self.code += "[-]";
     }
 
+    /// Push on stack
+    fn stack_push(&mut self, a: &Variable) {
+        let ID = 1; // TODO let user decide ID
+
+        self.copy(a, &"2".to_string()); // TODO Make a `copy` but for internal purposes (Does not clear one temp)
+
+        self.goto(&"2".to_string());
+
+        self.while_not_zero(&"2".to_string());
+
+        self.code += "-";
+
+        self.goto_end_of_vars();
+        self.code += ">>";
+
+        self.code += "[>>]";
+
+        self.code += ">+<";
+
+        self.code += "<<";
+
+        self.code += "[<<]";
+
+        self.goto(&"2".to_string());
+
+        self.end();
+
+        self.goto_end_of_vars();
+        self.code += ">>";
+        self.code += "[>>]";
+        self.code += &*"+".repeat(ID as usize);
+        self.code += "<<";
+        self.code += "[<<]";
+
+        self.goto(a);
+    }
+
+    /// Pop from the stack
+    fn stack_pop(&mut self, a: &Variable) {
+        self.zero(a);
+
+        // Goto the last stack position
+        self.goto_end_of_vars();
+        self.code += ">>";
+        self.code += "[>>]<";
+
+        self.code += "[";
+
+        // Dec and move it to a
+        self.code += "-";
+        self.code += "<";
+        self.code += "[<<]";
+
+        self.goto(a);
+        self.code += "+";
+
+        // Goto the last stack position again
+        self.goto_end_of_vars();
+        self.code += ">>";
+        self.code += "[>>]<";
+
+        self.code += "]";
+
+        // Remove the flag
+        self.code += "<#[-]";
+
+        self.code += "<<[<<]";
+
+        self.goto(a);
+    }
+
+    /// Move pointer to end of variables
+    fn goto_end_of_vars(&mut self) {
+        self.move_by(self.parsed.variable_count - self.ptr);
+    }
+
     /// Move pointer to a variable
     fn goto(&mut self, a: &Variable) {
         self.move_by(
@@ -618,6 +698,16 @@ impl Codegen {
     /// Move pointer by `diff`
     fn move_by(&mut self, diff: i32) {
         self.ptr += diff;
+        if diff < 0 {
+            self.code += &*"<".repeat(diff.unsigned_abs() as usize);
+        }
+        if diff > 0 {
+            self.code += &*">".repeat(diff.unsigned_abs() as usize);
+        }
+    }
+
+    /// Move pointer by `diff`, and do not set pointer
+    fn move_by_no_set(&mut self, diff: i32) {
         if diff < 0 {
             self.code += &*"<".repeat(diff.unsigned_abs() as usize);
         }

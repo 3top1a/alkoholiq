@@ -116,7 +116,20 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                     let b = inner.next().unwrap().as_str().to_string();
                     let r = inner.next().unwrap().as_str().to_string();
                     let q = inner.next().unwrap().as_str().to_string();
-                    Instruction::Div { a, b, remainder: r, quotient: q }
+                    Instruction::Div {
+                        a,
+                        b,
+                        remainder: r,
+                        quotient: q,
+                    }
+                }
+                Rule::push_instr => {
+                    let var = inner.into_inner().next().unwrap().as_str().to_string();
+                    Instruction::Push(var)
+                }
+                Rule::pop_instr => {
+                    let var = inner.into_inner().next().unwrap().as_str().to_string();
+                    Instruction::Pop(var)
                 }
                 Rule::if_equal_instr => {
                     let mut inner = inner.into_inner();

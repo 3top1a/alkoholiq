@@ -3,13 +3,12 @@ use anyhow::Result;
 use std::collections::HashMap;
 use thiserror::Error;
 
-#[derive(Debug, Clone, PartialEq)]
-#[derive(Default)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct InstructionsParsed {
     instructions: Vec<Instruction>,
     pub variables: HashMap<String, i32>,
+    pub variable_count: i32,
 }
-
 
 #[derive(Debug, Clone, Error)]
 enum InstructionError {
@@ -27,15 +26,16 @@ impl InstructionsParsed {
     pub fn new(instructions: Vec<Instruction>) -> Result<Self> {
         Self::sanity_check(instructions.clone())?;
 
-        let variables = Self::build_variable_hashmap(instructions.clone())?;
+        let (variables, variable_count) = Self::build_variable_hashmap(instructions.clone())?;
 
         Ok(Self {
             instructions,
             variables,
+            variable_count,
         })
     }
 
-    fn build_variable_hashmap(input: Vec<Instruction>) -> Result<HashMap<String, i32>> {
+    fn build_variable_hashmap(input: Vec<Instruction>) -> Result<(HashMap<String, i32>, i32)> {
         let mut variables = HashMap::new();
         let mut index = 0;
 
@@ -117,11 +117,22 @@ impl InstructionsParsed {
                     var(a, true)?;
                     var(b, true)?
                 }
-                Div { a, b, remainder: r, quotient: q } => {
+                Div {
+                    a,
+                    b,
+                    remainder: r,
+                    quotient: q,
+                } => {
                     var(a, true)?;
                     var(b, true)?;
                     var(r, false)?;
                     var(q, false)?;
+                }
+                Push(a) => {
+                    var(a, true)?;
+                }
+                Pop(a) => {
+                    var(a, false)?;
                 }
             }
         }
@@ -146,7 +157,7 @@ impl InstructionsParsed {
         variables.insert("1".to_string(), -2);
         variables.insert("0".to_string(), -1);
 
-        Ok(variables)
+        Ok((variables, index))
     }
 
     fn sanity_check(instructions: Vec<Instruction>) -> Result<()> {

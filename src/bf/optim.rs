@@ -28,3 +28,12 @@ pub fn remove_nonbf(bf: String) -> String {
         .trim()
         .to_string()
 }
+
+/// Removes all non-brainfuck characters from the input except for #
+pub fn remove_nonbf_except_hash(bf: String) -> String {
+    bf.chars()
+        .filter(|&c| "+-><[].,#".contains(c))
+        .collect::<String>()
+        .trim()
+        .to_string()
+}

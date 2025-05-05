@@ -97,6 +97,14 @@ pub enum Instruction {
         res: Variable,
     },
 
+    /// Push variable onto stack
+    Push(Variable),
+
+    /// Pop variable from stack
+    ///
+    /// Warning: Does not check for stack underflow and other undefined behavior
+    Pop(Variable),
+
     /// Insert raw brainfuck
     ///
     /// Only use if you have to, must put pointer back into position after every use

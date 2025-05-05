@@ -1,0 +1,15 @@
+set zero 0
+push zero
+
+read in
+
+while_nz in
+    push in
+    read in
+end
+
+pop out
+while_nz out
+    print out
+    pop out
+end

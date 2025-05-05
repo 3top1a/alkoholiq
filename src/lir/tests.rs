@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+    use std::fs::File;
+    use std::io::Read;
     use crate::bf;
     use crate::lir::codegen::Codegen;
     use crate::lir::lir::Instruction;
@@ -230,11 +232,42 @@ mod tests {
         let code = vec![
             Set("a".to_string(), 9),
             Set("b".to_string(), 2),
-            Div {a: "a".to_string(), b: "b".to_string(), remainder: "r".to_string(), quotient: "q".to_string()},
+            Div {
+                a: "a".to_string(),
+                b: "b".to_string(),
+                remainder: "r".to_string(),
+                quotient: "q".to_string(),
+            },
             Print("q".to_string()),
             Print("r".to_string()),
         ];
         assert_eq_bf(code, "[-]+++++++++>[-]++<<<<<<<<<<<[-]>>>>>>>>>>[-<+<+>>]<[->+<]<[-<<<<<<<<+>>>>>>>>]<<<<<<<<>[-]>>>>>>>>>>[-<<+<+>>>]<<[->>+<<]<[-<<<<<<<+>>>>>>>]<<<<<<<>>>>>>>>>>>[-]>[-]<<<<<<<<<<<[-]+[>[-]>>>>>>>>[-<<+<+>>>]<<[->>+<<]<[->>-<<]>><<<[-]>>>[-<+<+>>]<[->+<]<[-<+>]<[[-]>>>>[-<<+<+>>>]<<[->>+<<]<[->>+<<]>><<<<<<<[-]++++++++>>[-]+<[-]>[>>>>>->-<<<<<<<+>>>[-]+<[-]>>>>[<<<[-]<[-]>>>>[-<<<<+>>>>]]<<<<[->>>>+<<<<]>>>><<<[[-]<<<<[-]+>>[-]>>[-]][-]+<[-]>>>>>[<<<<[-]<[-]>>>>>[-<<<<<+>>>>>]]<<<<<[->>>>>+<<<<<]>>>>><<<<[[-]<<<<[-]++>>[-]>>[-]]<<]<[>>>>>>+>+<<<<<<<-]>>>>>>>[-<<+<+>>>]<<[->>+<<]<[->>-<<]>><<<]>>>>[-<<+<+>>>]<<[->>+<<]<[->>+<<]>><<<<<<<->>>>[-]<<<<[->>>>>>+<+<<<<<]>>>>>>[-<<<<<<+>>>>>>]<[-<+>]<<<<<+>>>>[[-]>>>>[-<<+<+>>>]<<[->>+<<]<[->>-<<]>>>>>+<<<<<<][-]<<<<-->>>>[-]<<<<[->>>>>>+<+<<<<<]>>>>>>[-<<<<<<+>>>>>>]<[-<+>]<<<<<++>>>>[[-]<<<<<[-]>>>>>][-]<<<<<]>[-]>>>>>>>>>[-]<<[->>+<<][-]<<<<<<<<<<[->>>>>>>>>>+<<<<<<<<<<]>>>>>>>>>>>[-]<<<<<<<<<<[->>>>>>>>>>+<<<<<<<<<<]>>>>>>>>>>>>.<.");
+
+        let code = vec![
+            // 9 2 0
+            Set("a".to_string(), 9),
+            Set("b".to_string(), 2),
+            Set("c".to_string(), 0),
+            Push("a".to_string()),
+            Push("b".to_string()),
+            Pop("c".to_string()),
+            Pop("b".to_string()),
+            // Mem should look like: 9 9 2, ptr at second 9
+        ];
+        assert_eq_bf(code, "[-]+++++++++>[-]++>[-]<<<<<[-]>>>[-<+<+>>]<[->+<]<[-<+>]<[->>>>>>>>[>>]>+<<<[<<]<<<<<<]>>>>>>>>[>>]+<<[<<]<<<<<<[-]>>>>[-<<+<+>>>]<<[->>+<<]<[-<+>]<[->>>>>>>>[>>]>+<<<[<<]<<<<<<]>>>>>>>>[>>]+<<[<<]<<>[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<<[-]>>>>[>>]<[-<[<<]<<+>>>>[>>]<]<[-]<<[<<]<<");
+
+        // This should reverse the two entered values using the stack
+        let code = vec![
+            Read("a".to_string()),
+            Read("b".to_string()),
+            Push("a".to_string()),
+            Push("b".to_string()),
+            Pop("a".to_string()),
+            Pop("b".to_string()),
+            Print("a".to_string()),
+            Print("b".to_string()),
+        ];
+        assert_eq_bf(code, "[-],>[-],<<<<[-]>>>[-<+<+>>]<[->+<]<[-<+>]<[->>>>>>>[>>]>+<<<[<<]<<<<<]>>>>>>>[>>]+<<[<<]<<<<<[-]>>>>[-<<+<+>>>]<<[->>+<<]<[-<+>]<[->>>>>>>[>>]>+<<<[<<]<<<<<]>>>>>>>[>>]+<<[<<]<<[-]>>>>[>>]<[-<[<<]<<+>>>>[>>]<]<[-]<<[<<]<<>[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<<.>.");
     }
 
     #[test]
@@ -408,7 +441,9 @@ end";
 
         // Same test for optimized and unoptimized versions
         for code in [bf, bf_optimized] {
-            let mut stdin = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz".as_bytes();
+            let mut stdin =
+                "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz"
+                    .as_bytes();
             let mut stdout = Box::new(Vec::new());
             let interpret = bf::interpreter::Interpreter::new();
             interpret.run(&code, &mut stdin, &mut stdout);
@@ -418,5 +453,34 @@ end";
                 "0123456789:;<=>?@NOPQRSTUVWXYZABCDEFGHIJKLM[]^_nopqrstuvwxyzabcdefghijklm"
             );
         }
+    }
+
+    #[test]
+    fn test_string_reverse () {
+        // Read from examples/lir
+        let mut read_code = String::new();
+        File::open("examples/lir/string_reverse.lir")
+            .expect("Failed to open file")
+            .read_to_string(&mut read_code).unwrap();
+
+        let parsed = crate::lir::parser::parse(&*read_code).expect("Failed to parse LIR");
+        let bf = Codegen::new_test(parsed)
+            .codegen()
+            .expect("Failed to generate BF");
+        let bf_optimized = bf::optimize(bf.clone());
+
+        // Same test for optimized and unoptimized versions
+        for code in [bf, bf_optimized] {
+            let mut stdin = "Hello World!".as_bytes();
+            let mut stdout = Box::new(Vec::new());
+            let interpret = bf::interpreter::Interpreter::new();
+            interpret.run(&code, &mut stdin, &mut stdout);
+
+            assert_eq!(
+                String::from_utf8(*stdout.clone()).unwrap(),
+                "!dlroW olleH"
+            );
+        }
+
     }
 }
