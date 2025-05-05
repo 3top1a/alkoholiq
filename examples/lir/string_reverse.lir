@@ -1,3 +1,6 @@
+// A very simple program that takes in input and prints it out in reverse.
+// An "unlimited" input size is achieved via the stack.
+
 set zero 0
 push zero
 
