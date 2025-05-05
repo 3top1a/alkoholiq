@@ -427,79 +427,47 @@ impl Codegen {
 
     /// Add variable `from` to variable `to`
     ///
-    /// Uses temporary variables `0` and `1` to store the value
+    /// Uses temporary variables `0` to store the value
     fn add(&mut self, to: &Variable, from: &Variable) {
         debug_assert_ne!(from, to);
         debug_assert_ne!(to, &"0".to_string());
-        debug_assert_ne!(to, &"1".to_string());
 
-        self.goto(from);
-
-        // Move `from` to temp0 and temp1
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(&"0".to_string());
-        self.code += "+";
-        self.goto(&"1".to_string());
-        self.code += "+";
-        self.goto(from);
-        self.code += "]";
+        // Move `from` to `temp0` and `to`
+        self.while_not_zero(from);
+        self.dec_by(from, &1);
+        self.inc_by(&"0".to_string(), &1);
+        self.inc_by(to, &1);
+        self.end();
 
         // Move `temp0` to `from`
-        self.goto(&"0".to_string());
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(from);
-        self.code += "+";
-        self.goto(&"0".to_string());
-        self.code += "]";
+        self.while_not_zero(&"0".to_string());
+        self.dec_by(&"0".to_string(), &1);
+        self.inc_by(from, &1);
+        self.end();
 
-        // Move `temp1` to `to`
-        self.goto(&"1".to_string());
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(to);
-        self.code += "+";
-        self.goto(&"1".to_string());
-        self.code += "]";
-
-        // Temp0 and temp1 are zeroed automatically
         self.goto(to);
     }
 
     /// Subtract variable `from` from variable `to`
     ///
-    /// Uses temporary variables `0` and `1` to store the value
+    /// Uses temporary variables `0` to store the value
     fn sub(&mut self, to: &Variable, from: &Variable) {
         debug_assert_ne!(from, to);
         debug_assert_ne!(to, &"0".to_string());
-        debug_assert_ne!(to, &"1".to_string());
 
-        self.goto(from);
-
-        // Move `from` to temp0 and temp1
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(&"0".to_string());
-        self.code += "+";
-        self.goto(&"1".to_string());
-        self.code += "+";
-        self.goto(from);
-        self.code += "]";
-
+        // Move `from` to `temp0` and decrease `to`
+        self.while_not_zero(from);
+        self.dec_by(from, &1);
+        self.inc_by(&"0".to_string(), &1);
+        self.dec_by(to, &1);
+        self.end();
+        
         // Move `temp0` to `from`
-        self.goto(&"0".to_string());
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(from);
-        self.code += "+";
-        self.goto(&"0".to_string());
-        self.code += "]";
-
-        // Move `temp1` to `to`
-        self.goto(&"1".to_string());
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(to);
-        self.code += "-";
-        self.goto(&"1".to_string());
-        self.code += "]";
-
-        // Temp0 and temp1 are zeroed automatically
+        self.while_not_zero(&"0".to_string());
+        self.dec_by(&"0".to_string(), &1);
+        self.inc_by(from, &1);
+        self.end();
+        
         self.goto(to);
     }
 

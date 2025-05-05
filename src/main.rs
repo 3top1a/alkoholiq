@@ -26,20 +26,20 @@ struct CliArgs {
 fn main() -> Result<()> {
     let args: CliArgs = argh::from_env();
 
-    let mut input_curor: Box<dyn Read> = Box::new(std::io::Cursor::new(Vec::new()));
+    let mut input_cursor: Box<dyn Read>;
 
     if args.input.is_none() {
-        input_curor = Box::new(stdin());
+        input_cursor = Box::new(stdin());
     } else {
         let path = args.input.unwrap();
         if path.as_os_str() == "-" {
-            input_curor = Box::new(stdin());
+            input_cursor = Box::new(stdin());
         } else {
-            input_curor = Box::new(std::fs::File::open(path)?);
+            input_cursor = Box::new(std::fs::File::open(path)?);
         }
     }
     let mut input = String::new();
-    input_curor.read_to_string(&mut input)?;
+    input_cursor.read_to_string(&mut input)?;
 
     let parsed = lir::parser::parse(&input)?;
 
