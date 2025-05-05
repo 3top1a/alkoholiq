@@ -1,5 +1,5 @@
 pub(crate) mod codegen;
-mod instructions;
-mod lir;
+mod analysis;
+mod instruction;
 pub(crate) mod parser;
 mod tests;

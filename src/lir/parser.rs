@@ -1,5 +1,5 @@
 // parser/mod.rs
-use crate::lir::lir::Instruction;
+use crate::lir::instruction::Instruction;
 use anyhow::Result;
 use pest::iterators::Pair;
 use pest::Parser;

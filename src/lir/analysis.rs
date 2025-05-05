@@ -1,10 +1,10 @@
-use crate::lir::lir::{Instruction, Instruction::*, Variable};
+use crate::lir::instruction::{Instruction, Instruction::*, Variable};
 use anyhow::Result;
 use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Debug, Clone, PartialEq, Default)]
-pub struct InstructionsParsed {
+pub struct InstructionsAnalysis {
     instructions: Vec<Instruction>,
     pub variables: HashMap<String, i32>,
     pub variable_count: i32,
@@ -22,7 +22,7 @@ enum InstructionError {
     UnevenAmountOfBlocks(),
 }
 
-impl InstructionsParsed {
+impl InstructionsAnalysis {
     pub fn new(instructions: Vec<Instruction>) -> Result<Self> {
         Self::sanity_check(instructions.clone())?;
 

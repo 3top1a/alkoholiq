@@ -1,5 +1,5 @@
-use crate::lir::instructions::InstructionsParsed;
-use crate::lir::lir::{Immediate, Instruction, Instruction::*, Variable};
+use crate::lir::analysis::InstructionsAnalysis;
+use crate::lir::instruction::{Immediate, Instruction, Instruction::*, Variable};
 use anyhow::Result;
 use std::string::ToString;
 
@@ -18,7 +18,7 @@ pub struct Codegen {
     code: String,
     ptr: i32,
     pub instructions: Vec<Instruction>,
-    parsed: InstructionsParsed,
+    parsed: InstructionsAnalysis,
     block_stack: Vec<BlockStack>,
     instruction_separator: String,
 }
@@ -29,7 +29,7 @@ impl Codegen {
             code: String::new(),
             ptr: 0,
             instructions,
-            parsed: InstructionsParsed::default(),
+            parsed: InstructionsAnalysis::default(),
             block_stack: Vec::new(),
             instruction_separator: String::new(),
         }
@@ -41,14 +41,14 @@ impl Codegen {
             code: String::new(),
             ptr: 0,
             instructions,
-            parsed: InstructionsParsed::default(),
+            parsed: InstructionsAnalysis::default(),
             block_stack: Vec::new(),
             instruction_separator: String::from("#"),
         }
     }
 
     pub fn codegen(mut self) -> Result<String> {
-        self.parsed = InstructionsParsed::new(self.instructions.clone())?;
+        self.parsed = InstructionsAnalysis::new(self.instructions.clone())?;
 
         for instruction in self.instructions.clone() {
             self.instruction(instruction)?
@@ -698,16 +698,6 @@ impl Codegen {
     /// Move pointer by `diff`
     fn move_by(&mut self, diff: i32) {
         self.ptr += diff;
-        if diff < 0 {
-            self.code += &*"<".repeat(diff.unsigned_abs() as usize);
-        }
-        if diff > 0 {
-            self.code += &*">".repeat(diff.unsigned_abs() as usize);
-        }
-    }
-
-    /// Move pointer by `diff`, and do not set pointer
-    fn move_by_no_set(&mut self, diff: i32) {
         if diff < 0 {
             self.code += &*"<".repeat(diff.unsigned_abs() as usize);
         }

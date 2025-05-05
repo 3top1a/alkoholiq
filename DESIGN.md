@@ -27,7 +27,7 @@ The cell denoting it is occupied might become user changeable in the future, all
 
 ### Instructions
 
-Also see the [lir.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/lir.rs) file.
+Also see the [instruction.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/instruction.rs) file.
 
 - `set <var> <value>` - Set a variable to a value
 - `copy <var> <var>` - Copy from variable a to variable b

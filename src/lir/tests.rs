@@ -4,8 +4,8 @@ mod tests {
     use std::io::Read;
     use crate::bf;
     use crate::lir::codegen::Codegen;
-    use crate::lir::lir::Instruction;
-    use crate::lir::lir::Instruction::*;
+    use crate::lir::instruction::Instruction;
+    use crate::lir::instruction::Instruction::*;
     use std::path::Path;
 
     #[test]
@@ -23,7 +23,7 @@ mod tests {
                 interpret.run(&bf, &mut stdin, &mut stdout);
             }
 
-            let bf = bf::optim::remove_nonbf(bf); // To remove instruction separators
+            let bf = bf::optim::remove_non_brainfuck(bf); // To remove instruction separators
             assert_eq!(bf, expected);
         }
 
