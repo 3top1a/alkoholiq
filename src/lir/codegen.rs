@@ -396,32 +396,21 @@ impl Codegen {
         debug_assert_ne!(to, &"1".to_string());
 
         self.zero(to);
-        self.goto(from);
 
         // Move `from` to temp0 and temp1
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(&"0".to_string());
-        self.code += "+";
-        self.goto(&"1".to_string());
-        self.code += "+";
-        self.goto(from);
-        self.code += "]";
+        self.while_not_zero(from);
+        self.dec_by(from, &1);
+        // TODO find optimal copy method computationally
+        // From and To are probably going to be closer than 0 and 1
+        self.inc_by(&"0".to_string(), &1);
+        self.inc_by(to, &1);
+        self.end();
 
         // Move `temp0` to `from`
-        self.goto(&"0".to_string());
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(from);
-        self.code += "+";
-        self.goto(&"0".to_string());
-        self.code += "]";
-
-        // Move `temp1` to `to`
-        self.goto(&"1".to_string());
-        self.code += "[-"; // TODO Use self. methods
-        self.goto(to);
-        self.code += "+";
-        self.goto(&"1".to_string());
-        self.code += "]";
+        self.while_not_zero(&"0".to_string());
+        self.dec_by(&"0".to_string(), &1);
+        self.inc_by(from, &1);
+        self.end();
 
         // Temp0 and temp1 are zeroed automatically
         self.goto(to);
