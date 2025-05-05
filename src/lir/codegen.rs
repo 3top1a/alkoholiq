@@ -461,13 +461,13 @@ impl Codegen {
         self.inc_by(&"0".to_string(), &1);
         self.dec_by(to, &1);
         self.end();
-        
+
         // Move `temp0` to `from`
         self.while_not_zero(&"0".to_string());
         self.dec_by(&"0".to_string(), &1);
         self.inc_by(from, &1);
         self.end();
-        
+
         self.goto(to);
     }
 
@@ -497,19 +497,19 @@ impl Codegen {
         );
 
         // So temp11 is hundreds, temp14 is tens, temp12 is ones
-        self.set(&"15".to_string(), &0); // TODO Replace with IfNotZero
+        self.set(&"15".to_string(), &0);
 
-        self.if_not_equal(&"11".to_string(), &"15".to_string());
+        self.if_not_equal_const(&"11".to_string(), &0);
         self.inc_by(&"11".to_string(), &48);
         self.print(&"11".to_string());
         self.end();
 
-        self.if_not_equal(&"14".to_string(), &"15".to_string());
+        self.if_not_equal_const(&"14".to_string(), &0);
         self.inc_by(&"14".to_string(), &48);
         self.print(&"14".to_string());
         self.end();
 
-        self.if_not_equal(&"12".to_string(), &"15".to_string());
+        self.if_not_equal_const(&"12".to_string(), &0);
         self.inc_by(&"12".to_string(), &48);
         self.print(&"12".to_string());
         self.end();
