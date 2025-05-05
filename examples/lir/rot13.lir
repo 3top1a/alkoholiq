@@ -1,9 +1,11 @@
+// This is a simple ROT13 implementation.
+// It reads in characters, applies rot13 and prints them out.
+// It is quite slow, as compare is very slow (probably because of all the constant copying).
+
 // Set some variables
 set A 64
-set B 65
 set Z 91
 set a 96
-set b 97
 set z 123
 
 read char
@@ -17,8 +19,8 @@ while_nz char
             dec_by char 13
 
             // Check for underflow
-            compare char B res
-            if_eq res 1
+            compare char A res
+            if_neq res 2
                 // Wrap around
                 inc_by char 26
             end
@@ -35,9 +37,9 @@ while_nz char
             dec_by char 13
 
             // Check for underflow
-            compare char b res
-            // TODO I could use compare char a res and if_neq once if not equal constant is implemented
-            if_eq res 1
+            compare char a res
+            // if_neq is faster than if_eq
+            if_neq res 2
                 // Wrap around
                 inc_by char 26
             end
