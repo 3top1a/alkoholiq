@@ -56,6 +56,9 @@ Also see the [lir.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/lir.
 - `while_nz <var>` - Run while a variable is not zero
 - `end` - End the current block
 
+- `push <var>` - Push a variable onto the stack
+- `pop <var>` - Pop a variable from the stack
+
 - `raw <string>` - Insert raw brainfuck code
 
 
