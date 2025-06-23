@@ -565,35 +565,28 @@ impl Codegen {
 
     /// Push on stack
     fn stack_push(&mut self, a: &Variable) {
-        let ID = 1; // TODO let user decide ID
+        let id = 1; // TODO let user decide id; probably not a good idea maybe?
 
-        self.copy(a, &"2".to_string()); // TODO Make a `copy` but for internal purposes (Does not clear one temp)
+        self.copy(a, &"1".to_string()); // TODO Make a `copy` but for internal purposes (Does not clear one temp)
+        self.goto(&"1".to_string());
 
-        self.goto(&"2".to_string());
-
-        self.while_not_zero(&"2".to_string());
-
+        self.while_not_zero(&"1".to_string());
         self.code += "-";
 
         self.goto_end_of_vars();
         self.code += ">>";
-
         self.code += "[>>]";
-
         self.code += ">+<";
-
         self.code += "<<";
-
         self.code += "[<<]";
-
-        self.goto(&"2".to_string());
+        self.goto(&"1".to_string());
 
         self.end();
 
         self.goto_end_of_vars();
         self.code += ">>";
         self.code += "[>>]";
-        self.code += &*"+".repeat(ID as usize);
+        self.code += &*"+".repeat(id as usize);
         self.code += "<<";
         self.code += "[<<]";
 
