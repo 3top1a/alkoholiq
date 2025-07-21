@@ -1,6 +1,6 @@
 use std::io::{Read, Write};
 
-const MAX_INSTRUCTIONS: usize = 100_000_000;
+const MAX_INSTRUCTIONS: usize = 100_000_000_000_000;
 
 pub struct Interpreter {
     tape: [u8; 30000],
@@ -22,6 +22,9 @@ impl Interpreter {
         let jump_table = Self::calculate_jumps(code);
         let mut instruction_index = 0;
         let code: Vec<char> = code.chars().collect();
+
+        // Assert amount of [ is the same as ]
+        assert_eq!(code.iter().filter(|x| **x == '[').count(), code.iter().filter(|x| **x == ']').count());
         
         // TODO Parse BF into instructions that can execute faster `+++` -> Add(3)
 
@@ -77,7 +80,8 @@ impl Interpreter {
                 }
                 '#' => {
                     // Check all temporary variables are zero
-                    assert!(self.tape.iter().rev().take(20).all(|&x| x == 0));
+                    let temps = self.tape.iter().rev().take(20).collect::<Vec<&u8>>();
+                    assert!(temps.iter().all(|&x| *x == 0), "Temporary variables are not zero at instruction {}: {:?}", instruction_index, temps);
                 }
                 _ => {}
             }

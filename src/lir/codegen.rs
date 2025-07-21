@@ -11,6 +11,7 @@ enum BlockStack {
     UntilEqual { a: Variable, b: Variable },
     WhileNotZero(Variable),
     IfNotEqualConst { a: Variable, b: Immediate },
+    Case,
 }
 
 #[derive(Debug, Clone)]
@@ -89,11 +90,60 @@ impl Codegen {
             } => self.div(&a, &b, &r, &q),
             Push(a) => self.stack_push(&a),
             Pop(a) => self.stack_pop(&a),
+            Match(a, cases) => self.match_var(&a, cases),
+            Case() => self.case(),
         }
 
         self.code += &self.instruction_separator;
 
         Ok(())
+    }
+
+    fn match_var(&mut self, a: &Variable, cases: Vec<Immediate>) {
+        /* from https://brainfuck.org/function_tutorial.b
+>+<[
+    -[
+        -[
+            -[
+                -[
+                    [-]>-default<
+                ]>[-4]<
+            ]>[-3]<
+        ]>[-2]<
+    ]>[-1]<
+]>[-0]<
+         */
+
+        // Make sure cases are sorted
+        let cases: Vec<u8> = cases.iter().map(|x| x.clone()).collect();
+        assert!(cases.is_sorted());
+        assert!(cases.len() > 0);
+
+        self.copy(&a, &"1".to_string());
+
+        self.set(&"0".to_string(), &1);
+        let mut last_case = 0;
+        for case in cases {
+            self.dec_by(&"1".to_string(), &(case - last_case));
+            self.goto(&"1".to_string());
+
+            self.code += "[";
+
+            last_case = case;
+        }
+
+        // Default case
+        self.zero(&"1".to_string());
+        self.dec_by(&"0".to_string(), &1);
+    }
+
+    fn case(&mut self) {
+        self.goto(&"1".to_string());
+        self.code += "]";
+        self.goto(&"0".to_string());
+        self.code += "[";
+
+        self.block_stack.push(BlockStack::Case);
     }
 
     /// Set a variable to a value
@@ -382,6 +432,11 @@ impl Codegen {
                 self.goto(&"2".to_string());
                 self.code += "]";
                 self.zero(&"2".to_string());
+            },
+            BlockStack::Case => {
+                self.goto(&"0".to_string());
+                self.code += "]";
+                self.zero(&"1".to_string());
             }
         }
     }

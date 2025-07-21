@@ -70,7 +70,7 @@ pub enum Instruction {
     /// Execute code only if `a` equals constant
     IfEqualConst { a: Variable, b: Immediate },
 
-    /// Execute code only if `a` doesn't equals constant
+    /// Execute code only if `a` doesn't equal constant
     IfNotEqualConst { a: Variable, b: Immediate },
 
     /// Execute code only if `a` does not equal `b`
@@ -104,6 +104,15 @@ pub enum Instruction {
     ///
     /// Warning: Does not check for stack underflow and other undefined behavior
     Pop(Variable),
+
+    /// Match value of a variable
+    /// 
+    /// Second argument needs to be sorted in ascending order, and the cases instructions must be
+    /// in the *exact opposite* order of the values in the second argument.
+    Match(Variable, Vec<Immediate>),
+
+    /// Case in a match case
+    Case(),
 
     /// Insert raw brainfuck
     ///

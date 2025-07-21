@@ -134,6 +134,8 @@ impl InstructionsAnalysis {
                 Pop(a) => {
                     var(a, false)?;
                 }
+                Match(a, _) => var(a, true)?,
+                Case() => {},
             }
         }
 
@@ -169,7 +171,8 @@ impl InstructionsAnalysis {
                 | UntilEqual { .. }
                 | WhileNotZero(..)
                 | IfNotEqualConst { .. }
-                | IfEqualConst { .. } => nesting += 1,
+                | IfEqualConst { .. }
+                | Case(..) => nesting += 1,
                 End => nesting -= 1,
                 _ => {}
             }

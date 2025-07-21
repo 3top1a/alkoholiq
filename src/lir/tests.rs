@@ -268,6 +268,42 @@ mod tests {
             Print("b".to_string()),
         ];
         assert_eq_bf(code, "[-],>[-],<<<[-]>>[-<+<+>>]<[->+<]<[->>>>>>[>>]>+<<<[<<]<<<<]>>>>>>[>>]+<<[<<]<<<<[-]>>>[-<<+<+>>>]<<[->>+<<]<[->>>>>>[>>]>+<<<[<<]<<<<]>>>>>>[>>]+<<[<<]<<[-]>>>>[>>]<[-<[<<]<<+>>>>[>>]<]<[-]<<[<<]<<>[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<<.>.");
+
+        let code = vec![
+            Read("a".to_string()),
+
+            Match("a".to_string(), vec![0, 1, 2, 3]),
+
+            Case(), // 3
+            End,
+            Case(), // 2
+            End,
+            Case(), // 1
+            End,
+            Case(), // 0
+            End,
+        ];
+        // let bf = Codegen::new_test(code).codegen().unwrap();
+        // assert_eq!(bf, "");
+        // assert_eq_bf(code, "");
+
+        let code = vec![
+            Read("a".to_string()),
+
+            Match("a".to_string(), vec![b'a', b'b']),
+
+            PrintMsg("C".to_string()), // default
+
+            Case(), // b
+            PrintMsg("B".to_string()),
+            End,
+
+            Case(), // a
+            PrintMsg("A".to_string()),
+            End,
+        ];
+        let bf = Codegen::new_test(code).codegen().unwrap();
+        assert_eq!(bf, "");
     }
 
     #[test]
