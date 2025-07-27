@@ -86,11 +86,11 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                     let var = inner.into_inner().next().unwrap().as_str().to_string();
                     Instruction::PrintC(var)
                 }
-                Rule::print_msg_instr => {
+                Rule::prints_instr => {
                     let msg = inner.into_inner().next().unwrap().as_str();
                     // Remove quotes from string literal
                     let msg = msg[1..msg.len() - 1].to_string();
-                    Instruction::PrintMsg(msg)
+                    Instruction::PrintS(msg)
                 }
                 Rule::match_instr => {
                     let mut inner = inner.into_inner();

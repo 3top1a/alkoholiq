@@ -29,7 +29,7 @@ pub enum Instruction {
     /// Print a string to STDOUT
     ///
     /// Includes escapes for newlines, carriage return and tabs
-    PrintMsg(String),
+    PrintS(String),
 
     /// Print variable as a human-readable number
     ///

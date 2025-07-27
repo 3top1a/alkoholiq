@@ -113,7 +113,7 @@ impl InstructionsAnalysis {
                     var(b, true)?;
                     var(res, false)?
                 }
-                PrintMsg(_) => {}
+                PrintS(_) => {}
                 Mul { a, b } => {
                     var(a, true)?;
                     var(b, true)?

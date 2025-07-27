@@ -9,9 +9,9 @@ set f_n-2 1
 set n 10
 
 printc f_n-1
-print_msg " "
+prints " "
 printc f_n-2
-print_msg " "
+prints " "
 
 dec_by n 2
 
@@ -22,7 +22,7 @@ while_nz n
     printc f_n
 
     if_neq n 1
-        print_msg ' '
+        prints ' '
     end
 
     copy f_n-2 f_n-1
@@ -30,7 +30,7 @@ while_nz n
 
     dec n
 end
-print_msg '\n'
+prints '\n'
 ```
 
 

@@ -7,12 +7,12 @@ set print 1
 until_eq n zero
     div n three r q
     if_eq r 0
-        print_msg "Fizz"
+        prints "Fizz"
         set print 0
     end
     div n five r q
     if_eq r 0
-        print_msg "Buzz"
+        prints "Buzz"
         set print 0
     end
 
@@ -20,7 +20,7 @@ until_eq n zero
         printc n
     end
 
-    print_msg "\n"
+    prints "\n"
     dec n
     set print 1
 end

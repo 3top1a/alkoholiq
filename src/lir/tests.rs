@@ -158,7 +158,7 @@ mod tests {
             "[-],>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++<<<<[-]+>>>>[-<<+>->]<<[->>+<<]><<<<[-]>>>>[-<+<<<+>>>>]<[->+<]<<<[>[-]<[-]]>>>>>[-<<+>+>]<<[->>+<<]><<<[[-]>>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.<<<[-]]>>>.",
         );
 
-        let code = vec![PrintMsg("Hello!".to_string())];
+        let code = vec![PrintS("Hello!".to_string())];
         assert_eq_bf(
             code,
             "<[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.+++++++++++++++++++++++++++++.+++++++..+++.------------------------------------------------------------------------------.[-]",
@@ -193,19 +193,19 @@ mod tests {
                 a: "res".to_string(),
                 b: 0,
             },
-            PrintMsg("=".to_string()),
+            PrintS("=".to_string()),
             End,
             IfEqualConst {
                 a: "res".to_string(),
                 b: 1,
             },
-            PrintMsg("<".to_string()),
+            PrintS("<".to_string()),
             End,
             IfEqualConst {
                 a: "res".to_string(),
                 b: 2,
             },
-            PrintMsg(">".to_string()),
+            PrintS(">".to_string()),
             End,
         ];
         assert_eq_bf(
@@ -273,11 +273,11 @@ mod tests {
             Read("a".to_string()),
             Set("b".to_string(), b'-'),
             Match("a".to_string(), vec![b'a', b'b']),
-            PrintMsg("C".to_string()), // default
+            PrintS("C".to_string()), // default
             Case(),                    // b
-            PrintMsg("B".to_string()),
+            PrintS("B".to_string()),
             Case(), // a
-            PrintMsg("A".to_string()),
+            PrintS("A".to_string()),
             End,
             Print("b".to_string()), // Here to check the pointer is in the correct place
         ];
@@ -367,9 +367,9 @@ set f_n-2 1
 set n 13
 
 printc f_n-1
-print_msg ' '
+prints ' '
 printc f_n-2
-print_msg ' '
+prints ' '
 
 dec_by n 2
 
@@ -381,7 +381,7 @@ while_nz n
     printc f_n
 
     if_neq n 1
-        print_msg ' '
+        prints ' '
     end
 
     copy f_n-2 f_n-1
@@ -389,7 +389,7 @@ while_nz n
 
     dec n
 end
-print_msg '\\n'";
+prints '\\n'";
 
         let parsed = crate::lir::parser::parse(code).expect("Failed to parse LIR");
         let bf = Codegen::new_test(parsed)

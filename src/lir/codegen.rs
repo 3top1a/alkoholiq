@@ -98,7 +98,7 @@ impl Codegen {
             WhileNotZero(a) => self.while_not_zero(&a),
             End => self.end(),
             Compare { a, b, res } => self.compare(&a, &b, &res),
-            PrintMsg(msg) => self.print_msg(msg),
+            PrintS(msg) => self.prints(msg),
             Mul { a, b } => self.mul(&a, &b),
             Div {
                 a,
@@ -612,7 +612,7 @@ impl Codegen {
         self.zero(&"15".to_string());
     }
 
-    fn print_msg(&mut self, msg: String) {
+    fn prints(&mut self, msg: String) {
         let msg = msg
             .replace("\\n", "\n")
             .replace("\\t", "\t")

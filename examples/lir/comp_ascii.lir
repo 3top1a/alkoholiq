@@ -9,23 +9,23 @@ read b
 compare a b res
 
 //if_eq res 0
-//    print_msg "Numbers are equal"
+//    prints "Numbers are equal"
 //end
 //if_eq res 1
-//    print_msg "Right number is greater"
+//    prints "Right number is greater"
 //end
 //if_eq res 2
-//    print_msg "Left number is greater"
+//    prints "Left number is greater"
 //end
 
 // This is equivalent code
 match res 1 2
     // default
-        print_msg "Numbers are equal"
+        prints "Numbers are equal"
 
     case // 2
-        print_msg "Left number is greater"
+        prints "Left number is greater"
 
     case // 1
-        print_msg "Right number is greater"
+        prints "Right number is greater"
 end

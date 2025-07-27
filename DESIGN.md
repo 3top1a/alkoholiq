@@ -46,7 +46,7 @@ The syntax is a 1:1 mapping to the internal representation of LIR instructions. 
 - `read <var>` - Read one byte from stdin and store it in a variable
 - `print <var>` - Print a variable to stdout
 - `printc <var>` - Print the decimal value of a variable to stdout
-- `print_msg <string>` - Print a static string to stdout
+- `prints <string>` - Print a static string to stdout
 
 - `if_eq <var> <var>` - If two variables are equal, run the next block
 - `if_eq <var> <const>` - If a variable is equal to a constant, run the next block
@@ -88,15 +88,15 @@ read b
 compare a b res
 
 if_eq res 0
-    print_msg "Numbers are equal"
+    prints "Numbers are equal"
 end
 
 if_eq res 1
-    print_msg "Right number is greater"
+    prints "Right number is greater"
 end
 
 if_eq res 2
-    print_msg "Left number is greater"
+    prints "Left number is greater"
 end
 ```
 
@@ -109,9 +109,9 @@ set f_n-2 1
 set n 10
 
 printc f_n-1
-print_msg " "
+prints " "
 printc f_n-2
-print_msg " "
+prints " "
 
 dec_by n 2
 
@@ -123,7 +123,7 @@ while_nz n
     printc f_n
 
     if_neq n 1
-        print_msg " "
+        prints " "
     end
 
     copy f_n-2 f_n-1
@@ -132,7 +132,7 @@ while_nz n
     dec n
 end
 // Also include a new line; '' and "" are equivalent
-print_msg '\n'
+prints '\n'
 ```
 
 Match example:
@@ -142,16 +142,16 @@ set a 1
 
 match a 1 2 3
     // Default case
-    print_msg "error"
+    prints "error"
 case
     // a == 3
-    print_msg "a is 3"
+    prints "a is 3"
 case
     // a == 2
-    print_msg "a is 2"
+    prints "a is 2"
 case
     // a == 1
-    print_msg "a is 1"
+    prints "a is 1"
 end
 ```
 

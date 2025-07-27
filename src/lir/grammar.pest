@@ -13,8 +13,8 @@ instruction = !{
     set_instr |
     read_instr |
     printc_instr |
+    prints_instr |
     print_instr |
-    print_msg_instr |
     match_instr |
     case_instr |
     add_instr |
@@ -49,7 +49,7 @@ set_instr = { "set" ~ variable ~ immediate }
 read_instr = { "read" ~ variable }
 printc_instr = { "printc" ~ variable }
 print_instr = { "print" ~ variable }
-print_msg_instr = { "print_msg" ~ string_literal }
+prints_instr = { "prints" ~ string_literal }
 match_instr = { "match" ~ variable ~ immediate+ }
 case_instr = { "case" }
 add_instr = { "add" ~ variable ~ variable }
