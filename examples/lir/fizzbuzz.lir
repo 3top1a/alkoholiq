@@ -1,0 +1,26 @@
+set n 100
+set five 5
+set three 3
+set zero 0
+set print 1
+
+until_eq n zero
+    div n three r q
+    if_eq r 0
+        print_msg "Fizz"
+        set print 0
+    end
+    div n five r q
+    if_eq r 0
+        print_msg "Buzz"
+        set print 0
+    end
+
+    if_neq print 0
+        printc n
+    end
+
+    print_msg "\n"
+    dec n
+    set print 1
+end
