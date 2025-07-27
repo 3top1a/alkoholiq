@@ -53,6 +53,7 @@ impl Codegen {
         }
     }
 
+    #[allow(dead_code)]
     pub fn new_test(instructions: Vec<Instruction>) -> Self {
         // Self::new but with the instruction separator set to `#`
         Self {
@@ -133,12 +134,12 @@ impl Codegen {
                  */
 
         // Make sure cases are sorted
-        let cases: Vec<u8> = cases.iter().map(|x| x.clone()).collect();
+        let cases: Vec<u8> = cases.to_vec();
         assert!(cases.is_sorted());
-        assert!(cases.len() > 0);
+        assert!(!cases.is_empty());
 
         // Copy to 1 and use 0 as temp so that the output matches the tutorial's example
-        self.copy(&a, &"1".to_string());
+        self.copy(a, &"1".to_string());
         self.set(&"0".to_string(), &1);
 
         let mut last_case = 0;
@@ -463,7 +464,7 @@ impl Codegen {
                 self.zero(&"2".to_string());
                 self.code += "]";
             }
-            BlockStack::IfNotEqualConst { a, b } => {
+            BlockStack::IfNotEqualConst { .. } => {
                 self.goto(&"2".to_string());
                 self.code += "]";
                 self.zero(&"2".to_string());

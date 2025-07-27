@@ -13,7 +13,7 @@ For example, the absence of jump instructions means function calls must be imple
 The memory layout looks like this:
 
 ```
-[ Temporary variables used by instructions] [ 0 ] [Variable storage+] [ 0 ] [Stack+]
+[ Temporary variables used by instructions] [ 0 ] [Variable storage] [ ] [ ] [Stack]
 ```
 
 Temporary variables are used by instructions to store intermediate results, and are not accessible to the user.

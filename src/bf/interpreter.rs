@@ -65,7 +65,7 @@ impl Interpreter {
                             if n == 1 {
                                 self.tape[self.pointer as usize] = buf[0];
                             } else {
-                                panic!("Expected 1 byte, got {}", n);
+                                panic!("Expected 1 byte, got {n}");
                             }
                         }
                         Err(_) => panic!("Error reading input"),
@@ -86,9 +86,7 @@ impl Interpreter {
                     let temps = self.tape.iter().rev().take(20).collect::<Vec<&u8>>();
                     assert!(
                         temps.iter().all(|&x| *x == 0),
-                        "Temporary variables are not zero at instruction {}: {:?}",
-                        instruction_index,
-                        temps
+                        "Temporary variables are not zero at instruction {instruction_index}: {temps:?}"
                     );
                 }
                 _ => {}
