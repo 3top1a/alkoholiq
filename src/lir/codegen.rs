@@ -49,7 +49,7 @@ impl Codegen {
             instructions,
             parsed: InstructionsAnalysis::default(),
             block_stack: Vec::new(),
-            instruction_separator: String::new(),
+            instruction_separator: String::from("#"),
         }
     }
 

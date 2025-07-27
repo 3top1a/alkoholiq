@@ -11,6 +11,8 @@ pub fn add_header(s: String) -> String {
 
 pub fn optimize(bf: String) -> String {
     let bf = optim::optimize_no_effect(bf);
+    let bf = optim::remove_redundant_zeros(bf);
+    let bf = optim::optimize_no_effect(bf);
     let bf = optim::remove_non_brainfuck(bf);
     add_header(bf)
 }
