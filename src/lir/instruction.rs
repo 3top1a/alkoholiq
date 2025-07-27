@@ -106,9 +106,10 @@ pub enum Instruction {
     Pop(Variable),
 
     /// Match value of a variable
-    /// 
+    ///
     /// Second argument needs to be sorted in ascending order, and the cases instructions must be
     /// in the *exact opposite* order of the values in the second argument.
+    /// Code between `Match` and `Case` will be executed if no case matches.
     Match(Variable, Vec<Immediate>),
 
     /// Case in a match case

@@ -92,6 +92,13 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                     let msg = msg[1..msg.len() - 1].to_string();
                     Instruction::PrintMsg(msg)
                 }
+                Rule::match_instr => {
+                    let mut inner = inner.into_inner();
+                    let var = inner.next().unwrap().as_str().to_string();
+                    let values = inner.map(|v| v.as_str().parse::<u8>().unwrap()).collect();
+                    Instruction::Match(var, values)
+                }
+                Rule::case_instr => Instruction::Case {},
                 Rule::add_instr => {
                     let mut inner = inner.into_inner();
                     let a = inner.next().unwrap().as_str().to_string();

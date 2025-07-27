@@ -27,7 +27,7 @@ The cell denoting it is occupied might become user changeable in the future, all
 
 ### Instructions
 
-Also see the [instruction.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/instruction.rs) file.
+The syntax is a 1:1 mapping to the internal representation of LIR instructions. See the [instruction.rs](https://github.com/3top1a/alkoholiq/blob/main/src/lir/instruction.rs) file.
 
 - `set <var> <value>` - Set a variable to a value
 - `copy <var> <var>` - Copy from variable a to variable b
@@ -54,6 +54,8 @@ Also see the [instruction.rs](https://github.com/3top1a/alkoholiq/blob/main/src/
 - `if_neq <var> <const>` - If a variable is not equal to a constant, run the next block
 - `until_eq <var> <var>` - Run until a variables are equal
 - `while_nz <var>` - Run while a variable is not zero
+- `match <var> <const+>` - Match a variable against a number of constants in reverse order
+- `case` - Start a case block for the match instruction
 - `end` - End the current block
 
 - `push <var>` - Push a variable onto the stack
@@ -131,6 +133,26 @@ while_nz n
 end
 // Also include a new line; '' and "" are equivalent
 print_msg '\n'
+```
+
+Match example:
+
+```js
+set a 1
+
+match a 1 2 3
+    // Default case
+    print_msg "error"
+case
+    // a == 3
+    print_msg "a is 3"
+case
+    // a == 2
+    print_msg "a is 2"
+case
+    // a == 1
+    print_msg "a is 1"
+end
 ```
 
 See the LIR's [example folder](https://github.com/3top1a/alkoholiq/tree/main/examples/lir) for more examples.

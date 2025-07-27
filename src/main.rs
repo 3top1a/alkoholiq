@@ -52,7 +52,7 @@ fn main() -> Result<()> {
 
     if args.brainfuck {
         println!();
-        println!("{}", code);
+        println!("{code}");
         return Ok(());
     }
 

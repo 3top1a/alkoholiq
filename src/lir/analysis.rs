@@ -136,7 +136,7 @@ impl InstructionsAnalysis {
                     var(a, false)?;
                 }
                 Match(a, _) => var(a, true)?,
-                Case() => {},
+                Case() => {}
             }
         }
 

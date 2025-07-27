@@ -23,7 +23,6 @@ impl Interpreter {
         let mut instruction_index = 0;
         let code: Vec<char> = code.chars().collect();
 
-        // Assert amount of [ is the same as ]
         assert_eq!(
             code.iter().filter(|x| **x == '[').count(),
             code.iter().filter(|x| **x == ']').count(),

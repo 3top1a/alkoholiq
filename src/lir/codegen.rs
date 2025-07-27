@@ -5,12 +5,26 @@ use std::string::ToString;
 
 #[derive(Debug, Clone, PartialEq)]
 enum BlockStack {
-    IfEqual { a: Variable, b: Variable },
-    IfEqualConst { a: Variable },
-    IfNotEqual { a: Variable, b: Variable },
-    UntilEqual { a: Variable, b: Variable },
+    IfEqual {
+        a: Variable,
+        b: Variable,
+    },
+    IfEqualConst {
+        a: Variable,
+    },
+    IfNotEqual {
+        a: Variable,
+        b: Variable,
+    },
+    UntilEqual {
+        a: Variable,
+        b: Variable,
+    },
     WhileNotZero(Variable),
-    IfNotEqualConst { a: Variable, b: Immediate },
+    IfNotEqualConst {
+        a: Variable,
+        b: Immediate,
+    },
     Match {
         /// Flag to indicate that the code is in the default case
         is_default_case: bool,
@@ -104,19 +118,19 @@ impl Codegen {
 
     fn match_var(&mut self, a: &Variable, cases: Vec<Immediate>) {
         /* from https://brainfuck.org/function_tutorial.b
->+<[
-    -[
-        -[
+        >+<[
             -[
                 -[
-                    [-]>-default<
-                ]>[-4]<
-            ]>[-3]<
-        ]>[-2]<
-    ]>[-1]<
-]>[-0]<
+                    -[
+                        -[
+                            [-]>-default<
+                        ]>[-4]<
+                    ]>[-3]<
+                ]>[-2]<
+            ]>[-1]<
+        ]>[-0]<
 
-         */
+                 */
 
         // Make sure cases are sorted
         let cases: Vec<u8> = cases.iter().map(|x| x.clone()).collect();
@@ -141,12 +155,14 @@ impl Codegen {
         self.zero(&"1".to_string());
         self.dec_by(&"0".to_string(), &1);
 
-        self.block_stack.push(BlockStack::Match {is_default_case: true});
+        self.block_stack.push(BlockStack::Match {
+            is_default_case: true,
+        });
     }
 
     fn case(&mut self) {
         // If the code is after the default case
-        if let Some(BlockStack::Match {is_default_case}) = self.block_stack.last_mut() {
+        if let Some(BlockStack::Match { is_default_case }) = self.block_stack.last_mut() {
             if *is_default_case {
                 *is_default_case = false;
                 self.goto(&"1".to_string());
@@ -451,8 +467,8 @@ impl Codegen {
                 self.goto(&"2".to_string());
                 self.code += "]";
                 self.zero(&"2".to_string());
-            },
-            BlockStack::Match {..} => {
+            }
+            BlockStack::Match { .. } => {
                 self.code += "]";
             }
         }
