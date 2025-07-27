@@ -64,6 +64,7 @@ impl InstructionsAnalysis {
             Ok(())
         };
 
+        // Register and check validity of variable accesses
         for i in input {
             match i {
                 Copy { a, b } => {
@@ -172,7 +173,7 @@ impl InstructionsAnalysis {
                 | WhileNotZero(..)
                 | IfNotEqualConst { .. }
                 | IfEqualConst { .. }
-                | Case(..) => nesting += 1,
+                | Match(..) => nesting += 1,
                 End => nesting -= 1,
                 _ => {}
             }

@@ -24,8 +24,12 @@ impl Interpreter {
         let code: Vec<char> = code.chars().collect();
 
         // Assert amount of [ is the same as ]
-        assert_eq!(code.iter().filter(|x| **x == '[').count(), code.iter().filter(|x| **x == ']').count());
-        
+        assert_eq!(
+            code.iter().filter(|x| **x == '[').count(),
+            code.iter().filter(|x| **x == ']').count(),
+            "Uneven number of [ and ]"
+        );
+
         // TODO Parse BF into instructions that can execute faster `+++` -> Add(3)
 
         while instruction_index < code.len() {
@@ -81,7 +85,12 @@ impl Interpreter {
                 '#' => {
                     // Check all temporary variables are zero
                     let temps = self.tape.iter().rev().take(20).collect::<Vec<&u8>>();
-                    assert!(temps.iter().all(|&x| *x == 0), "Temporary variables are not zero at instruction {}: {:?}", instruction_index, temps);
+                    assert!(
+                        temps.iter().all(|&x| *x == 0),
+                        "Temporary variables are not zero at instruction {}: {:?}",
+                        instruction_index,
+                        temps
+                    );
                 }
                 _ => {}
             }

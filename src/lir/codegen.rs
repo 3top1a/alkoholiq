@@ -3,7 +3,7 @@ use crate::lir::instruction::{Immediate, Instruction, Instruction::*, Variable};
 use anyhow::Result;
 use std::string::ToString;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 enum BlockStack {
     IfEqual { a: Variable, b: Variable },
     IfEqualConst { a: Variable },
@@ -11,7 +11,10 @@ enum BlockStack {
     UntilEqual { a: Variable, b: Variable },
     WhileNotZero(Variable),
     IfNotEqualConst { a: Variable, b: Immediate },
-    Case,
+    Match {
+        /// Flag to indicate that the code is in the default case
+        is_default_case: bool,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -112,6 +115,7 @@ impl Codegen {
         ]>[-2]<
     ]>[-1]<
 ]>[-0]<
+
          */
 
         // Make sure cases are sorted
@@ -119,9 +123,10 @@ impl Codegen {
         assert!(cases.is_sorted());
         assert!(cases.len() > 0);
 
+        // Copy to 1 and use 0 as temp so that the output matches the tutorial's example
         self.copy(&a, &"1".to_string());
-
         self.set(&"0".to_string(), &1);
+
         let mut last_case = 0;
         for case in cases {
             self.dec_by(&"1".to_string(), &(case - last_case));
@@ -135,15 +140,29 @@ impl Codegen {
         // Default case
         self.zero(&"1".to_string());
         self.dec_by(&"0".to_string(), &1);
+
+        self.block_stack.push(BlockStack::Match {is_default_case: true});
     }
 
     fn case(&mut self) {
-        self.goto(&"1".to_string());
-        self.code += "]";
-        self.goto(&"0".to_string());
-        self.code += "[";
+        // If the code is after the default case
+        if let Some(BlockStack::Match {is_default_case}) = self.block_stack.last_mut() {
+            if *is_default_case {
+                *is_default_case = false;
+                self.goto(&"1".to_string());
+                self.code += "]";
+                self.goto(&"0".to_string());
+                self.code += "[";
+                self.dec_by(&"0".to_string(), &1);
+                return;
+            }
+        }
 
-        self.block_stack.push(BlockStack::Case);
+        // This is magic code, no clue how it does the thing it does, I just did things until
+        // a test case's output matched https://brainfuck.org/function_tutorial.b
+        self.goto(&"0".to_string());
+        self.code += "]<]>[";
+        self.dec_by(&"0".to_string(), &1);
     }
 
     /// Set a variable to a value
@@ -433,10 +452,8 @@ impl Codegen {
                 self.code += "]";
                 self.zero(&"2".to_string());
             },
-            BlockStack::Case => {
-                self.goto(&"0".to_string());
+            BlockStack::Match {..} => {
                 self.code += "]";
-                self.zero(&"1".to_string());
             }
         }
     }
