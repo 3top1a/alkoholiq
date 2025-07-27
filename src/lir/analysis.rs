@@ -141,24 +141,12 @@ impl InstructionsAnalysis {
         }
 
         // Register temporary variables
-        variables.insert("17".to_string(), -18);
-        variables.insert("16".to_string(), -17);
-        variables.insert("15".to_string(), -16);
-        variables.insert("14".to_string(), -15);
-        variables.insert("13".to_string(), -14);
-        variables.insert("12".to_string(), -13);
-        variables.insert("11".to_string(), -12);
-        variables.insert("10".to_string(), -11);
-        variables.insert("9".to_string(), -10);
-        variables.insert("8".to_string(), -9);
-        variables.insert("7".to_string(), -8);
-        variables.insert("6".to_string(), -7);
-        variables.insert("5".to_string(), -6);
-        variables.insert("4".to_string(), -5);
-        variables.insert("3".to_string(), -4);
-        variables.insert("2".to_string(), -3);
-        variables.insert("1".to_string(), -2);
-        variables.insert("0".to_string(), -1);
+
+        // variables.insert("1".to_string(), -2);
+        // variables.insert("0".to_string(), -1);
+        for i in 0..17 {
+            variables.insert(i.to_string(), -i - 1);
+        }
 
         Ok((variables, index))
     }
