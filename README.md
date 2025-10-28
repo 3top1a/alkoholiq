@@ -70,7 +70,7 @@ I will not be taking any questions, thank you.
 ## License
 
 Licensed under [Good Luck With That Shit Public License](https://github.com/me-shaon/GLWTPL/tree/master) or [Derivative Gardens Misattribution-OnlyCommercial-ShareUnlike 6.9 Unportable License](https://www.boringcactus.com/2023/06/15/the-derivative-gardens-license.html), which ever you vibe with more.
-You may not, however, under any license, use Alkoholiq to program to piloting software on the Boeing 747, nor the Lockheed Martin F-35 Lightning II.
+You may not, however, under any license, use Alkoholiq to program the piloting software on the Boeing 747, nor the Lockheed Martin F-35 Lightning II.
 
 ![Good luck GIF](https://github.com/me-shaon/GLWTPL/blob/master/good-luck.gif?raw=true)
 
