@@ -61,7 +61,7 @@ Examples can be found in the [examples](https://github.com/3top1a/alkoholiq/tree
 The name stems from alcoholism, because, well, I'm from the Czech Republic where beer is cheaper than water.
 *Alkoholik* is a short Czech translation of an alcohol addict.
 Inspired by our automotive manufacturer, *Škoda*, that have started naming all of their new cars with the letter q at the end, I decided to do the same.
-Tune in next time for *QDE Qonnect*.
+Tune in next time for *QDE Qonneq*.
 
 ## Q&A
 
@@ -70,6 +70,7 @@ I will not be taking any questions, thank you.
 ## License
 
 Licensed under [Good Luck With That Shit Public License](https://github.com/me-shaon/GLWTPL/tree/master) or [Derivative Gardens Misattribution-OnlyCommercial-ShareUnlike 6.9 Unportable License](https://www.boringcactus.com/2023/06/15/the-derivative-gardens-license.html), which ever you vibe with more.
+You may not, however, under any license, use Alkoholiq to program to piloting software on the Boeing 747, nor the Lockheed Martin F-35 Lightning II.
 
 ![Good luck GIF](https://github.com/me-shaon/GLWTPL/blob/master/good-luck.gif?raw=true)
 
