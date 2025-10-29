@@ -60,7 +60,7 @@ Examples can be found in the [examples](https://github.com/3top1a/alkoholiq/tree
 
 The name stems from alcoholism, because, well, I'm from the Czech Republic where beer is cheaper than water.
 *Alkoholik* is a short Czech translation of an alcohol addict.
-Inspired by our automotive manufacturer, *Škoda*, that have started naming all of their new cars with the letter q at the end, I decided to do the same.
+Inspired by our automotive manufacturer, *Škoda*, that has started naming all of their new cars with the letter q at the end, I decided to do the same.
 Tune in next time for *QDE Qonneq*.
 
 ## Q&A
