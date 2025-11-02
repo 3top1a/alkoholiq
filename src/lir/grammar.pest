@@ -28,6 +28,7 @@ instruction = !{
     until_equal_instr |
     while_not_zero_instr |
     compare_instr |
+    push_const_instr |
     push_instr |
     pop_instr |
     raw_instr |
@@ -63,6 +64,7 @@ if_not_equal_const_instr = { "if_neq" ~ variable ~ immediate }
 until_equal_instr = { "until_eq" ~ variable ~ variable }
 while_not_zero_instr = { "while_nz" ~ variable }
 compare_instr = { "compare" ~ variable ~ variable ~ variable }
+push_const_instr = { "push" ~ immediate }
 push_instr = { "push" ~ variable }
 pop_instr = { "pop" ~ variable }
 raw_instr = { "raw" ~ string_literal }

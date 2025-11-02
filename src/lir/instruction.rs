@@ -99,6 +99,8 @@ pub enum Instruction {
 
     /// Push variable onto stack
     Push(Variable),
+    /// Push constant onto stack
+    PushConst(Immediate),
 
     /// Pop variable from stack
     ///

@@ -134,6 +134,10 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                     let var = inner.into_inner().next().unwrap().as_str().to_string();
                     Instruction::Push(var)
                 }
+                Rule::push_const_instr => {
+                    let a = inner.into_inner().next().unwrap().as_str().parse()?;
+                    Instruction::PushConst(a)
+                }
                 Rule::pop_instr => {
                     let var = inner.into_inner().next().unwrap().as_str().to_string();
                     Instruction::Pop(var)

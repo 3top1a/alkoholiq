@@ -107,6 +107,7 @@ impl Codegen {
                 quotient: q,
             } => self.div(&a, &b, &r, &q),
             Push(a) => self.stack_push(&a),
+            PushConst(a) => self.stack_push_const(&a),
             Pop(a) => self.stack_pop(&a),
             Match(a, cases) => self.match_var(&a, cases),
             Case() => self.case(),
@@ -662,16 +663,17 @@ impl Codegen {
         self.while_not_zero(&"1".to_string());
         self.code += "-";
 
-        self.goto_end_of_vars();
+        self.goto_end_of_vars(); // This will go to the end of the variable sector
         self.code += ">>";
-        self.code += "[>>]";
-        self.code += ">+<";
+        self.code += "[>>]"; // Go by two every time an entry is marked
+        self.code += ">+<"; // Increment by one, just like copying
         self.code += "<<";
         self.code += "[<<]";
         self.goto(&"1".to_string());
 
         self.end();
 
+        // Mark the entry as occupied by setting the first cell to `id`
         self.goto_end_of_vars();
         self.code += ">>";
         self.code += "[>>]";
@@ -680,6 +682,22 @@ impl Codegen {
         self.code += "[<<]";
 
         self.goto(a);
+    }
+
+    /// Push constant on stack
+    fn stack_push_const(&mut self, a: &Immediate) {
+        let id = 1; // TODO let user decide id; probably not a good idea maybe?
+
+        self.goto_end_of_vars();
+        self.code += ">>";
+        self.code += "[>>]";
+        self.code += &*"+".repeat(id as usize);
+        self.code += ">";
+        self.code += &*"+".repeat(*a as usize);
+        self.code += "<";
+        self.code += "<<";
+        self.code += "[<<]";
+        self.goto(&"1".to_string());
     }
 
     /// Pop from the stack

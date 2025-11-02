@@ -1,6 +1,3 @@
-use std::collections::HashSet;
-use std::fmt::format;
-
 /// Optimizes series of instructions that have no effect, e.g. <><> or +-+-
 pub fn optimize_no_effect(bf: String) -> String {
     // Literally remove <> and >< and +- and -+ until nothing changes
@@ -42,10 +39,10 @@ pub fn remove_redundant_zeros(bf: String) -> String {
     let mut bracket_index = 0;
     let mut used_variables = vec![];
 
-    let mut debug_index = 0;
+    // let mut debug_index = 0;
 
     for code in split {
-        debug_index += 1;
+        // debug_index += 1;
         for char in code.chars() {
             match char {
                 '<' => pointer -= 1,
@@ -66,12 +63,12 @@ pub fn remove_redundant_zeros(bf: String) -> String {
                     if !used_variables.contains(&pointer) {
                         used_variables.push(pointer)
                     }
-                },
+                }
                 '#' => {
                     // Remove all pointers in `used_variables` if they're temporary
                     used_variables.retain(|x| *x > 0);
                 }
-                _ => {},
+                _ => {}
             }
         }
 

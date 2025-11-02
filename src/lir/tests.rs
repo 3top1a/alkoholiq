@@ -274,7 +274,7 @@ mod tests {
             Set("b".to_string(), b'-'),
             Match("a".to_string(), vec![b'a', b'b']),
             PrintS("C".to_string()), // default
-            Case(),                    // b
+            Case(),                  // b
             PrintS("B".to_string()),
             Case(), // a
             PrintS("A".to_string()),
@@ -297,6 +297,9 @@ mod tests {
         // ];
         // let bf = Codegen::new_test(code).codegen().unwrap();
         // assert_eq!(bf, "<<[-]>>[-<+<+>>]<[->+<]<>[-]+<[-[-[-[[-]>-#<]>[-#]<]>[-#]<]>[-#]<]>[-#]#");
+
+        let code = vec![PushConst(65), Pop("a".to_string()), Print("a".to_string())];
+        assert_eq_bf(code, ">>>[>>]+>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++<<<[<<]<<<>>[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<.");
     }
 
     #[test]

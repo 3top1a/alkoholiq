@@ -1,0 +1,13 @@
+
+push 0
+
+
+
+
+
+pop PC
+while_nz PC
+
+    pop PC
+end
+

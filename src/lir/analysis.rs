@@ -132,6 +132,7 @@ impl InstructionsAnalysis {
                 Push(a) => {
                     var(a, true)?;
                 }
+                PushConst(_) => {}
                 Pop(a) => {
                     var(a, false)?;
                 }
