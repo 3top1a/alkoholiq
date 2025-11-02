@@ -25,6 +25,8 @@ while_nz PC
     case # PC == 1
         # Exit - push zero on the stack
         prints "\n"
+        inc PC
+        dec PC
         push 0
     end
 

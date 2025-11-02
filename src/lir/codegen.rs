@@ -27,7 +27,7 @@ enum BlockStack {
     },
     Match {
         /// Flag to indicate that the code is in the default case
-        is_default_case: bool,
+        is_first_case: bool,
     },
 }
 
@@ -49,7 +49,7 @@ impl Codegen {
             instructions,
             parsed: InstructionsAnalysis::default(),
             block_stack: Vec::new(),
-            instruction_separator: String::from("%"),
+            instruction_separator: String::from(""),
         }
     }
 
@@ -162,34 +162,35 @@ impl Codegen {
         self.dec_by(&"0".to_string(), &1);
 
         self.block_stack.push(BlockStack::Match {
-            is_default_case: true,
+            is_first_case: true,
         });
     }
 
     fn case(&mut self) {
-        // TODO This code ugly, fix
-
-        if let Some(BlockStack::Match {
-            is_default_case, ..
-        }) = self.block_stack.last_mut()
-        {
-            if *is_default_case {
-                // This gets called when this is the first case block encountered.
-                // So right before this was the code of the default block, and after this
-                // will be the first case expression's code.
-                // TODO Something's fishy that this needs a different block of code.
-                *is_default_case = false;
-                self.goto(&"0".to_string());
-                self.code += "<]>[";
-                self.dec_by(&"0".to_string(), &1);
-                return;
-            }
-        }
-
         // This is magic code, no clue how it does the thing it does, I just did things until
         // a test case's output matched https://brainfuck.org/function_tutorial.b
+
+        let is_first_case =
+            if let Some(BlockStack::Match { is_first_case, .. }) = self.block_stack.last_mut() {
+                let copy = *is_first_case;
+                *is_first_case = false;
+                copy
+            } else {
+                false
+            };
+
         self.goto(&"0".to_string());
-        self.code += "]<]>[";
+
+        if is_first_case {
+            // This gets called when this is the first case block encountered.
+            // So right before this was the code of the default block, and after this
+            // will be the first case expression's code.
+            // Because yes, it doesn't have the first ]
+            self.code += "<]>[";
+        } else {
+            self.code += "]<]>[";
+        }
+
         self.dec_by(&"0".to_string(), &1);
     }
 
@@ -499,7 +500,7 @@ impl Codegen {
         // Move `from` to temp0 and temp1
         self.while_not_zero(from);
         self.dec_by(from, &1);
-        // TODO find optimal copy method computationally
+
         // From and To are probably going to be closer than 0 and 1
         self.inc_by(&"0".to_string(), &1);
         self.inc_by(to, &1);
@@ -666,13 +667,10 @@ impl Codegen {
 
     /// Push on stack
     fn stack_push(&mut self, a: &Variable) {
-        let id = 1; // TODO let user decide id; probably not a good idea maybe?
-
         self.copy(a, &"1".to_string()); // TODO Make a `copy` but for internal purposes (Does not clear one temp)
-        self.goto(&"1".to_string());
 
         self.while_not_zero(&"1".to_string());
-        self.code += "-";
+        self.dec_by(&"1".to_string(), &1);
 
         self.goto_end_of_vars(); // This will go to the end of the variable sector
         self.code += ">>";
@@ -680,7 +678,7 @@ impl Codegen {
         self.code += ">+<"; // Increment by one, just like copying
         self.code += "<<";
         self.code += "[<<]";
-        self.goto(&"1".to_string());
+        self.goto(&"0".to_string());
 
         self.end();
 
@@ -688,7 +686,7 @@ impl Codegen {
         self.goto_end_of_vars();
         self.code += ">>";
         self.code += "[>>]";
-        self.code += &*"+".repeat(id as usize);
+        self.code += "+";
         self.code += "<<";
         self.code += "[<<]";
 
@@ -697,12 +695,10 @@ impl Codegen {
 
     /// Push constant on stack
     fn stack_push_const(&mut self, a: &Immediate) {
-        let id = 1; // TODO let user decide id; probably not a good idea maybe?
-
         self.goto_end_of_vars();
         self.code += ">>";
         self.code += "[>>]";
-        self.code += &*"+".repeat(id as usize);
+        self.code += "+";
         self.code += ">";
         self.code += &*"+".repeat(*a as usize);
         self.code += "<";
@@ -761,7 +757,7 @@ impl Codegen {
         )
     }
 
-    // Move pointer to position zero
+    /// Move pointer to position zero, only used for internal purposes
     fn goto_zero(&mut self) {
         self.move_by(0 - self.ptr)
     }
