@@ -135,8 +135,8 @@ impl Codegen {
                  */
 
         // Make sure cases are sorted
-        let cases: Vec<u8> = cases.to_vec();
-        assert!(cases.is_sorted());
+        let cases: Vec<&Immediate> = cases.iter().rev().clone().collect();
+        assert!(cases.iter().is_sorted());
         assert!(!cases.is_empty());
 
         // Copy to 1 and use 0 as temp so that the output matches the tutorial's example
@@ -150,7 +150,7 @@ impl Codegen {
 
             self.code += "[";
 
-            last_case = case;
+            last_case = *case;
         }
 
         // Default case

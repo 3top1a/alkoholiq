@@ -272,7 +272,7 @@ mod tests {
         let code = vec![
             Read("a".to_string()),
             Set("b".to_string(), b'-'),
-            Match("a".to_string(), vec![b'a', b'b']),
+            Match("a".to_string(), vec![b'b', b'a']),
             PrintS("C".to_string()), // default
             Case(),                  // b
             PrintS("B".to_string()),
@@ -286,7 +286,7 @@ mod tests {
         // Test case used for development, just here if I need it again
         // Does need the variable checking in analysis.rs to be set to false
         // let code = vec![
-        //     Match("a".to_string(), vec![0, 1, 2, 3]),
+        //     Match("a".to_string(), vec![3, 2, 1, 0]),
         //
         //     Case(), // 3
         //     Case(), // 2

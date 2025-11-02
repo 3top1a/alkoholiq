@@ -8,8 +8,9 @@ lint:
     cargo fmt -- --check
     cargo clippy
 
-test: build
+test:
     cargo test
+    cargo build --release
     for x in examples/lir/*; do cargo run --release < $x; done
 
 ci: test
