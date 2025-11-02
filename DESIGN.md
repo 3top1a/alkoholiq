@@ -48,18 +48,16 @@ The syntax is a 1:1 mapping to the internal representation of LIR instructions. 
 - `printc <var>` - Print the decimal value of a variable to stdout
 - `prints <string>` - Print a static string to stdout
 
-- `if_eq <var> <var>` - If two variables are equal, run the next block
-- `if_eq <var> <const>` - If a variable is equal to a constant, run the next block
-- `if_neq <var> <var>` - If two variables are not equal, run the next block
-- `if_neq <var> <const>` - If a variable is not equal to a constant, run the next block
+- `if_eq <var> <var/const>` - If equal, run the next block
+- `if_neq <var> <var/const>` - If not equal, run the next block
 - `until_eq <var> <var>` - Run until a variables are equal
 - `while_nz <var>` - Run while a variable is not zero
 - `match <var> <const+>` - Match a variable against a number of constants, see example below
 - `case` - Start a case block for the match instruction
 - `end` - End the current block
 
-- `push <var>` - Push a variable onto the stack
-- `pop <var>` - Pop a variable from the stack
+- `push <var/const>` - Push onto the stack
+- `pop <var>` - Pop from the stack and store into variable
 
 - `raw <string>` - Insert raw brainfuck code
 
