@@ -95,7 +95,10 @@ fn parse_instruction(pair: Pair<Rule>) -> Result<Option<Instruction>> {
                 Rule::match_instr => {
                     let mut inner = inner.into_inner();
                     let var = inner.next().unwrap().as_str().to_string();
-                    let values = inner.map(|v| v.as_str().parse::<u8>().unwrap()).collect();
+                    let values = inner
+                        .map(|v| v.as_str().parse::<u8>().unwrap())
+                        .rev()
+                        .collect();
                     Instruction::Match(var, values)
                 }
                 Rule::case_instr => Instruction::Case {},

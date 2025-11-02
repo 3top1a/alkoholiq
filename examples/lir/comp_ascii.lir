@@ -19,7 +19,7 @@ compare a b res
 //end
 
 // This is equivalent code
-match res 1 2
+match res 2 1
     // default
         prints "Numbers are equal"
 

@@ -1,5 +1,5 @@
 
-push 0
+push 1
 
 
 
@@ -8,6 +8,18 @@ push 0
 pop PC
 while_nz PC
 
+    # The actual function definitions are here, inside the match block
+    # Every time PC is non-zero, its corresponding function gets called
+    # The only limitation is that functions cannot call other functions mid code,
+    # only continuation style passing is possible
+
+    match PC 1
+
+    case # PC == 1
+        # Exit - push zero on the stack
+        push 0
+
+    end
     pop PC
 end
 

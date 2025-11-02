@@ -54,7 +54,7 @@ The syntax is a 1:1 mapping to the internal representation of LIR instructions. 
 - `if_neq <var> <const>` - If a variable is not equal to a constant, run the next block
 - `until_eq <var> <var>` - Run until a variables are equal
 - `while_nz <var>` - Run while a variable is not zero
-- `match <var> <const+>` - Match a variable against a number of constants in reverse order
+- `match <var> <const+>` - Match a variable against a number of constants, see example below
 - `case` - Start a case block for the match instruction
 - `end` - End the current block
 
@@ -140,17 +140,15 @@ Match example:
 ```js
 set a 1
 
-match a 1 2 3
+// The constants must be in descending order!
+match a 3 2 1
     // Default case
     prints "error"
-case
-    // a == 3
+case // a == 3
     prints "a is 3"
-case
-    // a == 2
+case // a == 2
     prints "a is 2"
-case
-    // a == 1
+case // a == 1
     prints "a is 1"
 end
 ```

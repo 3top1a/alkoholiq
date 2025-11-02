@@ -38,8 +38,18 @@ impl Interpreter {
             }
 
             match code[instruction_index] {
-                '>' => self.pointer_right(),
-                '<' => self.pointer_left(),
+                '>' => {
+                    self.pointer += 1;
+                    if self.pointer >= self.tape.len() as i32 {
+                        self.pointer -= self.tape.len() as i32;
+                    }
+                }
+                '<' => {
+                    self.pointer -= 1;
+                    if self.pointer < 0 {
+                        self.pointer += self.tape.len() as i32;
+                    }
+                }
                 '+' => {
                     self.tape[self.pointer as usize] =
                         self.tape[self.pointer as usize].wrapping_add(1)
@@ -114,19 +124,5 @@ impl Interpreter {
         }
 
         jump_table
-    }
-
-    fn pointer_left(&mut self) {
-        self.pointer -= 1;
-        if self.pointer < 0 {
-            self.pointer += self.tape.len() as i32;
-        }
-    }
-
-    fn pointer_right(&mut self) {
-        self.pointer += 1;
-        if self.pointer >= self.tape.len() as i32 {
-            self.pointer -= self.tape.len() as i32;
-        }
     }
 }
