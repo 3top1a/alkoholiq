@@ -1,25 +1,32 @@
-
-push 1
-
-
-
+# Push first function call
+push 3
 
 
 pop PC
 while_nz PC
-
     # The actual function definitions are here, inside the match block
     # Every time PC is non-zero, its corresponding function gets called
     # The only limitation is that functions cannot call other functions mid code,
     # only continuation style passing is possible
 
-    match PC 1
+    match PC 3 2 1
+    # Default case
+        prints "Invalid PC! Existing"
+        push 0
+
+    case # PC == 3
+        prints "Hello "
+        push 2
+
+    case # PC == 2
+        prints "World!"
+        push 1
 
     case # PC == 1
         # Exit - push zero on the stack
+        prints "\n"
         push 0
-
     end
+
     pop PC
 end
-

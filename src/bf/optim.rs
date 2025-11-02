@@ -9,9 +9,9 @@ pub fn optimize_no_effect(bf: String) -> String {
         new = new
             .replace("><", "")
             .replace("<>", "")
-            .replace("+-", "")
             .replace("[-][-]", "[-]")
-            .replace("-+", "");
+            .replace("-+", "")
+            .replace("+-", "");
         if old == new {
             break;
         }
@@ -64,7 +64,7 @@ pub fn remove_redundant_zeros(bf: String) -> String {
                         used_variables.push(pointer)
                     }
                 }
-                '#' => {
+                '%' => {
                     // Remove all pointers in `used_variables` if they're temporary
                     used_variables.retain(|x| *x > 0);
                 }

@@ -1,15 +1,17 @@
 #[cfg(test)]
 mod tests {
     use crate::bf;
+    use crate::bf::interpreter::Interpreter;
     use crate::lir::codegen::Codegen;
     use crate::lir::instruction::Instruction;
     use crate::lir::instruction::Instruction::*;
     use std::fs::File;
     use std::io::Read;
     use std::path::Path;
+    // TODO Split into "equals generated code" and "prints out string" tests
 
     #[test]
-    fn basics() {
+    fn test_equal_brainfuck() {
         // #[track_caller] makes it report the line of the caller not the func def
         #[track_caller]
         fn assert_eq_bf(code: Vec<Instruction>, expected: &str) {
@@ -19,14 +21,16 @@ mod tests {
             for input in ["", "A", "b", "11", "12", "21"] {
                 let mut stdin = input.as_bytes();
                 let mut stdout = Vec::new();
-                let interpret = bf::interpreter::Interpreter::new();
+                let interpret = Interpreter::new();
                 interpret.run(&bf, &mut stdin, &mut stdout);
             }
 
             let bf = bf::optim::remove_non_brainfuck(bf); // To remove instruction separators
+            let bf = bf::optim::optimize_no_effect(bf);
             assert_eq!(bf, expected);
         }
 
+        // The end result should be a tape with 11, 250, 11
         let code = vec![
             Set("asdf".to_string(), 10),
             Dec("another".to_string()),
@@ -37,7 +41,7 @@ mod tests {
                 b: "newasdf".to_string(),
             },
         ];
-        assert_eq_bf(code, "[-]++++++++++>-<+>----->[-]<<[-<+>>>+<<]<[->+<]>>>");
+        assert_eq_bf(code, "[-]++++++++++>-<+>----->[-]<<[-<+>>>+<<]<[->+<]>");
 
         let code = vec![
             Read("a".to_string()),
@@ -47,7 +51,7 @@ mod tests {
             IncBy("b".to_string(), b'Z'),
             Print("b".to_string()),
         ];
-        assert_eq_bf(code, "[-],+.>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.");
+        assert_eq_bf(code, "[-],+.>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.<");
 
         // This should error
         let code = vec![Read("1".to_string())];
@@ -105,24 +109,7 @@ mod tests {
             End,
             Print("b".to_string()),
         ];
-        assert_eq_bf(code, "[-],[->+<.]>.");
-
-        // If input is not A, print it twice
-        let code = vec![
-            Read("a".to_string()),
-            Set("b".to_string(), b'A'),
-            IfNotEqual {
-                a: "a".to_string(),
-                b: "b".to_string(),
-            },
-            Print("a".to_string()),
-            End,
-            Print("a".to_string()),
-        ];
-        assert_eq_bf(
-            code,
-            "[-],>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[-<<+>->]<<[->>+<<]><<<[-]>>>[-<+<<+>>>]<[->+<]<<[[-]>>>>[-<<+>+>]<<[->>+<<]>.>[-<<+>->]<<[->>+<<]><<<]>>>>[-<<+>+>]<<[->>+<<]>.",
-        );
+        assert_eq_bf(code, "[-],[->+<.]>.<");
 
         let code = vec![
             Read("a".to_string()),
@@ -155,13 +142,13 @@ mod tests {
         ];
         assert_eq_bf(
             code,
-            "[-],>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++<<<<[-]+>>>>[-<<+>->]<<[->>+<<]><<<<[-]>>>>[-<+<<<+>>>>]<[->+<]<<<[>[-]<[-]]>>>>>[-<<+>+>]<<[->>+<<]><<<[[-]>>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.<<<[-]]>>>.",
+            "[-],>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++<<<<[-]+>>>>[-<<+>->]<<[->>+<<]<<<[-]>>>>[-<+<<<+>>>>]<[->+<]<<<[>[-]<[-]]>>>>>[-<<+>+>]<<[->>+<<]<<[[-]>>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.<<<[-]]>>>.",
         );
 
         let code = vec![PrintS("Hello!".to_string())];
         assert_eq_bf(
             code,
-            "<[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.+++++++++++++++++++++++++++++.+++++++..+++.------------------------------------------------------------------------------.[-]",
+            "<[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.+++++++++++++++++++++++++++++.+++++++..+++.------------------------------------------------------------------------------.[-]>",
         );
 
         // If input is A, print BB, else print input
@@ -210,38 +197,8 @@ mod tests {
         ];
         assert_eq_bf(
             code,
-          "[-],>[-],>[-]<[-<<+>->]<<[->>+<<]><<<[-]>>>[-<+<<+>>>]<[->+<]<<[[-]>>>>[-<<+>+>]<<[->>+<<]><<[-]>[-]+[<+>>>-<-<<<[-]+<[-]>>>>[<<<[-]<[-]>>>>[-<<<<+>>>>]]<<<<[->>>>+<<<<]>>>><<<[[-]>>>>>[-]+<<<[-]<<[-]][-]+<[-]>>>>>[<<<<[-]<[-]>>>>>[-<<<<<+>>>>>]]<<<<<[->>>>>+<<<<<]>>>>><<<<[[-]>>>>>[-]++<<<[-]<<[-]]>>]<[->>+>+<<<]>>>[-<<+>->]<<[->>+<<]><<<]>>>>[-<<+>+>]<<[->>+<<]><<<[-]+<[-]>>>>>>[<<<<<[-]<[-]>>>>>>[-<<<<<<+>>>>>>]]<<<<<<[->>>>>>+<<<<<<]>>>>>><<<<<[[-]>>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<[-]][-]+<[-]>>>>>>-[<<<<<[-]<[-]>>>>>>[-<<<<<<+>>>>>>]]<<<<<<[->>>>>>+<<<<<<]>>>>>>+<<<<<[[-]>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<[-]][-]+<[-]>>>>>>--[<<<<<[-]<[-]>>>>>>[-<<<<<<+>>>>>>]]<<<<<<[->>>>>>+<<<<<<]>>>>>>++<<<<<[[-]>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<[-]]"
+         "[-],>[-],>[-]<[-<<+>->]<<[->>+<<]<<[-]>>>[-<+<<+>>>]<[->+<]<<[[-]>>>>[-<<+>+>]<<[->>+<<]<[-]>[-]+[<+>>>-<-<<<[-]+<[-]>>>>[<<<[-]<[-]>>>>[-<<<<+>>>>]]<<<<[->>>>+<<<<]>[[-]>>>>>[-]+<<<[-]<<[-]][-]+<[-]>>>>>[<<<<[-]<[-]>>>>>[-<<<<<+>>>>>]]<<<<<[->>>>>+<<<<<]>[[-]>>>>>[-]++<<<[-]<<[-]]>>]<[->>+>+<<<]>>>[-<<+>->]<<[->>+<<]<<]>>>>[-<<+>+>]<<[->>+<<]<<[-]+<[-]>>>>>>[<<<<<[-]<[-]>>>>>>[-<<<<<<+>>>>>>]]<<<<<<[->>>>>>+<<<<<<]>[[-]>>[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<[-]][-]+<[-]>>>>>>-[<<<<<[-]<[-]>>>>>>[-<<<<<<+>>>>>>]]<<<<<<[->>>>>>+<<<<<<]>>>>>>+<<<<<[[-]>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<[-]][-]+<[-]>>>>>>--[<<<<<[-]<[-]>>>>>>[-<<<<<<+>>>>>>]]<<<<<<[->>>>>>+<<<<<<]>>>>>>++<<<<<[[-]>>[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<[-]]>>>"
         );
-
-        // Should print D
-        let code = vec![
-            Set("a".to_string(), 17),
-            Set("b".to_string(), 4),
-            Mul {
-                a: "a".to_string(),
-                b: "b".to_string(),
-            },
-            Print("a".to_string()),
-        ];
-        assert_eq_bf(
-            code,
-            "[-]+++++++++++++++++>[-]++++<<<<[-]>>>>[-<<+<<+>>>>]<<[->>+<<]<<[->>>[-<+<<<+>>>>]<[->+<]<<<>]>>>[-]<<<<[->>>>+<<<<]>>>>.",
-        );
-
-        // Should print 4 and 1 in ascii
-        let code = vec![
-            Set("a".to_string(), 9),
-            Set("b".to_string(), 2),
-            Div {
-                a: "a".to_string(),
-                b: "b".to_string(),
-                remainder: "r".to_string(),
-                quotient: "q".to_string(),
-            },
-            Print("q".to_string()),
-            Print("r".to_string()),
-        ];
-        assert_eq_bf(code, "[-]+++++++++>[-]++<<<<<<<<<<<[-]>>>>>>>>>>[-<+<<<<<<<<<+>>>>>>>>>>]<[->+<]<<<<<<<<<>[-]>>>>>>>>>>[-<<+<<<<<<<<+>>>>>>>>>>]<<[->>+<<]<<<<<<<<>>>>>>>>>>>[-]>[-]<<<<<<<<<<<[-]+[>[-]>>>>>>>>[-<<+>->]<<[->>+<<]><<<[-]>>>[-<+<<+>>>]<[->+<]<<[[-]>>>>[-<<+>+>]<<[->>+<<]><<[-]>[-]+[<+>>>-<-<<<[-]+<[-]>>>>[<<<[-]<[-]>>>>[-<<<<+>>>>]]<<<<[->>>>+<<<<]>>>><<<[[-]<<<<[-]+>>>>>>[-]<<[-]][-]+<[-]>>>>>[<<<<[-]<[-]>>>>>[-<<<<<+>>>>>]]<<<<<[->>>>>+<<<<<]>>>>><<<<[[-]<<<<[-]++>>>>>>[-]<<[-]]>>]<[->>+>+<<<]>>>[-<<+>->]<<[->>+<<]><<<]>>>>[-<<+>+>]<<[->>+<<]><<<<<<<->>>>[-]<<<<[->>>>>>+<<+<<<<]>>>>>>[-<<<<<<+>>>>>>]<<<<<<+>>>>[[-]>>>>[-<<+>->]<<[->>+<<]>>>>+<<<<<<][-]<<<<-->>>>[-]<<<<[->>>>>>+<<+<<<<]>>>>>>[-<<<<<<+>>>>>>]<<<<<<++>>>>[[-]<<<<<[-]>>>>>][-]<<<<<]>[-]>>>>>>>>>[-]<<[->>+<<][-]<<<<<<<<<<[->>>>>>>>>>+<<<<<<<<<<]>>>>>>>>>>>[-]<<<<<<<<<<[->>>>>>>>>>+<<<<<<<<<<]>>>>>>>>>>>>.<.");
 
         let code = vec![
             // 9 2 0
@@ -252,23 +209,91 @@ mod tests {
             Push("b".to_string()),
             Pop("c".to_string()),
             Pop("b".to_string()),
-            // Mem should look like: 9 9 2, ptr at second 9
+            // Mem should look like: 9 9 2
         ];
-        assert_eq_bf(code, "[-]+++++++++>[-]++>[-]<<<<[-]>>[-<+<+>>]<[->+<]<[->>>>>>>[>>]>+<<<[<<]<<<<<]>>>>>>>[>>]+<<[<<]<<<<<[-]>>>[-<<+<+>>>]<<[->>+<<]<[->>>>>>>[>>]>+<<<[<<]<<<<<]>>>>>>>[>>]+<<[<<]<<>[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<<[-]>>>>[>>]<[-<[<<]<<+>>>>[>>]<]<[-]<<[<<]<<");
+        assert_eq_bf(code, "[-]+++++++++>[-]++>[-]<<<<[-]>>[-<+<+>>]<[->+<]<[->>>>>>>[>>]>+<<<[<<]<<<<<]>>>>>>>[>>]+<<[<<]<<<<<[-]>>>[-<<+<+>>>]<<[->>+<<]<[->>>>>>>[>>]>+<<<[<<]<<<<<]>>>>>>>[>>]+<<[<<]<[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<<[-]>>>>[>>]<[-<[<<]<<+>>>>[>>]<]<[-]<<[<<]<<<");
 
-        // This should reverse the two entered values using the stack
+        let code = vec![
+            Set("a".to_string(), 1),
+            Match("a".to_string(), vec![2, 1]),
+            Case(), // b
+            Case(), // a
+            End,
+        ];
+        assert_eq_bf(code, "[-]+<<[-]>>[-<+<+>>]<[->+<][-]+<-[-[[-]>-<]>[-]<]>[-]>");
+
+        let code = vec![PushConst(1), Pop("a".to_string()), Print("a".to_string())];
+        assert_eq_bf(code, ">>>[>>]+>+<<<[<<]<[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<.");
+    }
+
+    #[test]
+    fn test_correct_printout() {
+        #[track_caller]
+        fn test_bf(code: &Vec<Instruction>, input: &str, output: &str) {
+            let bf = Codegen::new_test(code.clone()).codegen().unwrap();
+
+            // Interpret the code and check that at every instruction separator, all temp variables are zero
+            let mut stdin = input.as_bytes();
+            let mut stdout = Vec::new();
+            let interpret = Interpreter::new();
+            interpret.run(&bf, &mut stdin, &mut stdout);
+
+            assert_eq!(output.to_string(), String::from_utf8(stdout).unwrap());
+        }
+
+        // If input is not A, print it twice
         let code = vec![
             Read("a".to_string()),
-            Read("b".to_string()),
-            Push("a".to_string()),
-            Push("b".to_string()),
+            Set("b".to_string(), b'A'),
+            IfNotEqual {
+                a: "a".to_string(),
+                b: "b".to_string(),
+            },
+            Print("a".to_string()),
+            End,
+            Print("a".to_string()),
+        ];
+        test_bf(&code, "", "\0\0");
+        test_bf(&code, "A", "A");
+        test_bf(&code, "AA", "A");
+        test_bf(&code, "B", "BB");
+        test_bf(&code, "Q", "QQ");
+
+
+        // Repeat stack pushes and pops
+        let code = vec![
+            PushConst(65),
             Pop("a".to_string()),
-            Pop("b".to_string()),
+            PushConst(65),
+            Pop("a".to_string()),
+            PushConst(65),
+            Pop("a".to_string()),
+            PushConst(65),
+            PushConst(65),
+            PushConst(65),
+            Print("a".to_string()),
+            Pop("a".to_string()),
+            Pop("a".to_string()),
+            Pop("a".to_string()),
+            PushConst(b'F'),
+            Pop("a".to_string()),
+            Print("a".to_string()),
+        ];
+        test_bf(&code, "", "AF");
+
+
+        // Prints BAB with stack ops in between to check for pointer consistency
+        let code = vec![
+            Set("b".to_string(), 66),
+            PushConst(65),
+            Print("b".to_string()),
+            Pop("a".to_string()),
             Print("a".to_string()),
             Print("b".to_string()),
         ];
-        assert_eq_bf(code, "[-],>[-],<<<[-]>>[-<+<+>>]<[->+<]<[->>>>>>[>>]>+<<<[<<]<<<<]>>>>>>[>>]+<<[<<]<<<<[-]>>>[-<<+<+>>>]<<[->>+<<]<[->>>>>>[>>]>+<<<[<<]<<<<]>>>>>>[>>]+<<[<<]<<[-]>>>>[>>]<[-<[<<]<<+>>>>[>>]<]<[-]<<[<<]<<>[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<<.>.");
+        test_bf(&code, "", "BAB");
 
+        // Tests match cases and default
         let code = vec![
             Read("a".to_string()),
             Set("b".to_string(), b'-'),
@@ -281,31 +306,54 @@ mod tests {
             End,
             Print("b".to_string()), // Here to check the pointer is in the correct place
         ];
-        assert_eq_bf(code, "[-],>[-]+++++++++++++++++++++++++++++++++++++++++++++<<<[-]>>[-<+<+>>]<[->+<]<>[-]+<-------------------------------------------------------------------------------------------------[-[[-]>-[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]<]>[-[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]]<]>[-[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]]>>.");
+        test_bf(&code, "", "C-");
+        test_bf(&code, "a", "A-");
+        test_bf(&code, "b", "B-");
 
-        // Test case used for development, just here if I need it again
-        // Does need the variable checking in analysis.rs to be set to false
-        // let code = vec![
-        //     Match("a".to_string(), vec![3, 2, 1, 0]),
-        //
-        //     Case(), // 3
-        //     Case(), // 2
-        //     Case(), // 1
-        //     Case(), // 0
-        //
-        //     End,
-        // ];
-        // let bf = Codegen::new_test(code).codegen().unwrap();
-        // assert_eq!(bf, "<<[-]>>[-<+<+>>]<[->+<]<>[-]+<[-[-[-[[-]>-#<]>[-#]<]>[-#]<]>[-#]<]>[-#]#");
+        // This should reverse the two entered values using the stack
+        let code = vec![
+            Read("a".to_string()),
+            Read("b".to_string()),
+            Push("a".to_string()),
+            Push("b".to_string()),
+            Pop("a".to_string()),
+            Pop("b".to_string()),
+            Print("a".to_string()),
+            Print("b".to_string()),
+        ];
+        test_bf(&code, "AC", "CA");
+        test_bf(&code, "A", "\0A");
 
-        let code = vec![PushConst(65), Pop("a".to_string()), Print("a".to_string())];
-        assert_eq_bf(code, ">>>[>>]+>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++<<<[<<]<<<>>[-]>>>[>>]<[-<[<<]<+>>>[>>]<]<[-]<<[<<]<.");
+        // Should print the division result (0x04) and remainder (0x01)
+        let code = vec![
+            Set("a".to_string(), 9),
+            Set("b".to_string(), 2),
+            Div {
+                a: "a".to_string(),
+                b: "b".to_string(),
+                remainder: "r".to_string(),
+                quotient: "q".to_string(),
+            },
+            Print("q".to_string()),
+            Print("r".to_string()),
+        ];
+        test_bf(&code, "", "\x04\x01");
+
+        // Should print D
+        let code = vec![
+            Set("a".to_string(), 17),
+            Set("b".to_string(), 4),
+            Mul {
+                a: "a".to_string(),
+                b: "b".to_string(),
+            },
+            Print("a".to_string()),
+        ];
+        test_bf(&code, "", "D");
     }
 
     #[test]
-    fn parse_examples() {
-        // Note: This only parses the examples and codegens them, it does not run them.
-        // Correct behaviour is not guaranteed.
+    fn run_examples() {
         let examples_dir = Path::new("examples/lir");
 
         let entries = std::fs::read_dir(examples_dir).expect("Failed to read examples directory");
@@ -317,13 +365,27 @@ mod tests {
             if path.is_file() {
                 let file_name = path.file_name().unwrap().to_str().unwrap();
                 if file_name.ends_with(".lir") {
+                    println!("Testing {}", path.display());
                     let code = std::fs::read_to_string(&path).expect("Failed to read file");
                     let parsed = crate::lir::parser::parse(&code).expect("Failed to parse LIR");
                     let bf = Codegen::new(parsed)
                         .codegen()
                         .expect("Failed to generate BF");
-                    let bf = bf::optimize(bf);
                     println!("{}", bf);
+
+                    // Run pre-optimization - as instruction separators are stripped out, this
+                    // allows the interpreter to catch temp-variables-not-zeroed-type errors
+                    let interpreter = Interpreter::new();
+                    let mut stdin = "".as_bytes();
+                    let mut stdout = Box::new(Vec::new());
+                    interpreter.run(&bf, &mut stdin, &mut stdout);
+
+                    // Run with optimization
+                    let bf = bf::optimize(bf);
+                    let interpreter = Interpreter::new();
+                    let mut stdin = "".as_bytes();
+                    let mut stdout = Box::new(Vec::new());
+                    interpreter.run(&bf, &mut stdin, &mut stdout);
                 }
             }
         }

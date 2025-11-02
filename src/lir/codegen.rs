@@ -49,20 +49,20 @@ impl Codegen {
             instructions,
             parsed: InstructionsAnalysis::default(),
             block_stack: Vec::new(),
-            instruction_separator: String::from("#"),
+            instruction_separator: String::from("%"),
         }
     }
 
     #[allow(dead_code)]
     pub fn new_test(instructions: Vec<Instruction>) -> Self {
-        // Self::new but with the instruction separator set to `#`
+        // Self::new but with the instruction separator set to `%`
         Self {
             code: String::new(),
             ptr: 0,
             instructions,
             parsed: InstructionsAnalysis::default(),
             block_stack: Vec::new(),
-            instruction_separator: String::from("#"),
+            instruction_separator: String::from("%"),
         }
     }
 
@@ -113,6 +113,10 @@ impl Codegen {
             Case() => self.case(),
         }
 
+        // As a debugging tool, when the interpreter encounters the instruction separator,
+        // it asserts that the pointer is truly at cell 0. Otherwise, some wierd pointer arithmetic
+        // took place and undefined behavior is going to happen.
+        self.goto_zero();
         self.code += &self.instruction_separator;
 
         Ok(())
@@ -163,14 +167,20 @@ impl Codegen {
     }
 
     fn case(&mut self) {
-        // If the code is after the default case
-        if let Some(BlockStack::Match { is_default_case }) = self.block_stack.last_mut() {
+        // TODO This code ugly, fix
+
+        if let Some(BlockStack::Match {
+            is_default_case, ..
+        }) = self.block_stack.last_mut()
+        {
             if *is_default_case {
+                // This gets called when this is the first case block encountered.
+                // So right before this was the code of the default block, and after this
+                // will be the first case expression's code.
+                // TODO Something's fishy that this needs a different block of code.
                 *is_default_case = false;
-                self.goto(&"1".to_string());
-                self.code += "]";
                 self.goto(&"0".to_string());
-                self.code += "[";
+                self.code += "<]>[";
                 self.dec_by(&"0".to_string(), &1);
                 return;
             }
@@ -471,6 +481,7 @@ impl Codegen {
                 self.zero(&"2".to_string());
             }
             BlockStack::Match { .. } => {
+                self.goto(&"0".to_string());
                 self.code += "]";
             }
         }
@@ -727,7 +738,7 @@ impl Codegen {
         self.code += "]";
 
         // Remove the flag
-        self.code += "<#[-]";
+        self.code += "<[-]";
 
         self.code += "<<[<<]";
 
@@ -748,6 +759,11 @@ impl Codegen {
                 .unwrap_or_else(|| panic!("Unable to retrieve position of variable {a}"))
                 - self.ptr,
         )
+    }
+
+    // Move pointer to position zero
+    fn goto_zero(&mut self) {
+        self.move_by(0 - self.ptr)
     }
 
     /// Move pointer by `diff`

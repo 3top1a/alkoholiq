@@ -21,23 +21,23 @@ impl Interpreter {
     pub fn run(mut self, code: &str, input: &mut impl Read, output: &mut impl Write) {
         let jump_table = Self::calculate_jumps(code);
         let mut instruction_index = 0;
-        let code: Vec<char> = code.chars().collect();
+        let code_chars: Vec<char> = code.chars().collect();
 
         assert_eq!(
-            code.iter().filter(|x| **x == '[').count(),
-            code.iter().filter(|x| **x == ']').count(),
-            "Uneven number of [ and ]"
+            code_chars.iter().filter(|x| **x == '[').count(),
+            code_chars.iter().filter(|x| **x == ']').count(),
+            "Uneven number of [ and ]. Code:\n{code}"
         );
 
         // TODO Parse BF into instructions that can execute faster `+++` -> Add(3)
 
-        while instruction_index < code.len() {
+        while instruction_index < code_chars.len() {
             self.instructions_ran += 1;
             if self.instructions_ran == MAX_INSTRUCTIONS {
                 panic!("Too many instructions");
             }
 
-            match code[instruction_index] {
+            match code_chars[instruction_index] {
                 '>' => {
                     self.pointer += 1;
                     if self.pointer >= self.tape.len() as i32 {
@@ -91,12 +91,18 @@ impl Interpreter {
                         instruction_index = jump_table[instruction_index];
                     }
                 }
-                '#' => {
+                '%' => {
                     // Check all temporary variables are zero
                     let temps = self.tape.iter().rev().take(20).collect::<Vec<&u8>>();
                     assert!(
                         temps.iter().all(|&x| *x == 0),
                         "Temporary variables are not zero at instruction {instruction_index}: {temps:?}"
+                    );
+
+                    // Check the pointer is at the correct position
+                    assert_eq!(
+                        self.pointer, 0,
+                        "Pointer not at zero at instruction {instruction_index}. Instructions: \n{code}"
                     );
                 }
                 _ => {}
